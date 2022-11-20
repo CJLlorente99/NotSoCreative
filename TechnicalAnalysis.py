@@ -146,6 +146,11 @@ def main():
     print(f'Total Investment: {total_inv}, Total sell {total_sell}')
     print(f'Money not invested: {money_notinv}, Money worth invested: {current_money_inv}')
     print(f'Total Money: {money_notinv + current_money_inv}')
+    
+    # Benchmark
+    df_open = df.Open
+    gain_bench = ((df_open[-1] - df_open[0]) / df_open[0]) * 100
+    print(f'Gain Benchmark: {gain_bench} %')
 
 
     plt.figure(figsize=(15, 5))
