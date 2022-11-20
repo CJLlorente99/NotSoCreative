@@ -99,7 +99,7 @@ def buy_stock(
 def MACD_dec(df):
     # wrong
     df['MACD_diff'] = ta.trend.macd_diff(df.Open)
-    df['Decision MACD'] = np.where((df.MACD_diff > 0) & (df.MACD_diff.shift(1) < 0), 1.0, 0.0)
+    df['Decision_MACD'] = np.where((df.MACD_diff > 0) & (df.MACD_diff.shift(1) < 0), 1.0, 0.0)
 
     return df
 
@@ -107,16 +107,16 @@ def Goldencross_dec(df, window_short=20, window_long=50):
     #50, 200
     df[f'SMA{window_short}'] = ta.trend.sma_indicator(df.Open, window=window_short)
     df[f'SMA{window_long}'] = ta.trend.sma_indicator(df.Open, window=window_long)
-    df['Signal'] = np.where(df[f'SMA{window_short}'] > df[f'SMA{window_long}'], 1.0, 0.0)
-    df['Decision GC'] = df.Signal.diff()
+    df['Signal_GC'] = np.where(df[f'SMA{window_short}'] > df[f'SMA{window_long}'], 1.0, 0.0)
+    df['Decision GC'] = df.Signal_GC.diff()
     return df
 
 def expMovingAve_dec(df, window_short=50, window_long=200):
     #50, 200
     df[f'EMA{window_short}'] = ta.trend.ema_indicator(df.Open, window=window_short)
     df[f'EMA{window_long}'] = ta.trend.ema_indicator(df.Open, window=window_long)
-    df['Signal'] = np.where(df[f'EMA{window_short}'] > df[f'EMA{window_long}'], 1.0, 0.0)
-    df['Decision EMA'] = df.Signal.diff()
+    df['Signal_EMA'] = np.where(df[f'EMA{window_short}'] > df[f'EMA{window_long}'], 1.0, 0.0)
+    df['Decision EMA'] = df.Signal_EMA_EMA.diff()
     return df
 
 def main():
