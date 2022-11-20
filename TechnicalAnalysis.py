@@ -125,15 +125,16 @@ def main():
     end = dt.datetime(2022, 1, 1)
     ticker = '^GSPC'
     df = web.DataReader(ticker, 'yahoo', start, end)
-    window_short = 50
-    window_long = 200
+    window_short = 20
+    window_long = 50
 
     df = Goldencross_dec(df, window_short, window_long)
 
-    #wrong
-    df = MACD_dec(df)
 
-    df = expMovingAve_dec(df, window_short, window_long)
+    #wrong
+    #df = MACD_dec(df)
+
+    #df = expMovingAve_dec(df, window_short, window_long)
 
     states_buy, states_sell, total_gain, gain_pct, money_notinv, total_inv, total_sell, current_money_inv = buy_stock(
         df.Open, df['Decision GC'])
