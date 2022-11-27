@@ -2,8 +2,10 @@ import pandas as pd
 from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
-from rsi import normalRSI, RSIInvestorParams
-from ma import simpleMovingAverage, SMAInvestorParams, GradientQuarter, exponentialMovingAverage, EMAInvestorParams, movingAverageConvergenceDivergence, MACDInvestorParams
+from rsi import relativeStrengthIndex, RSIInvestorParams
+from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence
+from bb import bollingerBands
+from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 from matplotlib import pyplot as plt
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
@@ -16,6 +18,10 @@ def main():
     global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
+
+    # Common data
+    maxBuy = 2500
+    maxSell = 10000
 
     # Run various experiments
     numExperiments = 10
@@ -35,34 +41,49 @@ def main():
 
         # Create investor RSI
         RSIwindow = 5
-        rsiParams = RSIInvestorParams(70, 40, RSIwindow)
-        investorRSI = Investor(10000, dataGetter.today, 2500, 10000, rsiParams=rsiParams)
+        upperBound = 70
+        lowerBound = 40
+        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell)
+        investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
 
         # Create investor SMA
         SMAwindow = 5
         sellParams = GradientQuarter(-10, 10, -30, 0)
         buyParams = GradientQuarter(-10, 10, 0, 30)
-        smaParams = SMAInvestorParams(buyParams, sellParams, SMAwindow)
-        investorSMA = Investor(10000, dataGetter.today, 2500, 10000, smaParams=smaParams)
+        smaParams = MAInvestorParams(buyParams, sellParams, SMAwindow, maxBuy, maxSell)
+        investorSMA = Investor(10000, dataGetter.today, smaParams=smaParams)
 
         # Create investor EMA
         EMAwindow = 5
         sellParams = GradientQuarter(-10, 10, -30, 0)
         buyParams = GradientQuarter(-10, 10, 0, 30)
-        emaParams = EMAInvestorParams(buyParams, sellParams, EMAwindow)
-        investorEMA = Investor(10000, dataGetter.today, 2500, 10000, emaParams=emaParams)
+        emaParams = MAInvestorParams(buyParams, sellParams, EMAwindow, maxBuy, maxSell)
+        investorEMA = Investor(10000, dataGetter.today, emaParams=emaParams)
 
         # Create investor MACD
         macdFastWindow = 12
         macdSlowWindow = 26
-        macdParams = MACDInvestorParams(30, -30, macdFastWindow, macdSlowWindow, 9)
-        investorMACD = Investor(10000, dataGetter.today, 2500, 10000, macdParams=macdParams)
+        upperBound = 30
+        lowerBound = -30
+        macdParams = MACDInvestorParams(upperBound, lowerBound, macdFastWindow, macdSlowWindow, 9, maxBuy, maxSell)
+        investorMACD = Investor(10000, dataGetter.today, macdParams=macdParams)
+
+        # Create investor BB
+        bbWindow = 5
+        bbStdDev = 2
+        lowerBound = 0.1
+        upperBound = 0.9
+        sellingSlope = 10
+        buyingSlope = 10
+        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, sellingSlope, buyingSlope, maxBuy, maxSell)
+        investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
         # Variables to store data
         auxRsi = pd.DataFrame()
         auxSma = pd.DataFrame()
         auxEma = pd.DataFrame()
         auxMacd = pd.DataFrame()
+        auxBb = pd.DataFrame()
         auxLoop = pd.DataFrame()
         # Run for loop as if days passed
         for i in range(10):
@@ -79,7 +100,7 @@ def main():
             auxLoop = pd.concat([auxLoop, aux], ignore_index=True)
 
             # RSI try
-            rsiResults = normalRSI(df.Open, RSIwindow)
+            rsiResults = relativeStrengthIndex(df.Open, rsiParams)
             dataManager.rsi = rsiResults[-1]
             # print(f'RSI is {dataManager.rsi}')
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorRSI.broker(dataManager, 'rsi')
@@ -89,7 +110,7 @@ def main():
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
 
             # SMA try
-            smaResults = simpleMovingAverage(df.Open, SMAwindow)
+            smaResults = simpleMovingAverage(df.Open, smaParams)
             dataManager.sma = smaResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorSMA.broker(dataManager, 'sma')
             aux = pd.DataFrame(
@@ -98,7 +119,7 @@ def main():
             auxSma = pd.concat([auxSma, aux], ignore_index=True)
 
             # EMA try
-            emaResults = exponentialMovingAverage(df.Open, EMAwindow)
+            emaResults = exponentialMovingAverage(df.Open, emaParams)
             dataManager.ema = emaResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorEMA.broker(dataManager, 'ema')
             aux = pd.DataFrame(
@@ -107,13 +128,22 @@ def main():
             auxEma = pd.concat([auxEma, aux], ignore_index=True)
 
             # MACD try
-            macdResults = movingAverageConvergenceDivergence(df.Open, macdSlowWindow, macdFastWindow)
+            macdResults = movingAverageConvergenceDivergence(df.Open, macdParams)
             dataManager.macd = macdResults[-1]
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorMACD.broker(dataManager, 'macd')
             aux = pd.DataFrame(
                 {'macd': [macdResults[-1]], 'moneyToInvestMACD': [moneyToInvest], 'moneyToSellMACD': [moneyToSell],
                  'investedMoneyMACD': [investedMoney], 'nonInvestedMoneyMACD': [nonInvestedMoney]})
             auxMacd = pd.concat([auxMacd, aux], ignore_index=True)
+
+            # BB try
+            bbResults = bollingerBands(df.Open, bbParams)
+            dataManager.bb = bbResults[-1]
+            moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorBB.broker(dataManager, 'bb')
+            aux = pd.DataFrame(
+                {'bb': [bbResults[-1]], 'moneyToInvestBB': [moneyToInvest], 'moneyToSellBB': [moneyToSell],
+                 'investedMoneyBB': [investedMoney], 'nonInvestedMoneyBB': [nonInvestedMoney]})
+            auxBb = pd.concat([auxBb, aux], ignore_index=True)
 
             # Refresh for next day
             dataManager.pastStockValue = todayData.Open.values[0]
@@ -123,7 +153,7 @@ def main():
         dataGetter.today += CDay(5, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
-        aux = pd.concat([auxLoop, auxRsi, auxSma, auxEma, auxMacd], axis=1)
+        aux = pd.concat([auxLoop, auxRsi, auxSma, auxEma, auxMacd, auxBb], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
@@ -131,6 +161,7 @@ def main():
         percentualGainSMA, meanPortfolioValueSMA = investorSMA.calculateMetrics()
         percentualGainEMA, meanPortfolioValueEMA = investorEMA.calculateMetrics()
         percentualGainMACD, meanPortfolioValueMACD = investorMACD.calculateMetrics()
+        percentualGainBB, meanPortfolioValueBB = investorBB.calculateMetrics()
         print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
                                                                                      meanPortfolioValueRSI))
         print("Percentual gain SMA {:.2f}%, mean portfolio value SMA {:.2f}$".format(percentualGainSMA,
@@ -139,6 +170,8 @@ def main():
                                                                                      meanPortfolioValueEMA))
         print("Percentual gain MACD {:.2f}%, mean portfolio value MACD {:.2f}$".format(percentualGainMACD,
                                                                                      meanPortfolioValueMACD))
+        print("Percentual gain BB {:.2f}%, mean portfolio value BB {:.2f}$".format(percentualGainBB,
+                                                                                       meanPortfolioValueBB))
         results = pd.DataFrame(
             {"initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
              "percentageRSI": [percentualGainRSI], "percentageSMA": [percentualGainSMA],
@@ -155,7 +188,8 @@ def main():
         f.write(str(rsiParams) + "\n")
         f.write(str(smaParams) + "\n")
         f.write(str(emaParams) + "\n")
-        f.write(str(macdParams))
+        f.write(str(macdParams) + "\n")
+        f.write(str(bbParams))
 
 
 if __name__ == '__main__':

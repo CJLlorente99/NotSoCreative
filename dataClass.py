@@ -18,6 +18,7 @@ class DataManager:
         self.sma = None
         self.ema = None
         self.macd = None
+        self.bb = None
 
 
 class DataGetter:
