@@ -100,8 +100,8 @@ def buyPredictionMACD(macd, params: MACDInvestorParams):
     :param macd: Series with the values of the MACD
     :param params: MACD params
     """
-    if macd > params.upperBound:  # Buy linearly then with factor f
-        return (macd - params.upperBound) * params.maxBuy / 9*params.upperBound
+    if macd < params.lowerBound:  # Buy linearly then with factor f
+        return (macd - params.lowerBound) * params.maxBuy / 9*params.lowerBound
     else:
         return 0
 
@@ -112,8 +112,8 @@ def sellPredictionMACD(macd, params: MACDInvestorParams):
     :param macd: Series with the values of the MACD
     :param params: MACD params
     """
-    if macd < params.lowerBound:  # Buy linearly then with factor f
-        return (params.lowerBound - macd) * params.maxSell / 0.9*params.lowerBound
+    if macd > params.upperBound:  # Buy linearly then with factor f
+        return (macd - params.upperBound) * params.maxSell / 0.9*params.upperBound
     else:
         return 0
 

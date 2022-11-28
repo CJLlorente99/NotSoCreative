@@ -6,7 +6,7 @@ from rsi import relativeStrengthIndex, RSIInvestorParams
 from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence
 from bb import bollingerBands
 from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
-from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
@@ -24,7 +24,7 @@ def main():
     maxSell = 10000
 
     # Run various experiments
-    numExperiments = 10
+    numExperiments = 1
     summaryResults = pd.DataFrame()
     advancedData = pd.DataFrame()
     for j in range(numExperiments):
@@ -63,18 +63,18 @@ def main():
         # Create investor MACD
         macdFastWindow = 12
         macdSlowWindow = 26
-        upperBound = 30
-        lowerBound = -30
+        upperBound = 1
+        lowerBound = -1
         macdParams = MACDInvestorParams(upperBound, lowerBound, macdFastWindow, macdSlowWindow, 9, maxBuy, maxSell)
         investorMACD = Investor(10000, dataGetter.today, macdParams=macdParams)
 
         # Create investor BB
         bbWindow = 5
         bbStdDev = 2
-        lowerBound = 0.1
-        upperBound = 0.9
-        sellingSlope = 10
-        buyingSlope = 10
+        lowerBound = 0.3
+        upperBound = 0.7
+        sellingSlope = 5000
+        buyingSlope = 5000
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, sellingSlope, buyingSlope, maxBuy, maxSell)
         investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
@@ -191,6 +191,11 @@ def main():
         f.write(str(macdParams) + "\n")
         f.write(str(bbParams))
 
+    investorRSI.plotEvolution(rsiResults, df.Open, "RSI")
+    investorSMA.plotEvolution(smaResults, df.Open, "SMA")
+    investorEMA.plotEvolution(emaResults, df.Open, "EMA")
+    investorMACD.plotEvolution(macdResults, df.Open, "MACD")
+    investorBB.plotEvolution(bbResults, df.Open, "BB")
 
 if __name__ == '__main__':
     main()

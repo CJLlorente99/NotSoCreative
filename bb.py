@@ -11,13 +11,14 @@ def bollingerBands(values, params: BBInvestorParams):
 
 def buyPredictionBB(bb, params: BBInvestorParams):
     if bb < params.lowerBound:
-        return max((params.lowerBound - bb) * params.buyingSlope, params.maxBuy)
+        return min((params.lowerBound - bb) * params.buyingSlope, params.maxBuy)
     else:
         return 0
 
+
 def sellPredictionBB(bb, params: BBInvestorParams):
     if bb > params.upperBound:
-        return max((bb - params.upperBound) * params.sellingSlope, params.maxSell)
+        return min((bb - params.upperBound) * params.sellingSlope, params.maxSell)
     else:
         return 0
 

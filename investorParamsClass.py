@@ -59,8 +59,8 @@ class RSIInvestorParams(InvestorParams):
         self.window = window
 
     def __str__(self):
-        return f'RSI,UpperBound, LowerBound, Window, MaxBuy, MaxSell\nRSI,{self.RSIupperBound},' \
-               f'{self.RSIlowerBound},{self.window},{self.maxBuy},{self.maxSell}'
+        return f'RSI,UpperBound, LowerBound, Window, MaxBuy, MaxSell\nRSI,{self.upperBound},' \
+               f'{self.lowerBound},{self.window},{self.maxBuy},{self.maxSell}'
 
 
 # Useful classes
