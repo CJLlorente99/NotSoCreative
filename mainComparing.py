@@ -2,9 +2,9 @@ import pandas as pd
 from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
-from rsi import relativeStrengthIndex, RSIInvestorParams
-from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence
-from bb import bollingerBands
+from rsi import relativeStrengthIndex, plotRSIDecisionRules
+from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence, plotSMADecisionRules, plotEMADecisionRules, plotMACDDecisionRules
+from bb import bollingerBands, plotBBDecisionRules
 from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 import plotly.graph_objects as go
 from pandas.tseries.offsets import CDay
@@ -196,6 +196,12 @@ def main():
     investorEMA.plotEvolution(emaResults, df.Open, "EMA")
     investorMACD.plotEvolution(macdResults, df.Open, "MACD")
     investorBB.plotEvolution(bbResults, df.Open, "BB")
+
+    plotRSIDecisionRules(rsiParams)
+    plotBBDecisionRules(bbParams)
+    plotSMADecisionRules(smaParams)
+    plotEMADecisionRules(emaParams)
+    plotMACDDecisionRules(macdParams)
 
 if __name__ == '__main__':
     main()

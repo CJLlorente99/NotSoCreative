@@ -1,5 +1,7 @@
+import numpy as np
 import ta
 from investorParamsClass import RSIInvestorParams
+import plotly.graph_objects as go
 
 
 def relativeStrengthIndex(values, params: RSIInvestorParams):
@@ -34,3 +36,18 @@ def sellFunctionPredictionRSI(rsi, params: RSIInvestorParams):
         return (rsi - params.upperBound) * params.maxSell / (100 - params.upperBound)
     else:
         return 0
+
+
+def plotRSIDecisionRules(params: RSIInvestorParams):
+    testRSI = np.arange(0, 100, 0.25)
+    buyPoints = []
+    sellPoints = []
+    for point in testRSI:
+        buyPoints = np.append(buyPoints, buyFunctionPredictionRSI(point, params))
+        sellPoints = np.append(sellPoints, sellFunctionPredictionRSI(point, params))
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(name="BuyPoints", x=testRSI, y=buyPoints, fill='tozeroy'))
+    fig.add_trace(go.Scatter(name="SellPoints", x=testRSI, y=-sellPoints, fill='tozeroy'))
+    fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    fig.show()

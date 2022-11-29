@@ -93,9 +93,9 @@ class Investor:
         if typeIndicator == 'rsi':
             moneyToInvest = rsi.buyFunctionPredictionRSI(data.rsi, self.rsiParams)
         elif typeIndicator == 'sma':
-            moneyToInvest = ma.buyPredictionSMA(data.sma, self.smaParams)
+            moneyToInvest = ma.buyPredictionSMA(data.sma, self.smaParams)[0]
         elif typeIndicator == 'ema':
-            moneyToInvest = ma.buyPredictionEMA(data.ema, self.emaParams)
+            moneyToInvest = ma.buyPredictionEMA(data.ema, self.emaParams)[0]
         elif typeIndicator == 'macd':
             moneyToInvest = ma.buyPredictionMACD(data.macd, self.macdParams)
         elif typeIndicator == 'bb':
@@ -113,9 +113,9 @@ class Investor:
         if typeIndicator == 'rsi':
             moneyToSell = rsi.sellFunctionPredictionRSI(data.rsi, self.rsiParams)
         elif typeIndicator == 'sma':
-            moneyToSell = ma.sellPredictionSMA(data.sma, self.smaParams)
+            moneyToSell = ma.sellPredictionSMA(data.sma, self.smaParams)[0]
         elif typeIndicator == 'ema':
-            moneyToSell = ma.sellPredictionEMA(data.ema, self.emaParams)
+            moneyToSell = ma.sellPredictionEMA(data.ema, self.emaParams)[0]
         elif typeIndicator == 'macd':
             moneyToSell = ma.sellPredictionMACD(data.macd, self.macdParams)
         elif typeIndicator == 'bb':
@@ -147,8 +147,8 @@ class Investor:
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
         fig.add_trace(go.Scatter(name=typeIndicator, x=self.record.index, y=indicatorData[:-len(self.record.index)+1]), row=1, col=1, secondary_y=True)
         fig.add_trace(go.Scatter(name="Stock Market Value", x=self.record.index, y=stockMarketData[:-len(self.record.index)+1]), row=1, col=1, secondary_y=False)
-        fig.add_trace(go.Bar(name="Money Invested", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-        fig.add_trace(go.Bar(name="Money Sold", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+        fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
+        fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
         fig.update_xaxes(title_text="Date", row=1, col=1)
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(title="Decision making under " + typeIndicator)

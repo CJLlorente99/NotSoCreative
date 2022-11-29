@@ -1,6 +1,7 @@
 from ta.volatility import BollingerBands
 from investorParamsClass import BBInvestorParams
-
+import plotly.graph_objects as go
+import numpy as np
 
 def bollingerBands(values, params: BBInvestorParams):
     # Important to take into account that pband works as follows:
@@ -23,4 +24,16 @@ def sellPredictionBB(bb, params: BBInvestorParams):
         return 0
 
 
+def plotBBDecisionRules(params: BBInvestorParams):
+    testBB = np.arange(-2, 3, 0.1)
+    buyPoints = []
+    sellPoints = []
+    for point in testBB:
+        buyPoints = np.append(buyPoints, buyPredictionBB(point, params))
+        sellPoints = np.append(sellPoints, sellPredictionBB(point, params))
 
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(name="BuyPoints", x=testBB, y=buyPoints, fill='tozeroy'))
+    fig.add_trace(go.Scatter(name="SellPoints", x=testBB, y=-sellPoints, fill='tozeroy'))
+    fig.update_layout(title="Decision Rules for BB indicator", xaxis={"title": "BB Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    fig.show()
