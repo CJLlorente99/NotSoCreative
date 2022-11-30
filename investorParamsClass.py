@@ -1,5 +1,10 @@
 class InvestorParams:
     def __init__(self, maxBuy, maxSell):
+        """
+        Basic parent class inherited by all the other investor parameters classes
+        :param maxBuy: Maximum money to be invested in a single operation
+        :param maxSell: Maximum money to be sold in a single operation
+        """
         self.maxBuy = maxBuy
         self.maxSell = maxSell
 

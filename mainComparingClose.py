@@ -96,11 +96,11 @@ def main():
             dataManager.actualStockValue = todayData.Open.values[0]
 
             # Save data into df for record
-            aux = pd.DataFrame({'nExperiment': [j], 'date': [dataGetter.today], 'stockValue': todayData.Open.values[0]})
+            aux = pd.DataFrame({'nExperiment': [j], 'date': [dataGetter.today], 'stockValueOpen': todayData.Open.values[0], 'stockValueClose': todayData.Close.values[0]})
             auxLoop = pd.concat([auxLoop, aux], ignore_index=True)
 
             # RSI try
-            rsiResults = relativeStrengthIndex(df.Open, rsiParams)
+            rsiResults = relativeStrengthIndex(df.Close, rsiParams)
             dataManager.rsi = rsiResults[-1]
             # print(f'RSI is {dataManager.rsi}')
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorRSI.broker(dataManager, 'rsi')
@@ -110,7 +110,7 @@ def main():
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
 
             # SMA try
-            smaResults = simpleMovingAverage(df.Open, smaParams)
+            smaResults = simpleMovingAverage(df.Close, smaParams)
             dataManager.sma = smaResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorSMA.broker(dataManager, 'sma')
             aux = pd.DataFrame(
@@ -119,7 +119,7 @@ def main():
             auxSma = pd.concat([auxSma, aux], ignore_index=True)
 
             # EMA try
-            emaResults = exponentialMovingAverage(df.Open, emaParams)
+            emaResults = exponentialMovingAverage(df.Close, emaParams)
             dataManager.ema = emaResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorEMA.broker(dataManager, 'ema')
             aux = pd.DataFrame(
@@ -128,7 +128,7 @@ def main():
             auxEma = pd.concat([auxEma, aux], ignore_index=True)
 
             # MACD try
-            macdResults = movingAverageConvergenceDivergence(df.Open, macdParams)
+            macdResults = movingAverageConvergenceDivergence(df.Close, macdParams)
             dataManager.macd = macdResults[-1]
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorMACD.broker(dataManager, 'macd')
             aux = pd.DataFrame(
@@ -137,7 +137,7 @@ def main():
             auxMacd = pd.concat([auxMacd, aux], ignore_index=True)
 
             # BB try
-            bbResults = bollingerBands(df.Open, bbParams)
+            bbResults = bollingerBands(df.Close, bbParams)
             dataManager.bb = bbResults[-1]
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorBB.broker(dataManager, 'bb')
             aux = pd.DataFrame(
@@ -181,11 +181,11 @@ def main():
         summaryResults = pd.concat([summaryResults, results], ignore_index=True)
 
         # Plot the evolution per experiment
-        investorRSI.plotEvolution(rsiResults, df.Open, "RSI")
-        investorSMA.plotEvolution(smaResults, df.Open, "SMA")
-        investorEMA.plotEvolution(emaResults, df.Open, "EMA")
-        investorMACD.plotEvolution(macdResults, df.Open, "MACD")
-        investorBB.plotEvolution(bbResults, df.Open, "BB")
+        investorRSI.plotEvolution(rsiResults, df, "RSI")
+        investorSMA.plotEvolution(smaResults, df, "SMA")
+        investorEMA.plotEvolution(emaResults, df, "EMA")
+        investorMACD.plotEvolution(macdResults, df, "MACD")
+        investorBB.plotEvolution(bbResults, df, "BB")
 
     now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     summaryResults.to_csv("data/" + now + ".csv", index_label="experiment")

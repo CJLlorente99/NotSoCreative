@@ -4,13 +4,23 @@ import plotly.graph_objects as go
 import numpy as np
 
 def bollingerBands(values, params: BBInvestorParams):
-    # Important to take into account that pband works as follows:
-    # < 0 => below lower band; > 1 over upper band; = 0.5 in the middle of the band
+    """
+    Function that calcualtes the bollinger bands
+    :param values: Open or Close value from the stock market series
+    :param params: BB investor parameters
+    :return: < 0 => below lower band; > 1 over upper band; = 0.5 in the middle of the band
+    """
     bb = BollingerBands(values, params.window, params.stdDev, fillna=True)
     return bb.bollinger_pband()
 
 
 def buyPredictionBB(bb, params: BBInvestorParams):
+    """
+    Function that returns the money to be invested
+    :param bb: bollinger_pband() value
+    :param params: BB investor parameters
+    :return:
+    """
     if bb < params.lowerBound:
         return min((params.lowerBound - bb) * params.buyingSlope, params.maxBuy)
     else:
@@ -18,6 +28,12 @@ def buyPredictionBB(bb, params: BBInvestorParams):
 
 
 def sellPredictionBB(bb, params: BBInvestorParams):
+    """
+    Function that returns the money to be sold
+    :param bb: bollinger_pband() value
+    :param params: BB investor parameters
+    :return:
+    """
     if bb > params.upperBound:
         return min((bb - params.upperBound) * params.sellingSlope, params.maxSell)
     else:
@@ -25,6 +41,10 @@ def sellPredictionBB(bb, params: BBInvestorParams):
 
 
 def plotBBDecisionRules(params: BBInvestorParams):
+    """
+    Function that plots both how bollinger_pband() works and how the decisions are made
+    :param params: B  investor parameters
+    """
     testBB = np.arange(-2, 3, 0.1)
     buyPoints = []
     sellPoints = []

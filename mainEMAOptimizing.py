@@ -2,7 +2,7 @@ import pandas as pd
 from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
-from ma import simpleMovingAverage
+from ma import exponentialMovingAverage
 from investorParamsClass import MAInvestorParams, GradientQuarter
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
@@ -18,7 +18,7 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    smaWindowValues = np.arange(2, 20, 4)
+    emaWindowValues = np.arange(2, 20, 4)
     lowerBoundGradientSellArray = np.arange(-30, 1, 15)
     upperBoundGradientSellArray = np.arange(1, 30, 15)
     lowerBoundSecondGradientSellArray = np.arange(-30, 5, 15)
@@ -36,7 +36,7 @@ def main():
 
     # Record data
     now = dt.datetime.now().strftime("_%Y_%m_%d_%H_%M_%S")
-    name = "optimizationSMA" + now
+    name = "optimizationEMA" + now
 
     # Load the data for the experiments, so it doesn't have to be loaded every time
     initDates = {}
@@ -59,16 +59,16 @@ def main():
         # Reset day to have a different dataset for next experiment
         dataGetter.today += CDay(100, calendar=USFederalHolidayCalendar())
 
-    summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageSMA", "meanPortfolioValueSMA"])
+    summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageEMA", "meanPortfolioValueEMA"])
     optParams = []
     nOpt = 0
     nExp = 0
-    nTotal = len(smaWindowValues) * len(lowerBoundGradientSellArray) * len(upperBoundGradientSellArray) * len(
+    nTotal = len(emaWindowValues) * len(lowerBoundGradientSellArray) * len(upperBoundGradientSellArray) * len(
         lowerBoundSecondGradientSellArray) * len(
         upperSecondGradientSellArray) * len(lowerBoundGradientBuyArray) * len(upperBoundGradientBuyArray) * len(
         lowerBoundSecondGradientBuyArray) * len(
         upperSecondGradientBuyArray) * len(maxSellValues) * len(maxBuyValues) * numExperiments
-    for smaWindow in smaWindowValues:
+    for smaWindow in emaWindowValues:
         for lowerBoundGradientSell in lowerBoundGradientSellArray:
             for upperBoundGradientSell in upperBoundGradientSellArray:
                 for lowerBoundSecondGradientSell in lowerBoundSecondGradientSellArray:
@@ -91,11 +91,11 @@ def main():
                                                     dataManager = DataManager()
                                                     dataManager.pastStockValue = df.Open[-1]
 
-                                                    # Create investor SMA
+                                                    # Create investor EMA
                                                     sellParams = GradientQuarter(lowerBoundGradientSell, upperBoundGradientSell, lowerBoundSecondGradientSell, upperSecondGradientSell)
                                                     buyParams = GradientQuarter(lowerBoundGradientBuy, upperBoundGradientBuy, lowerBoundSecondGradientBuy, upperSecondGradientBuy)
-                                                    smaParams = MAInvestorParams(buyParams, sellParams, smaWindow, maxBuy, maxSell)
-                                                    investorSMA = Investor(10000, listToday[str(j)], smaParams=smaParams)
+                                                    emaParams = MAInvestorParams(buyParams, sellParams, smaWindow, maxBuy, maxSell)
+                                                    investorEMA = Investor(10000, listToday[str(j)], emaParams=emaParams)
 
                                                     # Run for loop as if days passed
                                                     for i in range(10):
@@ -107,25 +107,25 @@ def main():
                                                         dataManager.date = todayData.index[0]
                                                         dataManager.actualStockValue = todayData.Open.values[0]
 
-                                                        # SMA try
-                                                        smaResults = simpleMovingAverage(df.Open, smaParams)
-                                                        dataManager.sma = smaResults
-                                                        investorSMA.broker(dataManager, 'sma')
+                                                        # EMA try
+                                                        emaResults = exponentialMovingAverage(df.Open, emaParams)
+                                                        dataManager.ema = emaResults
+                                                        investorEMA.broker(dataManager, 'ema')
 
                                                         # Refresh for next day
                                                         dataManager.pastStockValue = todayData.Open.values[0]
                                                     lastDate = listLastDates[str(j)]
 
                                                     # Calculate summary results
-                                                    percentualGainSMA, meanPortfolioValueSMA = investorSMA.calculateMetrics()
-                                                    # print("Percentual gain SMA {:.2f}%, mean portfolio value SMA {:.2f}$".format(percentualGainSMA,
-                                                    #                                                                              meanPortfolioValueSMA))
+                                                    percentualGainEMA, meanPortfolioValueEMA = investorEMA.calculateMetrics()
+                                                    # print("Percentual gain EMA {:.2f}%, mean portfolio value EMA {:.2f}$".format(percentualGainEMA,
+                                                    #                                                                              meanPortfolioValueEMA))
                                                     results = pd.DataFrame(
                                                         {"nOpt": [nOpt], "initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
-                                                         "percentageSMA": [percentualGainSMA],  "meanPortfolioValueSMA": [meanPortfolioValueSMA]})
+                                                         "percentageEMA": [percentualGainEMA],  "meanPortfolioValueEMA": [meanPortfolioValueEMA]})
                                                     summaryResults = pd.concat([summaryResults, results], ignore_index=True)
 
-                                                optParams = np.append(optParams, (str(nOpt) + ":" + str(smaParams)))
+                                                optParams = np.append(optParams, (str(nOpt) + ":" + str(emaParams)))
                                                 nOpt += 1
 
                                 summaryResults.to_csv("data/" + name + ".csv", index_label="experiment", mode="a")
@@ -133,7 +133,7 @@ def main():
                                     for opt in optParams:
                                         f.write(opt + "\n")
                                     f.close()
-                                summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageSMA", "meanPortfolioValueSMA"])
+                                summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageEMA", "meanPortfolioValueEMA"])
                                 optParams = []
 
 

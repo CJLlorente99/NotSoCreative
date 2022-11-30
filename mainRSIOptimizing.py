@@ -2,7 +2,8 @@ import pandas as pd
 from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
-from rsi import normalRSI, RSIInvestorParams
+from rsi import relativeStrengthIndex
+from investorParamsClass import RSIInvestorParams
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np
@@ -75,8 +76,8 @@ def main():
                             dataManager.pastStockValue = df.Open[-1]
 
                             # Create investor RSI
-                            rsiParams = RSIInvestorParams(upperBound, lowerBound, rsiWindow)
-                            investorRSI = Investor(10000, listToday[str(j)], maxBuy, maxSell, rsiParams=rsiParams)
+                            rsiParams = RSIInvestorParams(upperBound, lowerBound, rsiWindow, maxBuy, maxSell)
+                            investorRSI = Investor(10000, listToday[str(j)], rsiParams=rsiParams)
 
                             # Run for loop as if days passed
                             for i in range(numDays):
@@ -88,7 +89,7 @@ def main():
                                 dataManager.actualStockValue = todayData.Open.values[0]
 
                                 # RSI try
-                                rsiResults = normalRSI(df.Open, rsiWindow)
+                                rsiResults = relativeStrengthIndex(df.Open, rsiParams)
                                 dataManager.rsi = rsiResults[-1]
                                 investorRSI.broker(dataManager, 'rsi')
 
@@ -98,14 +99,14 @@ def main():
 
                             # Calculate summary results
                             percentualGainRSI, meanPortfolioValueRSI = investorRSI.calculateMetrics()
-                            print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
-                                                                                                         meanPortfolioValueRSI))
+                            # print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
+                            #                                                                              meanPortfolioValueRSI))
                             results = pd.DataFrame(
                                 {"nOpt": [nOpt], "initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
                                  "percentageRSI": [percentualGainRSI], "meanPortfolioValueRSI": [meanPortfolioValueRSI]})
                             summaryResults = pd.concat([summaryResults, results], ignore_index=True)
 
-                        optParams = np.append(optParams, (str(nOpt) + ":" + str(rsiParams) + "," + str(maxSell) + "," + str(maxBuy)))
+                        optParams = np.append(optParams, (str(nOpt) + ":" + str(rsiParams)))
 
                         nOpt += 1
 
