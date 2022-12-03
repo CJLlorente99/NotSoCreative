@@ -9,12 +9,75 @@ import pandas_ta as tap
 
 
 
+def BoillingerBandsBands_dec(df, windowBB=20):
+    df[f'BBB_h_devOne{windowBB}'] = ta.volatility.bollinger_hband_indicator(df.Close, window=windowBB, window_dev=1)
+    df[f'BBB_l_devOne{windowBB}'] = ta.volatility.bollinger_lband_indicator(df.Close, window=windowBB, window_dev=1)
+    df[f'BBB_h_devTwo{windowBB}'] = ta.volatility.bollinger_hband_indicator(df.Close, window=windowBB, window_dev=2)
+    df[f'BBB_l_devTwo{windowBB}'] = ta.volatility.bollinger_lband_indicator(df.Close, window=windowBB, window_dev=2)
+
+    # Boillinger Bands Bands Decision between upper bands --> buy  between lower bdns sell else hold
+    decision_list = []
+    for index, row in df.iterrows():
+
+        if (row[f'BBB_h_devOne{windowBB}'] == 1) & (row[f'BBB_h_devTwo{windowBB}'] == 0):
+            decision = 1.0
+        elif (df[f'BBB_l_devOne{windowBB}'] == 1) & (df[f'BBB_l_devTwo{windowBB}'] == 0) == 1:
+            decision = 0.0
+        #else:
+        #    decision = 0.0
+
+        decision_list.append(decision)
+
+    df['Decision_BB'] = decision_list
+    return df
+
+
+# classical Boillinger Bands with standard trading idea
+def BoillingerBands_dec(df, windowBB=20, windowBB_dev=2):
+    df[f'BB_h{windowBB}'] = ta.volatility.bollinger_hband_indicator(df.Close, window=windowBB, window_dev=windowBB_dev)
+    df[f'BB_l{windowBB}'] = ta.volatility.bollinger_lband_indicator(df.Close, window=windowBB, window_dev=windowBB_dev)
+
+    #Boillinger Band Classical Decision (Breaking trough upper/lower Band)
+    decision_list = []
+    for index, row in df.iterrows():
+        if row[f'BB_h{windowBB}'] == 1:
+            decision = 1.0
+        elif row[f'BB_l{windowBB}'] == 1:
+            decision = 0.0
+       # else:
+       #     decision = 0.0
+        decision_list.append(decision)
+
+    df['Decision_BB'] = decision_list
+    return df
+
 def MACD_dec(df):
     # wrong
-    df['MACD_diff'] = ta.trend.macd_diff(df.Open)
-    df['Decision_MACD'] = np.where((df.MACD_diff > 0) & (df.MACD_diff.shift(1) < 0), 1.0, 0.0)
-    tap.rsi(df.open)
+    # df['MACD_diff'] = ta.trend.macd_diff(df.Open)
+    # df['Decision_MACD'] = np.where((df.MACD_diff > 0) & (df.MACD_diff.shift(1) < 0), 1.0, 0.0)
+    # tap.rsi(df.open)
+    #classical MACD
+    df['MACD'] = ta.trend.macd(df.Close, window_slow=26, window_fast=12)
+    df['MACD_Signal'] = ta.trend.macd_signal(df.Close, window_slow=26, window_fast=12, window_sign=9)
 
+    # MACD Decision
+    decision_list = []
+    for i in range(0, df.shape[0]):
+        index = df.index[i]
+        shift = df.index[i - 1]
+
+        if (df.at[index, 'MACD'] > df.at[index, 'MACD_Signal']) & (
+                df.at[shift, 'MACD'] < df.at[shift, 'MACD_Signal']) > 0:
+            decision = 1.0
+        elif (df.at[index, 'MACD'] < df.at[index, 'MACD_Signal']) & (
+                df.at[shift, 'MACD'] > df.at[shift, 'MACD_Signal']) < 0:
+            decision = 0.0
+        #else:
+        #    decision = 0.0
+
+        decision_list.append(decision)
+
+    df['Decision_MACD'] = decision_list
     return df
 
 def Goldencross_dec(df, window_short=20, window_long=50):
