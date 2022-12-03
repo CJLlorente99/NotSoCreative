@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+# This script just searches for optimization configuration achieving better results
+
 fileName = "data/optimizationRSI_2022_12_02_22_57_01.csv"
 indicatorName = "RSI"
 

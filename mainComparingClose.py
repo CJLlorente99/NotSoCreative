@@ -11,11 +11,7 @@ from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
 
-figNum = 0
-
-
 def main():
-    global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
 
@@ -118,6 +114,7 @@ def main():
         auxMacdSignal = pd.DataFrame()
         auxBb = pd.DataFrame()
         auxLoop = pd.DataFrame()
+
         # Run for loop as if days passed
         for i in range(nDays):
             # print()
@@ -215,6 +212,8 @@ def main():
         percentualGainMACDZero, meanPortfolioValueMACDZero = investorMACDZero.calculateMetrics()
         percentualGainMACDSignal, meanPortfolioValueMACDSignal = investorMACDSignal.calculateMetrics()
         percentualGainBB, meanPortfolioValueBB = investorBB.calculateMetrics()
+
+        # Show final percentual gain and mean portfolio value per experiment
         print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
                                                                                      meanPortfolioValueRSI))
         # print("Percentual gain SMA {:.2f}%, mean portfolio value SMA {:.2f}$".format(percentualGainSMA,
@@ -250,6 +249,7 @@ def main():
         # investorMACDSignal.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Crossover Signal)")
         investorBB.plotEvolution(bbResults, df, "BB")
 
+    # Push the data into files for later inspection
     now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     summaryResults.to_csv("data/" + now + ".csv", index_label="experiment")
     advancedData.to_csv("data/" + now + "_advancedData.csv", index_label="experiment")
@@ -263,6 +263,7 @@ def main():
         f.write(str(macdParamsSignal) + "\n")
         f.write(str(bbParams))
 
+    # Show the decision rules with the parameters used
     plotRSIDecisionRules(rsiParams)
     plotBBDecisionRules(bbParams)
     # plotSMADecisionRules(smaParams)

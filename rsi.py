@@ -41,6 +41,10 @@ def sellFunctionPredictionRSI(rsi, params: RSIInvestorParams):
 
 
 def plotRSIDecisionRules(params: RSIInvestorParams):
+    """
+    Function that plots the decision rule with the given parameters
+    :param params: RSI parameters
+    """
     testRSI = np.arange(0, 100, 0.01)
     buyPoints = []
     sellPoints = []
@@ -54,7 +58,11 @@ def plotRSIDecisionRules(params: RSIInvestorParams):
     fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
     fig.show()
 
+
 def tryRSIDecisionRules():
+    """
+    Function that tries a bunch of a and b values in order to feel how the decision rule behaves
+    """
     a = np.arange(0.1, 0.5, 0.1)
     b = np.arange(0.1, 0.6, 0.1)
     titles = []

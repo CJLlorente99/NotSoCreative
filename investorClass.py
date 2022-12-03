@@ -154,14 +154,14 @@ class Investor:
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
-        if hasattr(self, 'macdParams'):
+        if hasattr(self, 'macdParams'):  # If MACD, also plot the signal line
             fig.add_trace(go.Scatter(name=typeIndicator, x=self.record.index,
                                      y=indicatorData["macd"][-len(self.record.index):]), row=1, col=1,
                           secondary_y=True)
             fig.add_trace(go.Scatter(name=typeIndicator + "Signal", x=self.record.index,
                                      y=indicatorData["signal"][-len(self.record.index):]), row=1, col=1,
                           secondary_y=True)
-        elif hasattr(self, 'bbParams'):
+        elif hasattr(self, 'bbParams'):  # If BB, plot all the band information
             fig.add_trace(go.Scatter(name=typeIndicator + "PBand", x=self.record.index,
                                      y=indicatorData["pband"][-len(self.record.index):]), row=1, col=1,
                           secondary_y=True)

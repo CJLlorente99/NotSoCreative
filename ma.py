@@ -1,5 +1,4 @@
 import math
-
 from ta.trend import SMAIndicator, EMAIndicator, MACD
 from investorParamsClass import MAInvestorParams, MACDInvestorParams, GradientQuarter
 import numpy as np
@@ -9,6 +8,12 @@ import pandas as pd
 
 
 def simpleMovingAverage(values, params: MAInvestorParams):
+    """
+
+    :param values:
+    :param params:
+    :return:
+    """
     sma = SMAIndicator(values, params.window, True)
     return sma.sma_indicator()
 
@@ -52,6 +57,10 @@ def sellPredictionSMA(sma, params: MAInvestorParams):
 
 
 def plotSMADecisionRules(params: MAInvestorParams):
+    """
+
+    :param params:
+    """
     x = np.arange(0, 4*math.pi, 0.05)
     testSMA = pd.Series(np.sin(x))
     buyPoints = []
@@ -73,6 +82,12 @@ def plotSMADecisionRules(params: MAInvestorParams):
 
 
 def exponentialMovingAverage(values, params: MAInvestorParams):
+    """
+
+    :param values:
+    :param params:
+    :return:
+    """
     ema = EMAIndicator(values, params.window, True)
     return ema.ema_indicator()
 
@@ -116,6 +131,10 @@ def sellPredictionEMA(sma, params: MAInvestorParams):
 
 
 def plotEMADecisionRules(params: MAInvestorParams):
+    """
+
+    :param params:
+    """
     x = np.arange(0, 4 * math.pi, 0.05)
     testEMA = pd.Series(np.sin(x))
     buyPoints = []
@@ -137,25 +156,35 @@ def plotEMADecisionRules(params: MAInvestorParams):
 
 
 def movingAverageConvergenceDivergence(values, params: MACDInvestorParams):
+    """
+
+    :param values:
+    :param params:
+    :return:
+    """
     macd = MACD(values, params.fastWindow, params.slowWindow, params.signal, True)
     return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
 
 
 def buyPredictionMACD(macdDict, params: MACDInvestorParams):
     """
-
-    :param macd: Series with the values of the MACD
+    Function that is used to predict next day buying behavior
+    :param macdDict: Dict with the values of the MACD (signal and macd)
     :param params: MACD params
     """
+    # Unpackage macdDict
     macd = macdDict["macd"]
     signal = macdDict["signal"]
     type = params.type
 
+    # Calculate gradients of the macd value
     firstGradient = np.gradient(macd.values)
     secondGradient = np.gradient(firstGradient)
 
+    # Calculate gradient of the signal
     firstGradientSignal = np.gradient(signal.values)
 
+    # Depending on the strategy, act accordingly
     if type == "grad":
         if params.buyGradients.lowerBoundGradient < firstGradient[
             -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < secondGradient[-1]:
@@ -174,19 +203,23 @@ def buyPredictionMACD(macdDict, params: MACDInvestorParams):
 
 def sellPredictionMACD(macdDict, params: MACDInvestorParams):
     """
-
-    :param macd: Series with the values of the MACD
+    Function that is used to predict next day selling behavior
+    :param macdDict: Dict with the values of the MACD (signal and macd)
     :param params: MACD params
     """
+    # Unpackage macdDict
     macd = macdDict["macd"]
     signal = macdDict["signal"]
     type = params.type
 
+    # Calculate gradients of the macd value
     firstGradient = np.gradient(macd.values)
     secondGradient = np.gradient(firstGradient)
 
+    # Calculate gradient of the signal
     firstGradientSignal = np.gradient(signal.values)
 
+    # Depending on the strategy, act accordingly
     if type == "grad":
         if params.sellGradients.lowerBoundGradient < firstGradient[-1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > secondGradient[-1]:
             return params.maxSell * math.tanh(params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
@@ -203,6 +236,10 @@ def sellPredictionMACD(macdDict, params: MACDInvestorParams):
 
 
 def plotMACDDecisionRules(params: MACDInvestorParams):
+    """
+    Function that plots the decision rule used
+    :param params: MACD params
+    """
     testMACDdata = pd.Series(np.random.normal(0, 1, 200))
     buyPoints = []
     sellPoints = []

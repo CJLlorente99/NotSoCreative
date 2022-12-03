@@ -5,12 +5,13 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 
+
 def bollingerBands(values, params: BBInvestorParams):
     """
     Function that calcualtes the bollinger bands
     :param values: Open or Close value from the stock market series
     :param params: BB investor parameters
-    :return: < 0 => below lower band; > 1 over upper band; = 0.5 in the middle of the band
+    :return: Dictionary with all the relevant features of the BB
     """
     bb = BollingerBands(values, params.window, params.stdDev, fillna=True)
     return {"pband": bb.bollinger_pband(), "mavg": bb.bollinger_mavg(), "hband": bb.bollinger_hband(), "lband": bb.bollinger_lband()}
@@ -45,7 +46,7 @@ def sellPredictionBB(bb, params: BBInvestorParams):
 def plotBBDecisionRules(params: BBInvestorParams):
     """
     Function that plots both how bollinger_pband() works and how the decisions are made
-    :param params: B  investor parameters
+    :param params: BB investor parameters
     """
     testBB = np.arange(-2, 3, 0.01)
     buyPoints = []
@@ -62,6 +63,9 @@ def plotBBDecisionRules(params: BBInvestorParams):
 
 
 def tryBBDecisionRules():
+    """
+    Function that tries a bunch of a and b values in order to feel how the decision rule behaves
+    """
     a = np.arange(1, 10, 3)
     b = np.arange(1, 15, 4)
     titles = []
