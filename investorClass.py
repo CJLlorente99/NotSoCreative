@@ -48,8 +48,6 @@ class Investor:
         self.__investAndSellToday()
         out1, out2 = self.moneyToInvest, self.moneyToSell
 
-        # print(f'Today-> invest {self.moneyToInvest}, sell {self.moneyToSell}')
-
         # Update porfolio record
         aux = pd.DataFrame({"moneyInvested": self.investedMoney, "moneyNotInvested": self.nonInvestedMoney,
                             "moneyInvestedToday": self.moneyToInvest, "moneySoldToday": self.moneyToSell,
@@ -62,6 +60,7 @@ class Investor:
         self.__possiblySellTomorrow(data, typeIndicator)
         self.__possiblyInvestTomorrow(data, typeIndicator)
 
+        # print(f'\nToday-> invest {out1}, sell {out2}')
         # print(f'Tomorrow-> invest {self.moneyToInvest}, sell {self.moneyToSell}')
 
         return out1, out2, self.investedMoney, self.nonInvestedMoney
@@ -98,7 +97,7 @@ class Investor:
         elif typeIndicator == 'ema':
             moneyToInvest = ma.buyPredictionEMA(data.ema, self.emaParams)[0]
         elif typeIndicator == 'macd':
-            moneyToInvest = ma.buyPredictionMACD(data.macd, self.macdParams)
+            firstGradient, secondGradient, moneyToInvest = ma.buyPredictionMACD(data.macd, self.macdParams)
         elif typeIndicator == 'bb':
             moneyToInvest = bb.buyPredictionBB(data.bb, self.bbParams)
 
@@ -155,16 +154,39 @@ class Investor:
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
-        fig.add_trace(go.Scatter(name=typeIndicator, x=self.record.index, y=indicatorData[:-len(self.record.index)+1]), row=1, col=1, secondary_y=True)
+        if hasattr(self, 'macdParams'):
+            fig.add_trace(go.Scatter(name=typeIndicator, x=self.record.index,
+                                     y=indicatorData["macd"][-len(self.record.index):]), row=1, col=1,
+                          secondary_y=True)
+            fig.add_trace(go.Scatter(name=typeIndicator + "Signal", x=self.record.index,
+                                     y=indicatorData["signal"][-len(self.record.index):]), row=1, col=1,
+                          secondary_y=True)
+        elif hasattr(self, 'bbParams'):
+            fig.add_trace(go.Scatter(name=typeIndicator + "PBand", x=self.record.index,
+                                     y=indicatorData["pband"][-len(self.record.index):]), row=1, col=1,
+                          secondary_y=True)
+            fig.add_trace(go.Scatter(name=typeIndicator + "HBand", x=self.record.index,
+                                     y=indicatorData["hband"][-len(self.record.index):], line = dict(color='black', width=2, dash='dash')), row=1, col=1,
+                          secondary_y=False)
+            fig.add_trace(go.Scatter(name=typeIndicator + "LBand", x=self.record.index,
+                                     y=indicatorData["lband"][-len(self.record.index):], line = dict(color='black', width=2, dash='dash')), row=1, col=1,
+                          secondary_y=False)
+            fig.add_trace(go.Scatter(name=typeIndicator + "MAvg", x=self.record.index,
+                                     y=indicatorData["mavg"][-len(self.record.index):], line = dict(color='black', width=2, dash='dot')), row=1, col=1,
+                          secondary_y=False)
+        else:
+            fig.add_trace(
+                go.Scatter(name=typeIndicator, x=self.record.index, y=indicatorData[-len(self.record.index):]), row=1,
+                col=1, secondary_y=True)
         fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
-                                 y=stockMarketData.Open[:-len(self.record.index) + 1]), row=1, col=1, secondary_y=False)
-        fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
-                                 y=stockMarketData.Close[:-len(self.record.index) + 1]), row=1, col=1, secondary_y=False)
+                                 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
+        fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
+                                 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
         fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
         fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
         fig.update_xaxes(title_text="Date", row=1, col=1)
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(
-            title="Decision making under " + typeIndicator + " (-)" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+            title="Decision making under " + typeIndicator + " (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")")
         fig.show()

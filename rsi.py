@@ -2,6 +2,8 @@ import numpy as np
 import ta
 from investorParamsClass import RSIInvestorParams
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import math
 
 
 def relativeStrengthIndex(values, params: RSIInvestorParams):
@@ -21,7 +23,7 @@ def buyFunctionPredictionRSI(rsi, params: RSIInvestorParams):
     :param params: RSI parameters
     """
     if rsi < params.lowerBound:  # Buy linearly then with factor f
-        return (params.lowerBound - rsi) * params.maxBuy / params.lowerBound
+        return params.maxBuy * math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
     else:
         return 0
 
@@ -33,13 +35,13 @@ def sellFunctionPredictionRSI(rsi, params: RSIInvestorParams):
     :param params: RSI parameters
     """
     if rsi > params.upperBound:  # Buy linearly then with factor f
-        return (rsi - params.upperBound) * params.maxSell / (100 - params.upperBound)
+        return params.maxSell * math.tanh(params.a * (rsi-params.upperBound) ** params.b)
     else:
         return 0
 
 
 def plotRSIDecisionRules(params: RSIInvestorParams):
-    testRSI = np.arange(0, 100, 0.25)
+    testRSI = np.arange(0, 100, 0.01)
     buyPoints = []
     sellPoints = []
     for point in testRSI:
@@ -50,4 +52,32 @@ def plotRSIDecisionRules(params: RSIInvestorParams):
     fig.add_trace(go.Scatter(name="BuyPoints", x=testRSI, y=buyPoints, fill='tozeroy'))
     fig.add_trace(go.Scatter(name="SellPoints", x=testRSI, y=-sellPoints, fill='tozeroy'))
     fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    fig.show()
+
+def tryRSIDecisionRules():
+    a = np.arange(0.1, 0.5, 0.1)
+    b = np.arange(0.1, 0.6, 0.1)
+    titles = []
+    for aVal in a:
+        for bVal in b:
+            titles = np.append(titles, "a=" + str(aVal) + " b=" + str(bVal))
+
+    testRSI = np.arange(0, 100, 0.25)
+    i = 1
+    j = 1
+    fig = make_subplots(rows=len(a), cols=len(b), subplot_titles=tuple(titles))
+    for aVal in a:
+        for bVal in b:
+            params = RSIInvestorParams(70, 30, 10, 2500, 10000, aVal, bVal)
+            buyPoints = []
+            sellPoints = []
+            for point in testRSI:
+                buyPoints = np.append(buyPoints, buyFunctionPredictionRSI(point, params))
+                sellPoints = np.append(sellPoints, sellFunctionPredictionRSI(point, params))
+            fig.add_trace(go.Scatter(name="BuyPoints", x=testRSI, y=buyPoints, fill='tozeroy'), row=i, col=j)
+            fig.add_trace(go.Scatter(name="SellPoints", x=testRSI, y=-sellPoints, fill='tozeroy'), row=i, col=j)
+            fig.update_layout(title="Decision Rules for RSI indicator")
+            j += 1
+        j = 1
+        i += 1
     fig.show()

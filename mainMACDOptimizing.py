@@ -18,13 +18,28 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    fastWindowValues = np.arange(2, 16, 2)
-    slowWindowValues = np.arange(2, 30, 2)
-    upperBoundValues = np.arange(-1, 2, 0.1)
-    lowerBoundValues = np.arange(-2, 1, 0.1)
-    maxSellValues = [5000, 7500, 10000]
-    maxBuyValues = [2500, 5000]
-
+    lowerBoundGradientSellArray = np.arange(-60, 0, 20)
+    upperBoundGradientSellArray = np.arange(0, 60, 20)
+    lowerBoundSecondGradientSellArray = np.arange(-65, -5, 20)
+    upperSecondGradientSellArray = [0]
+    sellNum = len(lowerBoundGradientSellArray) * len(upperBoundGradientSellArray) * len(
+        lowerBoundSecondGradientSellArray) * len(upperSecondGradientSellArray)
+    lowerBoundGradientBuyArray = np.arange(-60, 0, 20)
+    upperBoundGradientBuyArray = np.arange(0, 60, 20)
+    lowerBoundSecondGradientBuyArray = np.arange(5, 65, 20)
+    upperSecondGradientBuyArray = [0]
+    buyNum = len(lowerBoundGradientBuyArray) * len(upperBoundGradientBuyArray) * len(
+        lowerBoundSecondGradientBuyArray) * len(upperSecondGradientBuyArray)
+    fastWindowValues = np.arange(2, 8, 2)
+    slowWindowValues = np.arange(6, 12, 2)
+    signalValues = np.arange(5, 9, 1)
+    windowNum = len(fastWindowValues)*len(slowWindowValues)*len(signalValues)
+    aValues = np.arange(0.5, 2, 0.5)
+    bValues = np.arange(1, 5.5, 1.5)
+    tanNum = len(aValues)*len(bValues)
+    maxSellValues = [3333, 6666, 10000]
+    maxBuyValues = [3333, 6666, 10000]
+    maxNum = len(maxSellValues)*len(maxBuyValues)
     # Run various experiments
     numExperiments = 5
     numDays = 10
@@ -58,67 +73,127 @@ def main():
     optParams = []
     nOpt = 0
     nExp = 0
-    nTotal = len(slowWindowValues)*len(fastWindowValues)*len(upperBoundValues)*len(lowerBoundValues)*len(maxSellValues)*len(maxBuyValues)*numExperiments
-    for slowWindow in slowWindowValues:
-        for fastWindow in fastWindowValues:
-            for upperBound in upperBoundValues:
-                for lowerBound in lowerBoundValues:
-                    for maxSell in maxSellValues:
-                        for maxBuy in maxBuyValues:
-                            for j in range(numExperiments):
-                                print(f'({nExp}/{nTotal})')
-                                nExp += 1
+    nTotal = sellNum*buyNum*windowNum*tanNum*maxNum*numExperiments
+    for lowerBoundGradientSell in lowerBoundGradientSellArray:
+        for lowerBoundSecondGradientSell in lowerBoundSecondGradientSellArray:
+            for upperBoundGradientSell in upperBoundGradientSellArray:
+                for upperSecondGradientSell in upperSecondGradientSellArray:
+                    for lowerBoundGradientBuy in lowerBoundGradientBuyArray:
+                        for lowerBoundSecondGradientBuy in lowerBoundSecondGradientBuyArray:
+                            for upperBoundGradientBuy in upperBoundGradientBuyArray:
+                                for upperSecondGradientBuy in upperSecondGradientBuyArray:
+                                    for slowWindow in slowWindowValues:
+                                        for fastWindow in fastWindowValues:
+                                            for signal in signalValues:
+                                                for a in aValues:
+                                                    for b in bValues:
+                                                        for maxSell in maxSellValues:
+                                                            for maxBuy in maxBuyValues:
+                                                                for j in range(numExperiments):
+                                                                    print(f'({nExp}/{nTotal})')
+                                                                    nExp += 1
 
-                                initDate = initDates[str(j)]
-                                # Load data
-                                df = dfPastData[str(j)]
+                                                                    initDate = initDates[str(j)]
+                                                                    # Load data
+                                                                    df = dfPastData[str(j)]
 
-                                # Create data manager
-                                dataManager = DataManager()
-                                dataManager.pastStockValue = df.Open[-1]
+                                                                    # Create data manager
+                                                                    dataManager = DataManager()
+                                                                    dataManager.pastStockValue = df.Open[-1]
 
-                                # Create investor MACD
-                                macdParams = MACDInvestorParams(upperBound, lowerBound, fastWindow, slowWindow, 9, maxBuy, maxSell)
-                                investorMACD = Investor(10000, listToday[str(j)], macdParams=macdParams)
+                                                                    # Create investor MACD
+                                                                    sellGradient = GradientQuarter(lowerBoundGradientSell, upperBoundGradientSell, lowerBoundSecondGradientSell, upperSecondGradientSell)
+                                                                    buyGradient = GradientQuarter(lowerBoundGradientBuy, upperBoundGradientBuy, lowerBoundSecondGradientBuy, upperSecondGradientBuy)
+                                                                    macdParamsGrad = MACDInvestorParams(buyGradient,
+                                                                                                    sellGradient,
+                                                                                                    fastWindow,
+                                                                                                    slowWindow, signal,
+                                                                                                    maxBuy, maxSell, a,
+                                                                                                    b, "grad")
+                                                                    investorMACDGrad = Investor(10000,
+                                                                                                listToday[str(j)],
+                                                                                                macdParams=macdParamsGrad)
+                                                                    macdParamsZero = MACDInvestorParams(buyGradient,
+                                                                                                    sellGradient,
+                                                                                                    fastWindow,
+                                                                                                    slowWindow, signal,
+                                                                                                    maxBuy, maxSell, a,
+                                                                                                    b, "grad_crossZero")
+                                                                    investorMACDGradZero = Investor(10000,
+                                                                                                listToday[str(j)],
+                                                                                                macdParams=macdParamsZero)
+                                                                    macdParamsSignal = MACDInvestorParams(buyGradient,
+                                                                                                    sellGradient,
+                                                                                                    fastWindow,
+                                                                                                    slowWindow, signal,
+                                                                                                    maxBuy, maxSell, a,
+                                                                                                    b, "grad_crossSignal")
+                                                                    investorMACDGradSignal = Investor(10000,
+                                                                                                listToday[str(j)],
+                                                                                                macdParams=macdParamsSignal)
 
-                                # Run for loop as if days passed
-                                for i in range(numDays):
-                                    todayData = dfTodayData[str(j)+str(i)]
-                                    df = dfUntilToday[str(j)+str(i)]
+                                                                    # Run for loop as if days passed
+                                                                    for i in range(numDays):
+                                                                        todayData = dfTodayData[str(j)+str(i)]
+                                                                        df = dfUntilToday[str(j)+str(i)]
 
-                                    # Refresh data for today
-                                    dataManager.date = todayData.index[0]
-                                    dataManager.actualStockValue = todayData.Open.values[0]
+                                                                        # Refresh data for today
+                                                                        dataManager.date = todayData.index[0]
+                                                                        dataManager.actualStockValue = todayData.Open.values[0]
 
-                                    # MACD try
-                                    macdResults = movingAverageConvergenceDivergence(df.Open, macdParams)
-                                    dataManager.macd = macdResults[-1]
-                                    investorMACD.broker(dataManager, 'macd')
+                                                                        # MACD try
+                                                                        macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsGrad)
+                                                                        dataManager.macd = macdResults
+                                                                        investorMACDGrad.broker(dataManager, 'macd')
+                                                                        investorMACDGradZero.broker(dataManager, 'macd')
+                                                                        investorMACDGradSignal.broker(dataManager, 'macd')
 
-                                    # Refresh for next day
-                                    dataManager.pastStockValue = todayData.Open.values[0]
-                                lastDate = listLastDates[str(j)]
+                                                                        # Refresh for next day
+                                                                        dataManager.pastStockValue = todayData.Open.values[0]
+                                                                    lastDate = listLastDates[str(j)]
 
-                                # Calculate summary results
-                                percentualGainMACD, meanPortfolioValueMACD = investorMACD.calculateMetrics()
-                                # print("Percentual gain MACD {:.2f}%, mean portfolio value MACD {:.2f}$".format(percentualGainMACD,
-                                #                                                                              meanPortfolioValueMACD))
-                                results = pd.DataFrame(
-                                    {"nOpt": [nOpt], "initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
-                                     "percentageMACD": [percentualGainMACD], "meanPortfolioValueMACD": [meanPortfolioValueMACD]})
-                                summaryResults = pd.concat([summaryResults, results], ignore_index=True)
+                                                                    # Calculate summary results
+                                                                    percentualGainMACDGrad, meanPortfolioValueMACDGrad = investorMACDGrad.calculateMetrics()
+                                                                    percentualGainMACDZero, meanPortfolioValueMACDZero = investorMACDGradZero.calculateMetrics()
+                                                                    percentualGainMACDSignal, meanPortfolioValueMACDSignal = investorMACDGradSignal.calculateMetrics()
+                                                                    # print("Percentual gain MACD {:.2f}%, mean portfolio value MACD {:.2f}$".format(percentualGainMACD,
+                                                                    #                                                                              meanPortfolioValueMACD))
+                                                                    results = pd.DataFrame(
+                                                                        {"nOpt": [nOpt],
+                                                                         "initDate": [initDate.strftime("%d/%m/%Y")[0]],
+                                                                         "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
+                                                                         "percentageMACDGrad": [percentualGainMACDGrad],
+                                                                         "meanPortfolioValueMACDGrad": [
+                                                                             meanPortfolioValueMACDGrad],
+                                                                         "percentageMACDZero": [percentualGainMACDZero],
+                                                                         "meanPortfolioValueMACDZero": [
+                                                                             meanPortfolioValueMACDZero],
+                                                                         "percentageMACDSignal": [percentualGainMACDSignal],
+                                                                         "meanPortfolioValueMACDSignal": [
+                                                                             meanPortfolioValueMACDSignal]})
+                                                                    summaryResults = pd.concat([summaryResults, results], ignore_index=True)
 
-                            optParams = np.append(optParams, (str(nOpt) + ":" + str(macdParams)))
+                                                                optParams = np.append(optParams, (
+                                                                            str(nOpt) + ":" + str(macdParamsGrad)))
+                                                                optParams = np.append(optParams, (
+                                                                            str(nOpt) + ":" + str(macdParamsZero)))
+                                                                optParams = np.append(optParams, (
+                                                                            str(nOpt) + ":" + str(macdParamsSignal)))
 
-                            nOpt += 1
+                                                                nOpt += 1
 
-                    summaryResults.to_csv("data/" + name + ".csv", index_label="experiment", mode="a")
-                    with open("data/" + name + ".txt", "a") as f:
-                        for opt in optParams:
-                            f.write(opt + "\n")
-                        f.close()
-                    summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageMACD", "meanPortfolioValueMACD"])
-                    optParams = []
+                                                        summaryResults.to_csv("data/" + name + ".csv", index_label="experiment", mode="a")
+                                                        with open("data/" + name + ".txt", "a") as f:
+                                                            for opt in optParams:
+                                                                f.write(opt + "\n")
+                                                            f.close()
+                                                        summaryResults = pd.DataFrame(
+                                                            columns=["nOpt", "initDate", "lastDate",
+                                                                     "percentageMACDGrad", "meanPortfolioValueMACDGrad",
+                                                                     "percentageMACDZero", "meanPortfolioValueMACDZero",
+                                                                     "percentageMACDSignal",
+                                                                     "meanPortfolioValueMACDSignal"])
+                                                        optParams = []
 
 
 if __name__ == '__main__':

@@ -18,14 +18,16 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    rsiWindowValues = np.arange(2, 20, 2)
+    rsiWindowValues = np.arange(2, 20, 4)
     upperBoundValues = np.arange(40, 80, 5)
     lowerBoundValues = np.arange(20, 50, 5)
-    maxSellValues = np.arange(1000, 10000, 1000)
-    maxBuyValues = np.arange(1000, 10000, 1000)
+    aValues = np.arange(0.1, 1, 0.1)
+    bValues = np.arange(0.1, 1, 0.1)
+    maxSellValues = [3333, 6666, 10000]
+    maxBuyValues = [3333, 6666, 10000]
 
     # Run various experiments
-    numExperiments = 10
+    numExperiments = 5
     numDays = 10
 
     # Record data
@@ -57,66 +59,68 @@ def main():
     optParams = []
     nOpt = 0
     nExp = 0
-    nTotal = len(rsiWindowValues)*len(upperBoundValues)*len(lowerBoundValues)*len(maxSellValues)*len(maxBuyValues)*numExperiments
+    nTotal = len(rsiWindowValues)*len(upperBoundValues)*len(lowerBoundValues)*len(aValues)*len(bValues)*len(maxSellValues)*len(maxBuyValues)*numExperiments
     for rsiWindow in rsiWindowValues:
         for upperBound in upperBoundValues:
             for lowerBound in lowerBoundValues:
-                for maxSell in maxSellValues:
-                    for maxBuy in maxBuyValues:
-                        for j in range(numExperiments):
-                            print(f'({nExp}/{nTotal})')
-                            nExp += 1
+                for a in aValues:
+                    for b in bValues:
+                        for maxSell in maxSellValues:
+                            for maxBuy in maxBuyValues:
+                                for j in range(numExperiments):
+                                    print(f'({nExp}/{nTotal})')
+                                    nExp += 1
 
-                            initDate = initDates[str(j)]
-                            # Load data
-                            df = dfPastData[str(j)]
+                                    initDate = initDates[str(j)]
+                                    # Load data
+                                    df = dfPastData[str(j)]
 
-                            # Create data manager
-                            dataManager = DataManager()
-                            dataManager.pastStockValue = df.Open[-1]
+                                    # Create data manager
+                                    dataManager = DataManager()
+                                    dataManager.pastStockValue = df.Open[-1]
 
-                            # Create investor RSI
-                            rsiParams = RSIInvestorParams(upperBound, lowerBound, rsiWindow, maxBuy, maxSell)
-                            investorRSI = Investor(10000, listToday[str(j)], rsiParams=rsiParams)
+                                    # Create investor RSI
+                                    rsiParams = RSIInvestorParams(upperBound, lowerBound, rsiWindow, maxBuy, maxSell, a, b)
+                                    investorRSI = Investor(10000, listToday[str(j)], rsiParams=rsiParams)
 
-                            # Run for loop as if days passed
-                            for i in range(numDays):
-                                todayData = dfTodayData[str(j)+str(i)]
-                                df = dfUntilToday[str(j)+str(i)]
+                                    # Run for loop as if days passed
+                                    for i in range(numDays):
+                                        todayData = dfTodayData[str(j)+str(i)]
+                                        df = dfUntilToday[str(j)+str(i)]
 
-                                # Refresh data for today
-                                dataManager.date = todayData.index[0]
-                                dataManager.actualStockValue = todayData.Open.values[0]
+                                        # Refresh data for today
+                                        dataManager.date = todayData.index[0]
+                                        dataManager.actualStockValue = todayData.Open.values[0]
 
-                                # RSI try
-                                rsiResults = relativeStrengthIndex(df.Open, rsiParams)
-                                dataManager.rsi = rsiResults[-1]
-                                investorRSI.broker(dataManager, 'rsi')
+                                        # RSI try
+                                        rsiResults = relativeStrengthIndex(df.Close, rsiParams)
+                                        dataManager.rsi = rsiResults[-1]
+                                        investorRSI.broker(dataManager, 'rsi')
 
-                                # Refresh for next day
-                                dataManager.pastStockValue = todayData.Open.values[0]
-                            lastDate = listLastDates[str(j)]
+                                        # Refresh for next day
+                                        dataManager.pastStockValue = todayData.Open.values[0]
+                                    lastDate = listLastDates[str(j)]
 
-                            # Calculate summary results
-                            percentualGainRSI, meanPortfolioValueRSI = investorRSI.calculateMetrics()
-                            # print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
-                            #                                                                              meanPortfolioValueRSI))
-                            results = pd.DataFrame(
-                                {"nOpt": [nOpt], "initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
-                                 "percentageRSI": [percentualGainRSI], "meanPortfolioValueRSI": [meanPortfolioValueRSI]})
-                            summaryResults = pd.concat([summaryResults, results], ignore_index=True)
+                                    # Calculate summary results
+                                    percentualGainRSI, meanPortfolioValueRSI = investorRSI.calculateMetrics()
+                                    # print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
+                                    #                                                                              meanPortfolioValueRSI))
+                                    results = pd.DataFrame(
+                                        {"nOpt": [nOpt], "initDate": [initDate.strftime("%d/%m/%Y")[0]], "lastDate": [lastDate.strftime("%d/%m/%Y")[0]],
+                                         "percentageRSI": [percentualGainRSI], "meanPortfolioValueRSI": [meanPortfolioValueRSI]})
+                                    summaryResults = pd.concat([summaryResults, results], ignore_index=True)
 
-                        optParams = np.append(optParams, (str(nOpt) + ":" + str(rsiParams)))
+                                optParams = np.append(optParams, (str(nOpt) + ":" + str(rsiParams)))
 
-                        nOpt += 1
+                                nOpt += 1
 
-                summaryResults.to_csv("data/" + name + ".csv", index_label="experiment", mode="a")
-                with open("data/" + name + ".txt", "a") as f:
-                    for opt in optParams:
-                        f.write(opt + "\n")
-                    f.close()
-                summaryResults = pd.DataFrame()
-                optParams = []
+                        summaryResults.to_csv("data/" + name + ".csv", index_label="experiment", mode="a")
+                        with open("data/" + name + ".txt", "a") as f:
+                            for opt in optParams:
+                                f.write(opt + "\n")
+                            f.close()
+                        summaryResults = pd.DataFrame()
+                        optParams = []
 
 
 if __name__ == '__main__':

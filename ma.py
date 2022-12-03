@@ -1,7 +1,7 @@
 import math
 
 from ta.trend import SMAIndicator, EMAIndicator, MACD
-from investorParamsClass import MAInvestorParams, MACDInvestorParams
+from investorParamsClass import MAInvestorParams, MACDInvestorParams, GradientQuarter
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -138,44 +138,98 @@ def plotEMADecisionRules(params: MAInvestorParams):
 
 def movingAverageConvergenceDivergence(values, params: MACDInvestorParams):
     macd = MACD(values, params.fastWindow, params.slowWindow, params.signal, True)
-    return macd.macd()
+    return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
 
 
-def buyPredictionMACD(macd, params: MACDInvestorParams):
+def buyPredictionMACD(macdDict, params: MACDInvestorParams):
     """
 
     :param macd: Series with the values of the MACD
     :param params: MACD params
     """
-    if macd < params.lowerBound:  # Buy linearly then with factor f
-        return (macd - params.lowerBound) * params.maxBuy / 9*params.lowerBound
-    else:
+    macd = macdDict["macd"]
+    signal = macdDict["signal"]
+    type = params.type
+
+    firstGradient = np.gradient(macd.values)
+    secondGradient = np.gradient(firstGradient)
+
+    firstGradientSignal = np.gradient(signal.values)
+
+    if type == "grad":
+        if params.buyGradients.lowerBoundGradient < firstGradient[
+            -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < secondGradient[-1]:
+            return firstGradient, secondGradient, params.maxBuy * math.tanh(
+                params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
+        return firstGradient, secondGradient, 0
+    elif type == "grad_crossZero":
+        if firstGradient[-1] > 0 and -0.005 < macd.values[-1] < 0.005:
+            return firstGradient, secondGradient, params.maxBuy * math.tanh(params.a * firstGradient[-1] ** params.b)
+        return firstGradient, secondGradient, 0
+    elif type == "grad_crossSignal":
+        if abs(macd.values[-1] - signal.values[-1]) < 0.01 and firstGradient[-1] > firstGradientSignal[-1]:
+            return firstGradient, secondGradient, params.maxBuy * math.tanh(params.a * firstGradient[-1] ** params.b)
+        return firstGradient, secondGradient, 0
+
+
+def sellPredictionMACD(macdDict, params: MACDInvestorParams):
+    """
+
+    :param macd: Series with the values of the MACD
+    :param params: MACD params
+    """
+    macd = macdDict["macd"]
+    signal = macdDict["signal"]
+    type = params.type
+
+    firstGradient = np.gradient(macd.values)
+    secondGradient = np.gradient(firstGradient)
+
+    firstGradientSignal = np.gradient(signal.values)
+
+    if type == "grad":
+        if params.sellGradients.lowerBoundGradient < firstGradient[-1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > secondGradient[-1]:
+            return params.maxSell * math.tanh(params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
+        else:
+            return 0
+    elif type == "grad_crossZero":
+        if firstGradient[-1] < 0 and -0.005 < macd.values[-1] < 0.005:
+            return params.maxSell * math.tanh(params.a * (-firstGradient[-1]) ** params.b)
         return 0
-
-
-def sellPredictionMACD(macd, params: MACDInvestorParams):
-    """
-
-    :param macd: Series with the values of the MACD
-    :param params: MACD params
-    """
-    if macd > params.upperBound:  # Buy linearly then with factor f
-        return (macd - params.upperBound) * params.maxSell / 0.9*params.upperBound
-    else:
+    elif type == "grad_crossSignal":
+        if abs(macd.values[-1] - signal.values[-1]) < 0.01 and firstGradient[-1] < firstGradientSignal[-1]:
+            return params.maxSell * math.tanh(params.a * (-firstGradient[-1]) ** params.b)
         return 0
 
 
 def plotMACDDecisionRules(params: MACDInvestorParams):
-    testMACD = np.arange(-4, 5, 0.1)
+    testMACDdata = pd.Series(np.random.normal(0, 1, 200))
     buyPoints = []
     sellPoints = []
-    for point in testMACD:
-        buyPoints = np.append(buyPoints, buyPredictionMACD(point, params))
-        sellPoints = np.append(sellPoints, sellPredictionMACD(point, params))
+    for i in range(len(testMACDdata) - params.fastWindow):
+        testMACD = movingAverageConvergenceDivergence(testMACDdata[0:i+2], params)
+        firstGradient, secondGradient, buyPoint = buyPredictionMACD(testMACD, params)
+        buyPoints = np.append(buyPoints, buyPoint)
+        sellPoints = np.append(sellPoints, sellPredictionMACD(testMACD, params))
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(name="BuyPoints", x=testMACD, y=buyPoints, fill='tozeroy'))
-    fig.add_trace(go.Scatter(name="SellPoints", x=testMACD, y=-sellPoints, fill='tozeroy'))
-    fig.update_layout(title="Decision Rules for MACD indicator", xaxis={"title": "MACD Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    x = np.arange(len(testMACDdata))
+
+    fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": True}]])
+    fig.add_trace(go.Scatter(name="Stock data", x=x, y=testMACDdata.values), row=1, col=1, secondary_y=False)
+    fig.add_trace(go.Scatter(name="MACDValues", x=x[3:], y=testMACD["macd"].values), row=1, col=1, secondary_y=False)
+    fig.add_trace(go.Scatter(name="BuyPoints", x=x[4:], y=buyPoints, fill='tozeroy'), row=1, col=1, secondary_y=True)
+    fig.add_trace(go.Scatter(name="SellPoints", x=x[4:], y=-sellPoints, fill='tozeroy'), row=1, col=1, secondary_y=True)
+    fig.add_trace(go.Scatter(name="FirstGradient", x=x[3:], y=firstGradient), row=2, col=1, secondary_y=False)
+    if params.type == "grad":
+        fig.add_trace(go.Scatter(name="SecondGradient", x=x[3:], y=secondGradient), row=2, col=1, secondary_y=True)
+        fig.update_layout(title="Decision Rules for MACD indicator (Grad)", xaxis={"title": "x"},
+                          yaxis={"title": "Sell/Buy/Hold [$]"})
+    elif params.type == "grad_crossZero":
+        fig.update_layout(title="Decision Rules for MACD indicator (Grad+CrossZero)", xaxis={"title": "x"},
+                          yaxis={"title": "Sell/Buy/Hold [$]"})
+    elif params.type == "grad_crossSignal":
+        fig.add_trace(go.Scatter(name="SignalValues", x=x[3:], y=testMACD["signal"].values), row=1, col=1, secondary_y=False)
+        fig.update_layout(title="Decision Rules for MACD indicator (Grad+CrossSignal)", xaxis={"title": "x"},
+                          yaxis={"title": "Sell/Buy/Hold [$]"})
     fig.show()
 

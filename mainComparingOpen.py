@@ -20,12 +20,11 @@ def main():
     dataGetter = DataGetter()
 
     # Common data
-    maxBuy = 5000
-    maxSell = 5000
+    maxBuy = 2500
+    maxSell = 10000
 
     # Run various experiments
-    numExperiments = 5
-    nDays = 10
+    numExperiments = 2
     summaryResults = pd.DataFrame()
     advancedData = pd.DataFrame()
     for j in range(numExperiments):
@@ -41,11 +40,11 @@ def main():
         dataManager.pastStockValue = df.Open[-1]
 
         # Create investor RSI
-        RSIwindow = 6
-        upperBound = 50
-        lowerBound = 35
-        a = 0.9
-        b = 0.1
+        RSIwindow = 16
+        upperBound = 70
+        lowerBound = 40
+        a = 1
+        b = 3
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
         investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
 
@@ -64,48 +63,48 @@ def main():
         # investorEMA = Investor(10000, dataGetter.today, emaParams=emaParams)
 
         # Create investor MACD grad
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
+        sellGradient = GradientQuarter(-3, 3, -50, 0)
+        buyGradient = GradientQuarter(-3, 3, 50, 0)
         macdFastWindow = 6
         macdSlowWindow = 14
         signal = 9
-        a = 0.01
+        a = 1
         b = 3
         macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad")
         investorMACDGrad = Investor(10000, dataGetter.today, macdParams=macdParamsGrad)
 
         # Create investor MACD zero
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
+        sellGradient = GradientQuarter(-3, 3, -50, 0)
+        buyGradient = GradientQuarter(-3, 3, 50, 0)
         macdFastWindow = 6
         macdSlowWindow = 14
         signal = 9
-        a = 0.01
+        a = 1
         b = 3
         macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad_crossZero")
         investorMACDZero = Investor(10000, dataGetter.today, macdParams=macdParamsZero)
 
         # Create investor MACD signal
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
+        sellGradient = GradientQuarter(-3, 3, -50, 0)
+        buyGradient = GradientQuarter(-3, 3, 50, 0)
         macdFastWindow = 6
         macdSlowWindow = 14
         signal = 9
-        a = 0.01
+        a = 1
         b = 3
         macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad_crossSignal")
         investorMACDSignal = Investor(10000, dataGetter.today, macdParams=macdParamsSignal)
 
         # Create investor BB
-        bbWindow = 8
-        bbStdDev = 2.8
-        lowerBound = 1.4
-        upperBound = 0.4
-        a = 2
-        b = 1
+        bbWindow = 5
+        bbStdDev = 2
+        lowerBound = 0.3
+        upperBound = 0.7
+        a = 5
+        b = 3
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
@@ -119,7 +118,7 @@ def main():
         auxBb = pd.DataFrame()
         auxLoop = pd.DataFrame()
         # Run for loop as if days passed
-        for i in range(nDays):
+        for i in range(10):
             # print()
             todayData = dataGetter.getToday()
             df = dataGetter.getUntilToday()
@@ -133,7 +132,7 @@ def main():
             auxLoop = pd.concat([auxLoop, aux], ignore_index=True)
 
             # RSI try
-            rsiResults = relativeStrengthIndex(df.Close, rsiParams)
+            rsiResults = relativeStrengthIndex(df.Open, rsiParams)
             dataManager.rsi = rsiResults[-1]
             # print(f'RSI is {dataManager.rsi}')
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorRSI.broker(dataManager, 'rsi')
@@ -143,7 +142,7 @@ def main():
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
 
             # SMA try
-            # smaResults = simpleMovingAverage(df.Close, smaParams)
+            # smaResults = simpleMovingAverage(df.Open, smaParams)
             # dataManager.sma = smaResults
             # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorSMA.broker(dataManager, 'sma')
             # aux = pd.DataFrame(
@@ -152,7 +151,7 @@ def main():
             # auxSma = pd.concat([auxSma, aux], ignore_index=True)
             #
             # # EMA try
-            # emaResults = exponentialMovingAverage(df.Close, emaParams)
+            # emaResults = exponentialMovingAverage(df.Open, emaParams)
             # dataManager.ema = emaResults
             # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorEMA.broker(dataManager, 'ema')
             # aux = pd.DataFrame(
@@ -161,7 +160,7 @@ def main():
             # auxEma = pd.concat([auxEma, aux], ignore_index=True)
 
             # MACD Grad try
-            macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsGrad)
+            macdResults = movingAverageConvergenceDivergence(df.Open, macdParamsGrad)
             dataManager.macd = macdResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorMACDGrad.broker(dataManager, 'macd')
             aux = pd.DataFrame(
@@ -170,7 +169,7 @@ def main():
             auxMacdGrad = pd.concat([auxMacdGrad, aux], ignore_index=True)
 
             # MACD Zero try
-            macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsZero)
+            macdResults = movingAverageConvergenceDivergence(df.Open, macdParamsZero)
             dataManager.macd = macdResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorMACDZero.broker(dataManager, 'macd')
             aux = pd.DataFrame(
@@ -179,7 +178,7 @@ def main():
             auxMacdZero = pd.concat([auxMacdZero, aux], ignore_index=True)
 
             # MACD Signal try
-            macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsSignal)
+            macdResults = movingAverageConvergenceDivergence(df.Open, macdParamsSignal)
             dataManager.macd = macdResults
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorMACDSignal.broker(dataManager, 'macd')
             aux = pd.DataFrame(
@@ -188,11 +187,11 @@ def main():
             auxMacdSignal = pd.concat([auxMacdSignal, aux], ignore_index=True)
 
             # BB try
-            bbResults = bollingerBands(df.Close, bbParams)
-            dataManager.bb = bbResults["pband"][-1]
+            bbResults = bollingerBands(df.Open, bbParams)
+            dataManager.bb = bbResults[-1]
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorBB.broker(dataManager, 'bb')
             aux = pd.DataFrame(
-                {'bb': [bbResults["pband"][-1]], 'moneyToInvestBB': [moneyToInvest], 'moneyToSellBB': [moneyToSell],
+                {'bb': [bbResults[-1]], 'moneyToInvestBB': [moneyToInvest], 'moneyToSellBB': [moneyToSell],
                  'investedMoneyBB': [investedMoney], 'nonInvestedMoneyBB': [nonInvestedMoney]})
             auxBb = pd.concat([auxBb, aux], ignore_index=True)
 
@@ -201,7 +200,7 @@ def main():
             dataGetter.goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
         # Reset day to have a different 2 weeks window
-        dataGetter.today += CDay(200, calendar=USFederalHolidayCalendar())
+        dataGetter.today += CDay(100, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb], axis=1)
@@ -243,11 +242,11 @@ def main():
 
         # Plot the evolution per experiment
         investorRSI.plotEvolution(rsiResults, df, "RSI")
-        # investorSMA.plotEvolution(smaResults.iloc[-nDays:], df, "SMA")
-        # investorEMA.plotEvolution(emaResults.iloc[-nDays:], df, "EMA")
-        # investorMACDGrad.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Grad Method)")
-        # investorMACDZero.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Crossover Zero Method)")
-        # investorMACDSignal.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Crossover Signal)")
+        # investorSMA.plotEvolution(smaResults, df, "SMA")
+        # investorEMA.plotEvolution(emaResults, df, "EMA")
+        investorMACDGrad.plotEvolution(macdResults, df, "MACD (Grad Method)")
+        investorMACDZero.plotEvolution(macdResults, df, "MACD (Crossover Zero Method)")
+        investorMACDSignal.plotEvolution(macdResults, df, "MACD (Crossover Signal)")
         investorBB.plotEvolution(bbResults, df, "BB")
 
     now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -267,9 +266,9 @@ def main():
     plotBBDecisionRules(bbParams)
     # plotSMADecisionRules(smaParams)
     # plotEMADecisionRules(emaParams)
-    # plotMACDDecisionRules(macdParamsGrad)
-    # plotMACDDecisionRules(macdParamsZero)
-    # plotMACDDecisionRules(macdParamsSignal)
+    plotMACDDecisionRules(macdParamsGrad)
+    plotMACDDecisionRules(macdParamsZero)
+    plotMACDDecisionRules(macdParamsSignal)
 
 if __name__ == '__main__':
     main()

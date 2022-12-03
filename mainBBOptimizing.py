@@ -18,11 +18,11 @@ def main():
 
     # Trying to find data
     windowValues = np.arange(2, 10, 2)
-    stdDevValues = np.arange(0.2, 3, 0.3)
-    upperBoundValues = np.arange(-1, 0.5, 0.1)
-    lowerBoundValues = np.arange(0.5, 2, 0.1)
-    buyingSlopeValues = np.arange(3000, 10000, 2000)
-    sellingSlopeValues = np.arange(3000, 10000, 2000)
+    stdDevValues = np.arange(2, 3, 0.2)
+    upperBoundValues = np.arange(-0.5, 0.5, 0.1)
+    lowerBoundValues = np.arange(0.5, 1.5, 0.1)
+    aValues = np.arange(0, 5, 0.5)
+    bValues = np.arange(1, 2, 11)
     maxSellValues = [5000, 7500, 10000]
     maxBuyValues = [2500, 5000]
 
@@ -60,14 +60,14 @@ def main():
     nOpt = 0
     nExp = 0
     nTotal = len(windowValues) * len(stdDevValues) * len(upperBoundValues) * len(lowerBoundValues) * len(
-        buyingSlopeValues) * len(sellingSlopeValues) * len(
+        aValues) * len(bValues) * len(
         maxSellValues) * len(maxBuyValues) * numExperiments
     for window in windowValues:
         for stdDev in stdDevValues:
             for upperBound in upperBoundValues:
                 for lowerBound in lowerBoundValues:
-                    for buyingSlope in buyingSlopeValues:
-                        for sellingSlope in sellingSlopeValues:
+                    for a in aValues:
+                        for b in bValues:
                             for maxSell in maxSellValues:
                                 for maxBuy in maxBuyValues:
                                     for j in range(numExperiments):
@@ -83,8 +83,7 @@ def main():
                                         dataManager.pastStockValue = df.Open[-1]
 
                                         # Create investor BB
-                                        bbParams = BBInvestorParams(window, stdDev, lowerBound, upperBound, buyingSlope,
-                                                                        sellingSlope, maxBuy, maxSell)
+                                        bbParams = BBInvestorParams(window, stdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
                                         investorBB = Investor(10000, listToday[str(j)], bbParams=bbParams)
 
                                         # Run for loop as if days passed
@@ -97,7 +96,7 @@ def main():
                                             dataManager.actualStockValue = todayData.Open.values[0]
 
                                             # BB try
-                                            bbResults = bollingerBands(df.Open, bbParams)
+                                            bbResults = bollingerBands(df.Close, bbParams)
                                             dataManager.bb = bbResults[-1]
                                             investorBB.broker(dataManager, 'bb')
 

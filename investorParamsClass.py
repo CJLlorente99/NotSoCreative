@@ -10,19 +10,19 @@ class InvestorParams:
 
 
 class BBInvestorParams(InvestorParams):
-    def __init__(self, window, stdDev, lowerBound, upperBound, buyingSlope, sellingSlope, maxBuy=2500, maxSell=10000):
+    def __init__(self, window, stdDev, lowerBound, upperBound, maxBuy=2500, maxSell=10000, a=1, b=3):
         super().__init__(maxBuy, maxSell)
         self.window = window
         self.stdDev = stdDev
         self.lowerBound = lowerBound
         self.upperBound = upperBound
-        self.buyingSlope = buyingSlope
-        self.sellingSlope = sellingSlope
+        self.a = a
+        self.b = b
 
     def __str__(self):
-        string = "BB, Window, StdDev, LowerBound, UpperBound, BuyingSlope, SellingSlope, maxBuy, maxSell\nSMA," \
+        string = "BB, Window, StdDev, LowerBound, UpperBound, maxBuy, maxSell, a, b\nBB," \
                  + str(self.window) + "," + str(self.stdDev) + "," + str(self.lowerBound) + "," + str(self.upperBound) \
-                 + "," + str(self.buyingSlope) + "," + str(self.sellingSlope) + "," + str(self.maxBuy) + "," + str(self.maxSell)
+                 + "," + str(self.maxBuy) + "," + str(self.maxSell) + "," + str(self.a) + "," + str(self.b)
         return string
 
 
@@ -40,32 +40,35 @@ class MAInvestorParams(InvestorParams):
         return string
 
 
-class MACDInvestorParams(InvestorParams):
-    def __init__(self, upperBound=50, lowerBound=50, fastWindow=12, slowWindow=26, signal=9, maxBuy=2500, maxSell=10000):
-        super().__init__(maxBuy, maxSell)
-        self.upperBound = upperBound
-        self.lowerBound = lowerBound
+class MACDInvestorParams(MAInvestorParams):
+    def __init__(self, buyGradients, sellGradients, fastWindow=12, slowWindow=26, signal=9, maxBuy=2500, maxSell=10000, a=1, b=3, type="grad"):
+        super().__init__(buyGradients, sellGradients, None, maxBuy, maxSell)
         self.fastWindow = fastWindow
         self.slowWindow = slowWindow
         self.signal = signal
+        self.a = a
+        self.b = b
+        self.type = type
 
     def __str__(self):
-        string = "MACD, UpperBound, LowerBound, FastWindow, SlowWindow, Signal, MaxBuy, MaxSell\n"\
-                + "MACD," + str(self.upperBound) + "," + str(self.lowerBound) + "," + str(self.fastWindow) + ","\
-                + str(self.slowWindow) + "," + str(self.signal) + "," + str(self.maxBuy) + "," + str(self.maxSell)
+        string = "MACD, LowerBoundBuy, UpperBoundBuy, LowBoundSquareBuy, UpperBoundSquareBuy, LowerBoundSell, UpperBoundSell, LowBoundSquareSell, UpperBoundSquareSell, FastWindow, SlowWindow, Signal, MaxBuy, MaxSell, a, b, type\nMACD," \
+                 + str(self.buyGradients) + "," + str(self.sellGradients) + "," + str(self.fastWindow) + "," + str(
+            self.slowWindow) + "," + str(self.signal) + "," + str(self.a) + "," + str(self.b) + "," + str(self.type)
         return string
 
 
 class RSIInvestorParams(InvestorParams):
-    def __init__(self, upperBound, lowerBound, window, maxBuy=2500, maxSell=10000):
+    def __init__(self, upperBound, lowerBound, window, maxBuy=2500, maxSell=10000, a=1, b=3):
         super().__init__(maxBuy, maxSell)
         self.upperBound = upperBound
         self.lowerBound = lowerBound
         self.window = window
+        self.a = a
+        self.b = b
 
     def __str__(self):
-        return f'RSI,UpperBound, LowerBound, Window, MaxBuy, MaxSell\nRSI,{self.upperBound},' \
-               f'{self.lowerBound},{self.window},{self.maxBuy},{self.maxSell}'
+        return f'RSI,UpperBound, LowerBound, Window, MaxBuy, MaxSell, a, b\nRSI,{self.upperBound},' \
+               f'{self.lowerBound},{self.window},{self.maxBuy},{self.maxSell},{self.a},{self.b}'
 
 
 # Useful classes

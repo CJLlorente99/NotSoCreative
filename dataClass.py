@@ -22,7 +22,7 @@ class DataManager:
 
 
 class DataGetter:
-    dataLen = 21
+    dataLen = 60
 
     def __init__(self):
         """
