@@ -8,23 +8,20 @@ from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np
 
-figNum = 0
-
 
 def main():
-    global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
 
     # Trying to find data
-    windowValues = np.arange(8, 14, 2)
-    stdDevValues = np.arange(2, 3, 0.2)
-    upperBoundValues = np.arange(0, 1, 0.2)
-    lowerBoundValues = np.arange(1, 2, 0.2)
-    aValues = np.arange(1.5, 2.5, 0.2)
-    bValues = np.arange(1, 2, 0.1)
-    maxSellValues = [5000, 7500, 10000]
-    maxBuyValues = [2500, 5000]
+    windowValues = np.arange(9, 11, 1)
+    stdDevValues = np.arange(1.5, 2.5, 0.5)
+    upperBoundValues = np.arange(0.4, 1.2, 0.2)
+    lowerBoundValues = np.arange(1.3, 2, 0.2)
+    aValues = np.arange(1.5, 2.5, 0.3)
+    bValues = np.arange(0.5, 1.5, 0.5)
+    maxSellValues = [10000]
+    maxBuyValues = [10000]
 
     # Run various experiments
     numExperiments = 5

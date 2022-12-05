@@ -108,8 +108,8 @@ def plotComparatives(dfPercentage, dfPortfolio, indicatorName):
 
 
 if __name__ == "__main__":
-    fileNameData = "data/optimizationRSI_2022_12_05_09_41_33.csv"
-    fileNameParams = "data/optimizationRSI_2022_12_05_09_41_33.txt"
+    fileNameData = "data/optimizationRSI_2022_12_05_11_23_07.csv"
+    fileNameParams = "data/optimizationRSI_2022_12_05_11_23_07.txt"
 
     indicatorName = "RSI"
     # indicatorName = "BB"
@@ -128,4 +128,4 @@ if __name__ == "__main__":
     plotComparatives(topPercentage, topPortfolio, indicatorName)
 
     print(topPercentage[:10])
-    # print(topPortfolio[:10])
+    print(topPortfolio[:10])

@@ -128,12 +128,13 @@ class Investor:
         meanPortfolioValue = self.record["totalValue"].mean()
         return porcentualGain, meanPortfolioValue
 
-    def plotEvolution(self, indicatorData, stockMarketData, typeIndicator):
+    def plotEvolution(self, indicatorData, stockMarketData, typeIndicator, recordPredictedValue=None):
         """
         Function that plots the actual status of the investor investment as well as the decisions that have been made
         :param indicatorData: Data belonging to the indicator used to take decisions
         :param stockMarketData: df with the stock market data
         :param typeIndicator: Type of indicator used for the decisions
+        :param recordPredictedValue: Predicted data dataframe
         """
         # Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
         fig = go.Figure()
@@ -150,6 +151,10 @@ class Investor:
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
+        if recordPredictedValue is not None:
+            fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
+                                     y=recordPredictedValue[0]), row=1, col=1,
+                          secondary_y=False)
         if hasattr(self, 'macdParams'):  # If MACD, also plot the signal line
             fig.add_trace(go.Scatter(name=typeIndicator, x=self.record.index,
                                      y=indicatorData["macd"][-len(self.record.index):]), row=1, col=1,

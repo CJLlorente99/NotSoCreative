@@ -9,11 +9,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np
 
 
-figNum = 0
-
-
 def main():
-    global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
 
@@ -41,8 +37,8 @@ def main():
     bValues = np.arange(0.5, 4.5, 2)
     tanNum = len(aValues)*len(bValues)
 
-    maxSellValues = [5000, 10000]
-    maxBuyValues = [5000, 10000]
+    maxSellValues = [10000]
+    maxBuyValues = [10000]
     maxNum = len(maxSellValues)*len(maxBuyValues)
 
     # Run various experiments

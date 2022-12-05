@@ -20,7 +20,7 @@ def main():
     maxSell = 10000
 
     # Run various experiments
-    numExperiments = 2
+    numExperiments = 1
     summaryResults = pd.DataFrame()
     advancedData = pd.DataFrame()
     for j in range(numExperiments):
@@ -36,11 +36,11 @@ def main():
         dataManager.pastStockValue = df.Open[-1]
 
         # Create investor RSI
-        RSIwindow = 16
-        upperBound = 70
-        lowerBound = 40
-        a = 1
-        b = 3
+        RSIwindow = 3
+        upperBound = 61
+        lowerBound = 27.5
+        a = 1.1
+        b = 2.4
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
         investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
 
@@ -81,12 +81,12 @@ def main():
         investorMACDSignal = Investor(10000, dataGetter.today, macdParams=macdParamsSignal)
 
         # Create investor BB
-        bbWindow = 5
-        bbStdDev = 2
-        lowerBound = 0.3
-        upperBound = 0.7
-        a = 5
-        b = 3
+        bbWindow = 10
+        bbStdDev = 1.5
+        lowerBound = 1.9
+        upperBound = 0.8
+        a = 2.4
+        b = 0.5
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
@@ -150,10 +150,10 @@ def main():
 
             # BB try
             bbResults = bollingerBands(df.Open, bbParams)
-            dataManager.bb = bbResults[-1]
+            dataManager.bb = bbResults["pband"][-1]
             moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorBB.broker(dataManager, 'bb')
             aux = pd.DataFrame(
-                {'bb': [bbResults[-1]], 'moneyToInvestBB': [moneyToInvest], 'moneyToSellBB': [moneyToSell],
+                {'bb': [bbResults["pband"][-1]], 'moneyToInvestBB': [moneyToInvest], 'moneyToSellBB': [moneyToSell],
                  'investedMoneyBB': [investedMoney], 'nonInvestedMoneyBB': [nonInvestedMoney]})
             auxBb = pd.concat([auxBb, aux], ignore_index=True)
 

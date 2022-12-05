@@ -14,13 +14,13 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    rsiWindowValues = np.arange(3, 5, 1)
-    upperBoundValues = np.arange(55, 65, 2)
-    lowerBoundValues = np.arange(28, 32, 1)
-    aValues = np.arange(0.2, 1, 0.2)
-    bValues = np.arange(0.5, 2, 0.4)
-    maxSellValues = [5000, 10000]
-    maxBuyValues = [5000, 10000]
+    rsiWindowValues = np.arange(1, 4, 1)
+    upperBoundValues = np.arange(58, 62, 0.5)
+    lowerBoundValues = np.arange(27, 28, 0.5)
+    aValues = np.arange(0.9, 1.2, 0.1)
+    bValues = np.arange(2, 2.5, 0.1)
+    maxSellValues = [10000]
+    maxBuyValues = [10000]
 
     # Run various experiments
     numExperiments = 5

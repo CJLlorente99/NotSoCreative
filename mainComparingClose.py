@@ -3,7 +3,7 @@ from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
 from rsi import relativeStrengthIndex, plotRSIDecisionRules
-from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence, plotSMADecisionRules, plotEMADecisionRules, plotMACDDecisionRules
+from ma import movingAverageConvergenceDivergence, plotMACDDecisionRules
 from bb import bollingerBands, plotBBDecisionRules
 from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 import plotly.graph_objects as go
@@ -38,10 +38,10 @@ def main():
 
         # Create investor RSI
         RSIwindow = 3
-        upperBound = 60
-        lowerBound = 30
-        a = 0.4
-        b = 1.7
+        upperBound = 61
+        lowerBound = 27.5
+        a = 1.1
+        b = 2.4
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
         investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
 
@@ -82,12 +82,12 @@ def main():
         investorMACDSignal = Investor(10000, dataGetter.today, macdParams=macdParamsSignal)
 
         # Create investor BB
-        bbWindow = 12
-        bbStdDev = 2
-        lowerBound = 1.4
+        bbWindow = 10
+        bbStdDev = 1.5
+        lowerBound = 1.9
         upperBound = 0.8
-        a = 2.3
-        b = 1.9
+        a = 2.4
+        b = 0.5
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
