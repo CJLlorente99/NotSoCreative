@@ -1,6 +1,6 @@
 import math
 from ta.trend import MACD
-from investorParamsClass import MAInvestorParams, MACDInvestorParams, GradientQuarter
+from classes.investorParamsClass import MACDInvestorParams
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots

@@ -1,5 +1,8 @@
 from numpy.random import normal
 
+# This function simulates some simulated data. Most probably, the LSTM model could be fitted into this function somehow
+# The output of the function should be a value containing the predicted value
+
 
 def predictedDataGenerator(dataGetter, avgError):
     tomorrowData = dataGetter.getNextDay()

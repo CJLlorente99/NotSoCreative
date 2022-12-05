@@ -1,6 +1,6 @@
 import math
 from ta.volatility import BollingerBands
-from investorParamsClass import BBInvestorParams
+from classes.investorParamsClass import BBInvestorParams
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np

@@ -1,8 +1,6 @@
 import pandas as pd
-import ma
 from dataClass import DataManager
-import rsi
-import bb
+from TAIndicators import bb, rsi, ma
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 

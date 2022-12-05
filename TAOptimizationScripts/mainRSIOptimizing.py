@@ -1,9 +1,9 @@
 import pandas as pd
-from investorClass import Investor
-from dataClass import DataManager, DataGetter
+from classes.investorClass import Investor
+from classes.dataClass import DataManager, DataGetter
 import datetime as dt
-from rsi import relativeStrengthIndex
-from investorParamsClass import RSIInvestorParams
+from TAIndicators.rsi import relativeStrengthIndex
+from classes.investorParamsClass import RSIInvestorParams
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np

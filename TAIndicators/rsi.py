@@ -1,6 +1,6 @@
 import numpy as np
 import ta
-from investorParamsClass import RSIInvestorParams
+from classes.investorParamsClass import RSIInvestorParams
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import math

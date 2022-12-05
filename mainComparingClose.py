@@ -1,12 +1,10 @@
 import pandas as pd
-from investorClass import Investor
-from dataClass import DataManager, DataGetter
-import datetime as dt
-from rsi import relativeStrengthIndex, plotRSIDecisionRules
-from ma import movingAverageConvergenceDivergence, plotMACDDecisionRules
-from bb import bollingerBands, plotBBDecisionRules
-from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
-import plotly.graph_objects as go
+from classes.investorClass import Investor
+from classes.dataClass import DataManager, DataGetter
+from TAIndicators.rsi import relativeStrengthIndex, plotRSIDecisionRules
+from TAIndicators.ma import movingAverageConvergenceDivergence, plotMACDDecisionRules
+from TAIndicators.bb import bollingerBands, plotBBDecisionRules
+from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 

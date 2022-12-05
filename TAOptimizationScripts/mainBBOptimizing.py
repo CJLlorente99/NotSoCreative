@@ -1,9 +1,9 @@
 import pandas as pd
-from investorClass import Investor
-from dataClass import DataManager, DataGetter
+from classes.investorClass import Investor
+from classes.dataClass import DataManager, DataGetter
 import datetime as dt
-from bb import bollingerBands
-from investorParamsClass import BBInvestorParams
+from TAIndicators.bb import bollingerBands
+from classes.investorParamsClass import BBInvestorParams
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np
