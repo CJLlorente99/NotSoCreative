@@ -20,7 +20,7 @@ class BBInvestorParams(InvestorParams):
         self.b = b
 
     def __str__(self):
-        string = "BB, Window, StdDev, LowerBound, UpperBound, maxBuy, maxSell, a, b\nBB," \
+        string = "BB, Window, StdDev, LowerBound, UpperBound, MaxBuy, MaxSell, a, b\nBB," \
                  + str(self.window) + "," + str(self.stdDev) + "," + str(self.lowerBound) + "," + str(self.upperBound) \
                  + "," + str(self.maxBuy) + "," + str(self.maxSell) + "," + str(self.a) + "," + str(self.b)
         return string
@@ -53,7 +53,8 @@ class MACDInvestorParams(MAInvestorParams):
     def __str__(self):
         string = "MACD, LowerBoundBuy, UpperBoundBuy, LowBoundSquareBuy, UpperBoundSquareBuy, LowerBoundSell, UpperBoundSell, LowBoundSquareSell, UpperBoundSquareSell, FastWindow, SlowWindow, Signal, MaxBuy, MaxSell, a, b, type\nMACD," \
                  + str(self.buyGradients) + "," + str(self.sellGradients) + "," + str(self.fastWindow) + "," + str(
-            self.slowWindow) + "," + str(self.signal) + "," + str(self.a) + "," + str(self.b) + "," + str(self.type)
+            self.slowWindow) + "," + str(self.signal) + "," + str(self.maxBuy) + "," + str(self.maxSell) + "," + str(
+            self.a) + "," + str(self.b) + "," + str(self.type)
         return string
 
 

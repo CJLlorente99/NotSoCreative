@@ -17,12 +17,12 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    windowValues = np.arange(2, 10, 2)
+    windowValues = np.arange(8, 14, 2)
     stdDevValues = np.arange(2, 3, 0.2)
-    upperBoundValues = np.arange(-0.5, 0.5, 0.1)
-    lowerBoundValues = np.arange(0.5, 1.5, 0.1)
-    aValues = np.arange(0, 5, 0.5)
-    bValues = np.arange(1, 2, 11)
+    upperBoundValues = np.arange(0, 1, 0.2)
+    lowerBoundValues = np.arange(1, 2, 0.2)
+    aValues = np.arange(1.5, 2.5, 0.2)
+    bValues = np.arange(1, 2, 0.1)
     maxSellValues = [5000, 7500, 10000]
     maxBuyValues = [2500, 5000]
 
@@ -97,7 +97,7 @@ def main():
 
                                             # BB try
                                             bbResults = bollingerBands(df.Close, bbParams)
-                                            dataManager.bb = bbResults[-1]
+                                            dataManager.bb = bbResults["pband"][-1]
                                             investorBB.broker(dataManager, 'bb')
 
                                             # Refresh for next day

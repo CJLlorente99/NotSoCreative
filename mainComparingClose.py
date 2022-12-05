@@ -16,11 +16,11 @@ def main():
     dataGetter = DataGetter()
 
     # Common data
-    maxBuy = 5000
-    maxSell = 5000
+    maxBuy = 10000
+    maxSell = 10000
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 1
     nDays = 10
     summaryResults = pd.DataFrame()
     advancedData = pd.DataFrame()
@@ -37,78 +37,62 @@ def main():
         dataManager.pastStockValue = df.Open[-1]
 
         # Create investor RSI
-        RSIwindow = 6
-        upperBound = 50
-        lowerBound = 35
-        a = 0.9
-        b = 0.1
+        RSIwindow = 3
+        upperBound = 60
+        lowerBound = 30
+        a = 0.4
+        b = 1.7
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
         investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
 
-        # Create investor SMA
-        # SMAwindow = 5
-        # sellParams = GradientQuarter(-10, 10, -30, 0)
-        # buyParams = GradientQuarter(-10, 10, 0, 30)
-        # smaParams = MAInvestorParams(buyParams, sellParams, SMAwindow, maxBuy, maxSell)
-        # investorSMA = Investor(10000, dataGetter.today, smaParams=smaParams)
-        #
-        # # Create investor EMA
-        # EMAwindow = 5
-        # sellParams = GradientQuarter(-10, 10, -30, 0)
-        # buyParams = GradientQuarter(-10, 10, 0, 30)
-        # emaParams = MAInvestorParams(buyParams, sellParams, EMAwindow, maxBuy, maxSell)
-        # investorEMA = Investor(10000, dataGetter.today, emaParams=emaParams)
-
         # Create investor MACD grad
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
-        macdFastWindow = 6
-        macdSlowWindow = 14
-        signal = 9
-        a = 0.01
-        b = 3
+        sellGradient = GradientQuarter(-200, 50, -50, 0)
+        buyGradient = GradientQuarter(-100, 50, 0, 0)
+        macdFastWindow = 2
+        macdSlowWindow = 6
+        signal = 7
+        a = 0.7
+        b = 2.5
         macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad")
         investorMACDGrad = Investor(10000, dataGetter.today, macdParams=macdParamsGrad)
 
         # Create investor MACD zero
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
-        macdFastWindow = 6
-        macdSlowWindow = 14
-        signal = 9
-        a = 0.01
-        b = 3
+        sellGradient = GradientQuarter(-50, 100, -100, 0)
+        buyGradient = GradientQuarter(-100, 0, 50, 0)
+        macdFastWindow = 2
+        macdSlowWindow = 9
+        signal = 7
+        a = 0.7
+        b = 0.5
         macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad_crossZero")
         investorMACDZero = Investor(10000, dataGetter.today, macdParams=macdParamsZero)
 
         # Create investor MACD signal
-        sellGradient = GradientQuarter(-1, 1, -50, 0)
-        buyGradient = GradientQuarter(-1, 1, 50, 0)
-        macdFastWindow = 6
-        macdSlowWindow = 14
-        signal = 9
-        a = 0.01
-        b = 3
+        sellGradient = GradientQuarter(-150, 150, -200, 0)
+        buyGradient = GradientQuarter(-200, 0, 100, 0)
+        macdFastWindow = 2
+        macdSlowWindow = 6
+        signal = 5
+        a = 0.7
+        b = 2.5
         macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
                                         maxSell, a, b, "grad_crossSignal")
         investorMACDSignal = Investor(10000, dataGetter.today, macdParams=macdParamsSignal)
 
         # Create investor BB
-        bbWindow = 8
-        bbStdDev = 2.8
+        bbWindow = 12
+        bbStdDev = 2
         lowerBound = 1.4
-        upperBound = 0.4
-        a = 2
-        b = 1
+        upperBound = 0.8
+        a = 2.3
+        b = 1.9
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = Investor(10000, dataGetter.today, bbParams=bbParams)
 
         # Variables to store data
         auxRsi = pd.DataFrame()
-        # auxSma = pd.DataFrame()
-        # auxEma = pd.DataFrame()
         auxMacdGrad = pd.DataFrame()
         auxMacdZero = pd.DataFrame()
         auxMacdSignal = pd.DataFrame()
@@ -138,24 +122,6 @@ def main():
                 {'rsi': [rsiResults[-1]], 'moneyToInvestRSI': [moneyToInvest], 'moneyToSellRSI': [moneyToSell],
                  'investedMoneyRSI': [investedMoney], 'nonInvestedMoneyRSI': [nonInvestedMoney]})
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
-
-            # SMA try
-            # smaResults = simpleMovingAverage(df.Close, smaParams)
-            # dataManager.sma = smaResults
-            # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorSMA.broker(dataManager, 'sma')
-            # aux = pd.DataFrame(
-            #     {'sma': [smaResults[-1]], 'moneyToInvestSMA': [moneyToInvest], 'moneyToSellSMA': [moneyToSell],
-            #      'investedMoneySMA': [investedMoney], 'nonInvestedMoneySMA': [nonInvestedMoney]})
-            # auxSma = pd.concat([auxSma, aux], ignore_index=True)
-            #
-            # # EMA try
-            # emaResults = exponentialMovingAverage(df.Close, emaParams)
-            # dataManager.ema = emaResults
-            # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorEMA.broker(dataManager, 'ema')
-            # aux = pd.DataFrame(
-            #     {'ema': [emaResults[-1]], 'moneyToInvestEMA': [moneyToInvest], 'moneyToSellEMA': [moneyToSell],
-            #      'investedMoneyEMA': [investedMoney], 'nonInvestedMoneyEMA': [nonInvestedMoney]})
-            # auxEma = pd.concat([auxEma, aux], ignore_index=True)
 
             # MACD Grad try
             macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsGrad)
@@ -206,8 +172,6 @@ def main():
 
         # Calculate summary results
         percentualGainRSI, meanPortfolioValueRSI = investorRSI.calculateMetrics()
-        # percentualGainSMA, meanPortfolioValueSMA = investorSMA.calculateMetrics()
-        # percentualGainEMA, meanPortfolioValueEMA = investorEMA.calculateMetrics()
         percentualGainMACDGrad, meanPortfolioValueMACDGrad = investorMACDGrad.calculateMetrics()
         percentualGainMACDZero, meanPortfolioValueMACDZero = investorMACDZero.calculateMetrics()
         percentualGainMACDSignal, meanPortfolioValueMACDSignal = investorMACDSignal.calculateMetrics()
@@ -216,10 +180,6 @@ def main():
         # Show final percentual gain and mean portfolio value per experiment
         print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
                                                                                      meanPortfolioValueRSI))
-        # print("Percentual gain SMA {:.2f}%, mean portfolio value SMA {:.2f}$".format(percentualGainSMA,
-        #                                                                              meanPortfolioValueSMA))
-        # print("Percentual gain EMA {:.2f}%, mean portfolio value EMA {:.2f}$".format(percentualGainEMA,
-        #                                                                              meanPortfolioValueEMA))
         print("Percentual gain MACD Grad {:.2f}%, mean portfolio value MACD Grad {:.2f}$".format(percentualGainMACDGrad,
                                                                                      meanPortfolioValueMACDGrad))
         print("Percentual gain MACD Zero {:.2f}%, mean portfolio value MACD Zero {:.2f}$".format(percentualGainMACDZero,
@@ -242,35 +202,32 @@ def main():
 
         # Plot the evolution per experiment
         investorRSI.plotEvolution(rsiResults, df, "RSI")
-        # investorSMA.plotEvolution(smaResults.iloc[-nDays:], df, "SMA")
-        # investorEMA.plotEvolution(emaResults.iloc[-nDays:], df, "EMA")
-        # investorMACDGrad.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Grad Method)")
-        # investorMACDZero.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Crossover Zero Method)")
-        # investorMACDSignal.plotEvolution(macdResults.iloc[-nDays:], df, "MACD (Crossover Signal)")
+        investorMACDGrad.plotEvolution(macdResults, df, "MACD (Grad Method)")
+        investorMACDZero.plotEvolution(macdResults, df, "MACD (Crossover Zero Method)")
+        investorMACDSignal.plotEvolution(macdResults, df, "MACD (Crossover Signal)")
         investorBB.plotEvolution(bbResults, df, "BB")
 
     # Push the data into files for later inspection
-    now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    summaryResults.to_csv("data/" + now + ".csv", index_label="experiment")
-    advancedData.to_csv("data/" + now + "_advancedData.csv", index_label="experiment")
+    # now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    # summaryResults.to_csv("data/" + now + ".csv", index_label="experiment")
+    # advancedData.to_csv("data/" + now + "_advancedData.csv", index_label="experiment")
 
-    with open("data/" + now + ".txt", "w") as f:
-        f.write(str(rsiParams) + "\n")
-        # f.write(str(smaParams) + "\n")
-        # f.write(str(emaParams) + "\n")
-        f.write(str(macdParamsGrad) + "\n")
-        f.write(str(macdParamsZero) + "\n")
-        f.write(str(macdParamsSignal) + "\n")
-        f.write(str(bbParams))
+    # with open("data/" + now + ".txt", "w") as f:
+    #     f.write(str(rsiParams) + "\n")
+    #     # f.write(str(smaParams) + "\n")
+    #     # f.write(str(emaParams) + "\n")
+    #     f.write(str(macdParamsGrad) + "\n")
+    #     f.write(str(macdParamsZero) + "\n")
+    #     f.write(str(macdParamsSignal) + "\n")
+    #     f.write(str(bbParams))
 
     # Show the decision rules with the parameters used
     plotRSIDecisionRules(rsiParams)
     plotBBDecisionRules(bbParams)
-    # plotSMADecisionRules(smaParams)
-    # plotEMADecisionRules(emaParams)
-    # plotMACDDecisionRules(macdParamsGrad)
-    # plotMACDDecisionRules(macdParamsZero)
-    # plotMACDDecisionRules(macdParamsSignal)
+    plotMACDDecisionRules(macdParamsGrad)
+    plotMACDDecisionRules(macdParamsZero)
+    plotMACDDecisionRules(macdParamsSignal)
+
 
 if __name__ == '__main__':
     main()

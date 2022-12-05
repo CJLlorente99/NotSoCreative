@@ -55,7 +55,8 @@ def plotRSIDecisionRules(params: RSIInvestorParams):
     fig = go.Figure()
     fig.add_trace(go.Scatter(name="BuyPoints", x=testRSI, y=buyPoints, fill='tozeroy'))
     fig.add_trace(go.Scatter(name="SellPoints", x=testRSI, y=-sellPoints, fill='tozeroy'))
-    fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"},
+                      yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
     fig.show()
 
 
@@ -63,8 +64,8 @@ def tryRSIDecisionRules():
     """
     Function that tries a bunch of a and b values in order to feel how the decision rule behaves
     """
-    a = np.arange(0.1, 0.5, 0.1)
-    b = np.arange(0.1, 0.6, 0.1)
+    a = np.arange(0.1, 1.7, 0.4)
+    b = np.arange(0.1, 1.7, 0.4)
     titles = []
     for aVal in a:
         for bVal in b:

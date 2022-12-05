@@ -3,7 +3,7 @@ from investorClass import Investor
 from dataClass import DataManager, DataGetter
 import datetime as dt
 from rsi import relativeStrengthIndex, plotRSIDecisionRules
-from ma import simpleMovingAverage, exponentialMovingAverage, movingAverageConvergenceDivergence, plotSMADecisionRules, plotEMADecisionRules, plotMACDDecisionRules
+from ma import movingAverageConvergenceDivergence, plotMACDDecisionRules
 from bb import bollingerBands, plotBBDecisionRules
 from investorParamsClass import RSIInvestorParams, MAInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 import plotly.graph_objects as go
@@ -11,11 +11,7 @@ from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
 
-figNum = 0
-
-
 def main():
-    global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
 
@@ -47,20 +43,6 @@ def main():
         b = 3
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
         investorRSI = Investor(10000, dataGetter.today, rsiParams=rsiParams)
-
-        # Create investor SMA
-        # SMAwindow = 5
-        # sellParams = GradientQuarter(-10, 10, -30, 0)
-        # buyParams = GradientQuarter(-10, 10, 0, 30)
-        # smaParams = MAInvestorParams(buyParams, sellParams, SMAwindow, maxBuy, maxSell)
-        # investorSMA = Investor(10000, dataGetter.today, smaParams=smaParams)
-        #
-        # # Create investor EMA
-        # EMAwindow = 5
-        # sellParams = GradientQuarter(-10, 10, -30, 0)
-        # buyParams = GradientQuarter(-10, 10, 0, 30)
-        # emaParams = MAInvestorParams(buyParams, sellParams, EMAwindow, maxBuy, maxSell)
-        # investorEMA = Investor(10000, dataGetter.today, emaParams=emaParams)
 
         # Create investor MACD grad
         sellGradient = GradientQuarter(-3, 3, -50, 0)
@@ -110,8 +92,6 @@ def main():
 
         # Variables to store data
         auxRsi = pd.DataFrame()
-        # auxSma = pd.DataFrame()
-        # auxEma = pd.DataFrame()
         auxMacdGrad = pd.DataFrame()
         auxMacdZero = pd.DataFrame()
         auxMacdSignal = pd.DataFrame()
@@ -140,24 +120,6 @@ def main():
                 {'rsi': [rsiResults[-1]], 'moneyToInvestRSI': [moneyToInvest], 'moneyToSellRSI': [moneyToSell],
                  'investedMoneyRSI': [investedMoney], 'nonInvestedMoneyRSI': [nonInvestedMoney]})
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
-
-            # SMA try
-            # smaResults = simpleMovingAverage(df.Open, smaParams)
-            # dataManager.sma = smaResults
-            # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorSMA.broker(dataManager, 'sma')
-            # aux = pd.DataFrame(
-            #     {'sma': [smaResults[-1]], 'moneyToInvestSMA': [moneyToInvest], 'moneyToSellSMA': [moneyToSell],
-            #      'investedMoneySMA': [investedMoney], 'nonInvestedMoneySMA': [nonInvestedMoney]})
-            # auxSma = pd.concat([auxSma, aux], ignore_index=True)
-            #
-            # # EMA try
-            # emaResults = exponentialMovingAverage(df.Open, emaParams)
-            # dataManager.ema = emaResults
-            # moneyToInvest, moneyToSell, investedMoney, nonInvestedMoney = investorEMA.broker(dataManager, 'ema')
-            # aux = pd.DataFrame(
-            #     {'ema': [emaResults[-1]], 'moneyToInvestEMA': [moneyToInvest], 'moneyToSellEMA': [moneyToSell],
-            #      'investedMoneyEMA': [investedMoney], 'nonInvestedMoneyEMA': [nonInvestedMoney]})
-            # auxEma = pd.concat([auxEma, aux], ignore_index=True)
 
             # MACD Grad try
             macdResults = movingAverageConvergenceDivergence(df.Open, macdParamsGrad)
@@ -208,18 +170,12 @@ def main():
 
         # Calculate summary results
         percentualGainRSI, meanPortfolioValueRSI = investorRSI.calculateMetrics()
-        # percentualGainSMA, meanPortfolioValueSMA = investorSMA.calculateMetrics()
-        # percentualGainEMA, meanPortfolioValueEMA = investorEMA.calculateMetrics()
         percentualGainMACDGrad, meanPortfolioValueMACDGrad = investorMACDGrad.calculateMetrics()
         percentualGainMACDZero, meanPortfolioValueMACDZero = investorMACDZero.calculateMetrics()
         percentualGainMACDSignal, meanPortfolioValueMACDSignal = investorMACDSignal.calculateMetrics()
         percentualGainBB, meanPortfolioValueBB = investorBB.calculateMetrics()
         print("Percentual gain RSI {:.2f}%, mean portfolio value RSI {:.2f}$".format(percentualGainRSI,
                                                                                      meanPortfolioValueRSI))
-        # print("Percentual gain SMA {:.2f}%, mean portfolio value SMA {:.2f}$".format(percentualGainSMA,
-        #                                                                              meanPortfolioValueSMA))
-        # print("Percentual gain EMA {:.2f}%, mean portfolio value EMA {:.2f}$".format(percentualGainEMA,
-        #                                                                              meanPortfolioValueEMA))
         print("Percentual gain MACD Grad {:.2f}%, mean portfolio value MACD Grad {:.2f}$".format(percentualGainMACDGrad,
                                                                                      meanPortfolioValueMACDGrad))
         print("Percentual gain MACD Zero {:.2f}%, mean portfolio value MACD Zero {:.2f}$".format(percentualGainMACDZero,
@@ -242,8 +198,6 @@ def main():
 
         # Plot the evolution per experiment
         investorRSI.plotEvolution(rsiResults, df, "RSI")
-        # investorSMA.plotEvolution(smaResults, df, "SMA")
-        # investorEMA.plotEvolution(emaResults, df, "EMA")
         investorMACDGrad.plotEvolution(macdResults, df, "MACD (Grad Method)")
         investorMACDZero.plotEvolution(macdResults, df, "MACD (Crossover Zero Method)")
         investorMACDSignal.plotEvolution(macdResults, df, "MACD (Crossover Signal)")
@@ -255,8 +209,6 @@ def main():
 
     with open("data/" + now + ".txt", "w") as f:
         f.write(str(rsiParams) + "\n")
-        # f.write(str(smaParams) + "\n")
-        # f.write(str(emaParams) + "\n")
         f.write(str(macdParamsGrad) + "\n")
         f.write(str(macdParamsZero) + "\n")
         f.write(str(macdParamsSignal) + "\n")
@@ -264,11 +216,10 @@ def main():
 
     plotRSIDecisionRules(rsiParams)
     plotBBDecisionRules(bbParams)
-    # plotSMADecisionRules(smaParams)
-    # plotEMADecisionRules(emaParams)
     plotMACDDecisionRules(macdParamsGrad)
     plotMACDDecisionRules(macdParamsZero)
     plotMACDDecisionRules(macdParamsSignal)
+
 
 if __name__ == '__main__':
     main()

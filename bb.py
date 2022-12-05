@@ -58,7 +58,8 @@ def plotBBDecisionRules(params: BBInvestorParams):
     fig = go.Figure()
     fig.add_trace(go.Scatter(name="BuyPoints", x=testBB, y=buyPoints, fill='tozeroy'))
     fig.add_trace(go.Scatter(name="SellPoints", x=testBB, y=-sellPoints, fill='tozeroy'))
-    fig.update_layout(title="Decision Rules for BB indicator", xaxis={"title": "BB Value"}, yaxis={"title": "Sell/Buy/Hold [$]"})
+    fig.update_layout(title="Decision Rules for BB indicator", xaxis={"title": "BB Value"},
+                      yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
     fig.show()
 
 

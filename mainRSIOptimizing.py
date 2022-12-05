@@ -9,22 +9,18 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 import numpy as np
 
 
-figNum = 0
-
-
 def main():
-    global figNum
     # Create DataGetter instance
     dataGetter = DataGetter()
 
     # Trying to find data
-    rsiWindowValues = np.arange(2, 20, 4)
-    upperBoundValues = np.arange(40, 80, 5)
-    lowerBoundValues = np.arange(20, 50, 5)
-    aValues = np.arange(0.1, 1, 0.1)
-    bValues = np.arange(0.1, 1, 0.1)
-    maxSellValues = [3333, 6666, 10000]
-    maxBuyValues = [3333, 6666, 10000]
+    rsiWindowValues = np.arange(3, 5, 1)
+    upperBoundValues = np.arange(55, 65, 2)
+    lowerBoundValues = np.arange(28, 32, 1)
+    aValues = np.arange(0.2, 1, 0.2)
+    bValues = np.arange(0.5, 2, 0.4)
+    maxSellValues = [5000, 10000]
+    maxBuyValues = [5000, 10000]
 
     # Run various experiments
     numExperiments = 5

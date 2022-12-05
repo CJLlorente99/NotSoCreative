@@ -15,8 +15,6 @@ class DataManager:
         self.nextStockValue = 0
         self.date = dt.date.today()
         self.rsi = 0
-        self.sma = None
-        self.ema = None
         self.macd = None
         self.bb = None
 

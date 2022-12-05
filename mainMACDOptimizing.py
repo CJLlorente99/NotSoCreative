@@ -18,30 +18,35 @@ def main():
     dataGetter = DataGetter()
 
     # Trying to find data
-    lowerBoundGradientSellArray = np.arange(-60, 0, 20)
-    upperBoundGradientSellArray = np.arange(0, 60, 20)
-    lowerBoundSecondGradientSellArray = np.arange(-65, -5, 20)
+    lowerBoundGradientSellArray = np.arange(-200, 0, 50)
+    upperBoundGradientSellArray = np.arange(0, 200, 50)
+    lowerBoundSecondGradientSellArray = np.arange(-200, 0, 50)
     upperSecondGradientSellArray = [0]
     sellNum = len(lowerBoundGradientSellArray) * len(upperBoundGradientSellArray) * len(
         lowerBoundSecondGradientSellArray) * len(upperSecondGradientSellArray)
-    lowerBoundGradientBuyArray = np.arange(-60, 0, 20)
-    upperBoundGradientBuyArray = np.arange(0, 60, 20)
-    lowerBoundSecondGradientBuyArray = np.arange(5, 65, 20)
+
+    lowerBoundGradientBuyArray = np.arange(-200, 0, 50)
+    upperBoundGradientBuyArray = np.arange(0, 200, 50)
+    lowerBoundSecondGradientBuyArray = np.arange(0, 200, 50)
     upperSecondGradientBuyArray = [0]
     buyNum = len(lowerBoundGradientBuyArray) * len(upperBoundGradientBuyArray) * len(
         lowerBoundSecondGradientBuyArray) * len(upperSecondGradientBuyArray)
-    fastWindowValues = np.arange(2, 8, 2)
-    slowWindowValues = np.arange(6, 12, 2)
-    signalValues = np.arange(5, 9, 1)
+
+    fastWindowValues = np.arange(2, 8, 3)
+    slowWindowValues = np.arange(6, 12, 3)
+    signalValues = np.arange(5, 9, 2)
     windowNum = len(fastWindowValues)*len(slowWindowValues)*len(signalValues)
-    aValues = np.arange(0.5, 2, 0.5)
-    bValues = np.arange(1, 5.5, 1.5)
+
+    aValues = np.arange(0.1, 1.3, 0.6)
+    bValues = np.arange(0.5, 4.5, 2)
     tanNum = len(aValues)*len(bValues)
-    maxSellValues = [3333, 6666, 10000]
-    maxBuyValues = [3333, 6666, 10000]
+
+    maxSellValues = [5000, 10000]
+    maxBuyValues = [5000, 10000]
     maxNum = len(maxSellValues)*len(maxBuyValues)
+
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 3
     numDays = 10
 
     # Record data
@@ -69,7 +74,7 @@ def main():
         # Reset day to have a different dataset for next experiment
         dataGetter.today += CDay(100, calendar=USFederalHolidayCalendar())
 
-    summaryResults = pd.DataFrame(columns=["nOpt", "initDate", "lastDate", "percentageMACD", "meanPortfolioValueMACD"])
+    summaryResults = pd.DataFrame()
     optParams = []
     nOpt = 0
     nExp = 0

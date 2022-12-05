@@ -27,10 +27,6 @@ class Investor:
         self.moneyToSell = 0
         if rsiParams:
             self.rsiParams = rsiParams
-        if smaParams:
-            self.smaParams = smaParams
-        if emaParams:
-            self.emaParams = emaParams
         if macdParams:
             self.macdParams = macdParams
         if bbParams:
@@ -69,6 +65,14 @@ class Investor:
         """
         This function performs the operation given by signals established the day before
         """
+        # In one day, we should only be able to sell or buy (not both at the same time)
+        if self.moneyToInvest > self.moneyToSell:
+            self.moneyToInvest -= self.moneyToSell
+            self.moneyToSell = 0
+        elif self.moneyToInvest < self.moneyToSell:
+            self.moneyToSell -= self.moneyToInvest
+            self.moneyToInvest = 0
+
         if self.moneyToInvest > self.nonInvestedMoney:
             self.investedMoney += self.nonInvestedMoney
             self.nonInvestedMoney = 0
@@ -92,10 +96,6 @@ class Investor:
         moneyToInvest = 0
         if typeIndicator == 'rsi':
             moneyToInvest = rsi.buyFunctionPredictionRSI(data.rsi, self.rsiParams)
-        elif typeIndicator == 'sma':
-            moneyToInvest = ma.buyPredictionSMA(data.sma, self.smaParams)[0]
-        elif typeIndicator == 'ema':
-            moneyToInvest = ma.buyPredictionEMA(data.ema, self.emaParams)[0]
         elif typeIndicator == 'macd':
             firstGradient, secondGradient, moneyToInvest = ma.buyPredictionMACD(data.macd, self.macdParams)
         elif typeIndicator == 'bb':
@@ -112,10 +112,6 @@ class Investor:
         moneyToSell = 0
         if typeIndicator == 'rsi':
             moneyToSell = rsi.sellFunctionPredictionRSI(data.rsi, self.rsiParams)
-        elif typeIndicator == 'sma':
-            moneyToSell = ma.sellPredictionSMA(data.sma, self.smaParams)[0]
-        elif typeIndicator == 'ema':
-            moneyToSell = ma.sellPredictionEMA(data.ema, self.emaParams)[0]
         elif typeIndicator == 'macd':
             moneyToSell = ma.sellPredictionMACD(data.macd, self.macdParams)
         elif typeIndicator == 'bb':
@@ -148,7 +144,7 @@ class Investor:
             title="Evolution of Porfolio using " + typeIndicator + " (" + self.record.index[0].strftime(
                 "%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
-            yaxis_title="Value [$]")
+            yaxis_title="Value [$]", hovermode='x unified')
         fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
@@ -188,5 +184,5 @@ class Investor:
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(
             title="Decision making under " + typeIndicator + " (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
-                  self.record.index[-1].strftime("%d/%m/%Y") + ")")
+                  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
         fig.show()
