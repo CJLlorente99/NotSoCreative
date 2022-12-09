@@ -78,6 +78,7 @@ def searchTopParams(filename, indicatorName, locArray):
 
     if indicatorName == "MACD":
         df.drop(df[df[" type"] != lastColumnIndicator].index, inplace=True)
+        df.drop(" type", axis=1, inplace=True)
 
     df.reset_index(inplace=True, drop=True)
     df = df.astype("float64")
@@ -108,14 +109,14 @@ def plotComparatives(dfPercentage, dfPortfolio, indicatorName):
 
 
 if __name__ == "__main__":
-    fileNameData = "data/optimizationRSI_2022_12_05_11_23_07.csv"
-    fileNameParams = "data/optimizationRSI_2022_12_05_11_23_07.txt"
+    fileNameData = "../data/optimizationMACD_2022_12_05_22_50_35.csv"
+    fileNameParams = "../data/optimizationMACD_2022_12_05_22_50_35.txt"
 
-    indicatorName = "RSI"
+    # indicatorName = "RSI"
     # indicatorName = "BB"
     # indicatorName = "MACDGrad"
     # indicatorName = "MACDZero"
-    # indicatorName = "MACDSignal"
+    indicatorName = "MACDSignal"
 
     topPercentage, topPortfolio = searchTopResults(fileNameData, indicatorName, 500)
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     topPercentage = pd.concat([topPercentage, topPercentageParams], axis=1)
     topPortfolio = pd.concat([topPortfolio, topPortfolioParams], axis=1)
 
-    plotComparatives(topPercentage, topPortfolio, indicatorName)
+    # plotComparatives(topPercentage, topPortfolio, indicatorName)
 
     print(topPercentage[:10])
     print(topPortfolio[:10])
