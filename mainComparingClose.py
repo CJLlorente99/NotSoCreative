@@ -15,7 +15,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 2
+    numExperiments = 10
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -154,7 +154,7 @@ def main():
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
         # Reset day to have a different 2 weeks window
-        dataGetter.today += CDay(200, calendar=USFederalHolidayCalendar())
+        dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb], axis=1)
@@ -166,10 +166,14 @@ def main():
         testCriteriaMACDZero = pd.DataFrame(testCriteriaClass.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
         testCriteriaMACDSignal = pd.DataFrame(testCriteriaClass.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
         testCriteriaBB = pd.DataFrame(testCriteriaClass.calculateCriteria("bb", investorBB.record), index=[j])
+        dfTestCriteriaAux = pd.concat(
+            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB])
 
-        dfTestCriteria = pd.concat(
-            [dfTestCriteria, testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal,
-             testCriteriaBB])
+        # Plot test criteria
+        title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
+        testCriteriaClass.plotCriteria(dfTestCriteriaAux, title)
+
+        dfTestCriteria = pd.concat([dfTestCriteria, dfTestCriteriaAux])
 
         # Plot the evolution per experiment
         # investorRSI.plotEvolution(rsiResults, df)
@@ -177,6 +181,11 @@ def main():
         # investorMACDZero.plotEvolution(macdResults, df)
         # investorMACDSignal.plotEvolution(macdResults, df)
         # investorBB.plotEvolution(bbResults, df)
+
+    # Plot summary of test criteria
+    result = testCriteriaClass.calculateCriteriaVariousExperiments(dfTestCriteria)
+    title = "Summary of the test criteria"
+    testCriteriaClass.plotCriteriaVariousExperiments(result, title)
 
     # Push the data into files for later inspection
     now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
