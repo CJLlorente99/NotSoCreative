@@ -39,7 +39,7 @@ class Investor(ABC):
         # Update porfolio record
         aux = pd.DataFrame({"moneyInvested": self.investedMoney, "moneyNotInvested": self.nonInvestedMoney,
                             "moneyInvestedToday": self.moneyToInvest, "moneySoldToday": self.moneyToSell,
-                            "totalValue": (self.investedMoney + self.nonInvestedMoney)}, index=[data.date])
+                            "totalValue": (self.investedMoney + self.nonInvestedMoney), "openValue": data.actualStockValue}, index=[data.date])
         self.record = pd.concat([self.record, aux])
 
         # print(f'Date: {data.date}, moneyInvested {self.investedMoney}, moneyNonInvested {self.nonInvestedMoney}, actualInvestmentValue {self.record["totalValue"].iloc[-1]}')

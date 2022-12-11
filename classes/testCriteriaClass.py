@@ -1,6 +1,8 @@
 import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import numpy as np
+import pandas_datareader as web
 
 
 class testCriteriaClass:
@@ -25,6 +27,9 @@ class testCriteriaClass:
 		- Mean selling (MeanSelling)
 		- Max gain in 1 day (maxGainOneDay)
 		- Max loss in 1 day (maxLossOneDay)
+		- Treynor Measure (TreynorMeasure)
+		- Sharpe Ratio (SharpeRatio)
+		- Jensen Measure (JensenMeasure)
 		:return: metrics calculated
 		"""
 		results = {}
@@ -96,16 +101,33 @@ class testCriteriaClass:
 		maxLossOneDay = record["totalValue"].diff().min()
 		results["maxLossOneDay"] = maxLossOneDay
 
+		# Calculation of TreynorMeasure
+		beta = np.cov(record["totalValue"].diff()[1:].values, record["openValue"].diff()[1:].values)[0][1] / np.var(record["openValue"].diff()[1:].values)
+		rfr = calculateRFR(record.index.values[0], record.index.values[-1])
+		TreynorMeasure = (PerGain - rfr) / beta
+		results["TreynorMeasure"] = TreynorMeasure
+
+		# Calculation of SharpeRatio
+		SP500std = record["openValue"].std()
+		SharpeRatio = (PerGain - rfr) / SP500std
+		results["SharpeRatio"] = SharpeRatio
+
+		# Calculation of JensenMeasure
+		capm = rfr + beta
+		JensonMeasure = PerGain - capm
+		results["JensenMeasure"] = JensonMeasure
+
 		return results
 
 	@staticmethod
 	def plotCriteria(dfResult, title):
-		fig = make_subplots(rows=2, cols=3,
-							subplot_titles=["MPV(StdPV)", "maxPV-minPV", "PerGain-AbsGain", "nOperation",
-											"GainPerOperation-maxOneDay-maxOneDay",
-											"MNotInvested-MInvested-MBuy-MSell"],
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+							subplot_titles=["MPV(StdPV)", "maxPV-minPV", "%Gain-AbsGain", "nOp",
+											"GainPerOp-max1Day-max1Day", "Treynor-Sharpe-Jensen",
+											"MNotInv-MInv-MBuy-MSell"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
+								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False}, {"secondary_y": False}]])
 
 		fig.add_trace(go.Scatter(name="MPV", x=dfResult["name"], y=dfResult["MPV"],
 								 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
@@ -126,15 +148,23 @@ class testCriteriaClass:
 		fig.add_trace(go.Scatter(name="maxLossOneDay", x=dfResult["name"],
 								 y=dfResult["maxLossOneDay"]), row=2, col=2)
 
+		fig.add_trace(go.Scatter(name="TreynorMeasure", x=dfResult["name"],
+								 y=dfResult["TreynorMeasure"]), row=2, col=3)
+		fig.add_trace(go.Scatter(name="SharpeRatio", x=dfResult["name"],
+								 y=dfResult["SharpeRatio"]), row=2, col=3)
+		fig.add_trace(go.Scatter(name="JensenMeasure", x=dfResult["name"],
+								 y=dfResult["JensenMeasure"]), row=2, col=3)
+
 		fig.add_trace(go.Scatter(name="MNotInvested,", x=dfResult["name"],
-								 y=dfResult["meanNotInvested"]), row=2, col=3)
+								 y=dfResult["meanNotInvested"]), row=3, col=1)
 		fig.add_trace(go.Scatter(name="MInvested", x=dfResult["name"],
-								 y=dfResult["meanInvested"]), row=2, col=3)
+								 y=dfResult["meanInvested"]), row=3, col=1)
 		fig.add_trace(go.Scatter(name="MBuying", x=dfResult["name"],
-								 y=dfResult["meanBuying"]), row=2, col=3)
+								 y=dfResult["meanBuying"]), row=3, col=1)
 		fig.add_trace(go.Scatter(name="MSelling", x=dfResult["name"],
-								 y=dfResult["meanSelling"]), row=2, col=3)
-		fig.update_layout(title_text=title)
+								 y=dfResult["meanSelling"]), row=3, col=1)
+
+		fig.update_layout(title_text=title, hovermode="x unified")
 
 		fig.show()
 
@@ -166,6 +196,9 @@ class testCriteriaClass:
 		- Std max gain in 1 day (StdmaxGainOneDay)
 		- Mean Max loss in 1 day (MmaxLossOneDay)
 		- Std Max loss in 1 day (StdmaxLossOneDay)
+		- Mean Treynor Measure (MTreynorMeasure)
+		- Mean Sharpe Ratio (MSharpeRatio)
+		- Mean Jensen Measure (MJensenMeasure)
 		:return: metrics calculated
 		"""
 		result = pd.DataFrame()
@@ -274,6 +307,18 @@ class testCriteriaClass:
 			StdmaxLossOneDay = df["maxLossOneDay"].std()
 			aux["StdmaxLossOneDay"] = StdmaxLossOneDay
 
+			# Calculation of the MTreynorMeasure
+			MTreynorMeasure = df["TreynorMeasure"].mean()
+			aux["MTreynorMeasure"] = MTreynorMeasure
+
+			# Calculation of the MSharpeRatio
+			MSharpeRatio = df["SharpeRatio"].mean()
+			aux["MSharpeRatio"] = MSharpeRatio
+
+			# Calculation of the MJensenMeasure
+			MJensenMeasure = df["JensenMeasure"].mean()
+			aux["MJensenMeasure"] = MJensenMeasure
+
 			result = pd.concat([result, pd.DataFrame(aux, index=[i])])
 			i += 1
 
@@ -281,12 +326,13 @@ class testCriteriaClass:
 
 	@staticmethod
 	def plotCriteriaVariousExperiments(dfResult, title):
-		fig = make_subplots(rows=2, cols=3,
-							subplot_titles=["MMPV", "MStdPV", "MPerGain-MAbsGain", "MnOperation",
-											"MGainPerOperation-MmaxOneDay-MmaxOneDay",
-											"MMNotInvested-MMInvested-MMBuy-MMSell"],
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+							subplot_titles=["MMPV", "MStdPV", "M%Gain-MAbsGain", "MnOp",
+											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen",
+											"MMNotInv-MMInv-MMBuy-MMSell"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
+								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False}, {"secondary_y": False}]])
 
 		fig.add_trace(go.Scatter(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"],
 								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
@@ -317,19 +363,35 @@ class testCriteriaClass:
 								 error_y=dict(type='data', array=dfResult["StdmaxLossOneDay"].values, visible=True)),
 					  row=2, col=2)
 
+		fig.add_trace(go.Scatter(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
+								 row=2, col=3)
+		fig.add_trace(go.Scatter(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"]),
+								 row=2, col=3)
+		fig.add_trace(go.Scatter(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
+								 row=2, col=3)
+
 		fig.add_trace(go.Scatter(name="MMNotInvested,", x=dfResult["name"], y=dfResult["MMNotInvested"],
 								 error_y=dict(type='data', array=dfResult["StdMNotInvested"].values, visible=True)),
-					  row=2, col=3)
+					  row=3, col=1)
 		fig.add_trace(go.Scatter(name="MMInvested", x=dfResult["name"], y=dfResult["MMInvested"],
 								 error_y=dict(type='data', array=dfResult["StdMInvested"].values, visible=True)),
-					  row=2, col=3)
+					  row=3, col=1)
 		fig.add_trace(go.Scatter(name="MMBuying", x=dfResult["name"], y=dfResult["MMBuying"],
 								 error_y=dict(type='data', array=dfResult["StdMBuying"].values, visible=True)),
-					  row=2, col=3)
+					  row=3, col=1)
 		fig.add_trace(go.Scatter(name="MMSelling", x=dfResult["name"], y=dfResult["MMSelling"],
 								 error_y=dict(type='data', array=dfResult["StdMSelling"].values, visible=True)),
-					  row=2, col=3)
-		fig.update_layout(title_text=title)
+					  row=3, col=1)
+		fig.update_layout(title_text=title, hovermode="x unified")
 
 		fig.show()
 
+
+def calculateRFR(firstDate, lastDate):
+	"""
+	This function calculates the Risk-Free Return using the treasury bills as a proxy.
+	:param firstDate:  First date from when data will be retrieved
+	:param lastDate:  Last date until when data will be retrieved
+	"""
+	dfTreasuryBills = web.DataReader("^IRX", 'yahoo', firstDate, lastDate)
+	return dfTreasuryBills.iloc[-1]["Open"] - dfTreasuryBills.iloc[0]["Open"]
