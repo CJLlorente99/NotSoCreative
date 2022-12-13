@@ -113,7 +113,9 @@ class testCriteriaClass:
 		results["SharpeRatio"] = SharpeRatio
 
 		# Calculation of JensenMeasure
-		capm = rfr + beta
+		marketReturn = record["openValue"].diff()[1:].sum()/100
+		betaJensen = beta * (marketReturn - rfr)
+		capm = rfr + betaJensen
 		JensonMeasure = PerGain - capm
 		results["JensenMeasure"] = JensonMeasure
 
@@ -121,7 +123,7 @@ class testCriteriaClass:
 
 	@staticmethod
 	def plotCriteria(dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
 							subplot_titles=["MPV(StdPV)", "maxPV-minPV", "%Gain-AbsGain", "nOp",
 											"GainPerOp-max1Day-max1Day", "Treynor-Sharpe-Jensen",
 											"MNotInv-MInv-MBuy-MSell"],
@@ -326,7 +328,7 @@ class testCriteriaClass:
 
 	@staticmethod
 	def plotCriteriaVariousExperiments(dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
 							subplot_titles=["MMPV", "MStdPV", "M%Gain-MAbsGain", "MnOp",
 											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen",
 											"MMNotInv-MMInv-MMBuy-MMSell"],

@@ -13,6 +13,8 @@ class DataManager:
         self.pastStockValue = 0
         self.actualStockValue = 0
         self.nextStockValue = 0
+        self.nextStockValueClose = 0
+        self.nextStockValueOpen = 0
         self.date = dt.date.today()
         self.rsi = 0
         self.macd = None

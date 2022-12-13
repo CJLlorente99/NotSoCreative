@@ -3,6 +3,7 @@ from classes.dataClass import DataManager, DataGetter
 from TAIndicators.rsi import relativeStrengthIndex, InvestorRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence, InvestorMACD
 from TAIndicators.bb import bollingerBands, InvestorBB
+from DecisionFunction.bia import InvestorBIA
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
@@ -15,7 +16,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 1
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -96,12 +97,16 @@ def main():
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = InvestorBB(10000, bbParams)
 
+        # Create investor BIA
+        investorBIA = InvestorBIA(10000)
+
         # Variables to store data
         auxRsi = pd.DataFrame()
         auxMacdGrad = pd.DataFrame()
         auxMacdZero = pd.DataFrame()
         auxMacdSignal = pd.DataFrame()
         auxBb = pd.DataFrame()
+        auxBia = pd.DataFrame()
         auxLoop = pd.DataFrame()
 
         # Run for loop as if days passed
@@ -148,6 +153,12 @@ def main():
             aux = investorBB.broker(dataManager)
             auxBb = pd.concat([auxBb, aux], ignore_index=True)
 
+            # BIA try
+            dataManager.nextStockValueClose = dataGetter.getNextDay().Close.values[0]
+            dataManager.nextStockValueOpen = dataGetter.getNextDay().Open.values[0]
+            aux = investorBIA.broker(dataManager)
+            auxBia = pd.concat([auxBia, aux], ignore_index=True)
+
             # Refresh for next day
             dataManager.pastStockValue = todayData.Open.values[0]
             dataGetter.goNextDay()
@@ -157,7 +168,7 @@ def main():
         dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
-        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb], axis=1)
+        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxBia], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
@@ -166,8 +177,9 @@ def main():
         testCriteriaMACDZero = pd.DataFrame(testCriteriaClass.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
         testCriteriaMACDSignal = pd.DataFrame(testCriteriaClass.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
         testCriteriaBB = pd.DataFrame(testCriteriaClass.calculateCriteria("bb", investorBB.record), index=[j])
+        testCriteriaBIA = pd.DataFrame(testCriteriaClass.calculateCriteria("bia", investorBIA.record), index=[j])
         dfTestCriteriaAux = pd.concat(
-            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB])
+            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB, testCriteriaBIA])
 
         # Plot test criteria
         title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
@@ -181,6 +193,7 @@ def main():
         # investorMACDZero.plotEvolution(macdResults, df)
         # investorMACDSignal.plotEvolution(macdResults, df)
         # investorBB.plotEvolution(bbResults, df)
+        investorBIA.plotEvolution(df)
 
     # Plot summary of test criteria
     result = testCriteriaClass.calculateCriteriaVariousExperiments(dfTestCriteria)
