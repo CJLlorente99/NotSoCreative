@@ -4,6 +4,12 @@ from TAIndicators.rsi import relativeStrengthIndex, InvestorRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence, InvestorMACD
 from TAIndicators.bb import bollingerBands, InvestorBB
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
+from Benchmarks.randomBenchmark import InvestorRandom
+from Benchmarks.bia import InvestorBIA
+from Benchmarks.wia import InvestorWIA
+from Benchmarks.costAverage import InvestorCA
+from Benchmarks.bah import InvestorBaH
+from Benchmarks.idle import InvestorIdle
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from classes.testCriteriaClass import testCriteriaClass
@@ -15,7 +21,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 3
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -96,16 +102,41 @@ def main():
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
         investorBB = InvestorBB(10000, bbParams)
 
+        # Create investor Random
+        investorRandom = InvestorRandom(10000)
+
+        # Create investor BIA
+        investorBIA = InvestorBIA(10000)
+
+        # Create investor WIA
+        investorWIA = InvestorWIA(10000)
+
+        # Create investor CA
+        investorCA = InvestorCA(10000, 1100)
+
+        # Create investor BaH
+        investorBaH = InvestorBaH(10000)
+
+        # Create investor Idle
+        investorIdle = InvestorIdle(10000)
+
         # Variables to store data
         auxRsi = pd.DataFrame()
         auxMacdGrad = pd.DataFrame()
         auxMacdZero = pd.DataFrame()
         auxMacdSignal = pd.DataFrame()
         auxBb = pd.DataFrame()
+        auxRandom = pd.DataFrame()
+        auxBIA = pd.DataFrame()
+        auxWIA = pd.DataFrame()
+        auxCA = pd.DataFrame()
+        auxBaH = pd.DataFrame()
+        auxIdle = pd.DataFrame()
         auxLoop = pd.DataFrame()
 
         # Run for loop as if days passed
         for i in range(nDays):
+            dataManager.nDay = i
             # print()
             todayData = dataGetter.getToday()
             df = dataGetter.getUntilToday()
@@ -148,6 +179,32 @@ def main():
             aux = investorBB.broker(dataManager)
             auxBb = pd.concat([auxBb, aux], ignore_index=True)
 
+            # Random try
+            aux = investorRandom.broker(dataManager)
+            auxRandom = pd.concat([auxRandom, aux], ignore_index=True)
+
+            # BIA try
+            dataManager.nextnextStockValueOpen = dataGetter.getNextNextDay().Open.values[0]
+            dataManager.nextStockValueOpen = dataGetter.getNextDay().Open.values[0]
+            aux = investorBIA.broker(dataManager)
+            auxBIA = pd.concat([auxBIA, aux], ignore_index=True)
+
+            # WIA try
+            aux = investorWIA.broker(dataManager)
+            auxWIA = pd.concat([auxWIA, aux], ignore_index=True)
+
+            # CA try
+            aux = investorCA.broker(dataManager)
+            auxCA = pd.concat([auxCA, aux], ignore_index=True)
+
+            # BaH try
+            aux = investorBaH.broker(dataManager)
+            auxBaH = pd.concat([auxBaH, aux], ignore_index=True)
+
+            # Idle try
+            aux = investorIdle.broker(dataManager)
+            auxIdle = pd.concat([auxIdle, aux], ignore_index=True)
+
             # Refresh for next day
             dataManager.pastStockValue = todayData.Open.values[0]
             dataGetter.goNextDay()
@@ -157,21 +214,36 @@ def main():
         dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
-        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb], axis=1)
+        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxRandom], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
-        testCriteriaRSI = pd.DataFrame(testCriteriaClass.calculateCriteria("rsi", investorRSI.record), index=[j])
-        testCriteriaMACDGrad = pd.DataFrame(testCriteriaClass.calculateCriteria("macdGrad", investorMACDGrad.record), index=[j])
-        testCriteriaMACDZero = pd.DataFrame(testCriteriaClass.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
-        testCriteriaMACDSignal = pd.DataFrame(testCriteriaClass.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
-        testCriteriaBB = pd.DataFrame(testCriteriaClass.calculateCriteria("bb", investorBB.record), index=[j])
+        firstDate = investorRSI.record.index.values[0]
+        letzteDate = investorRSI.record.index.values[-1]
+        criteriaCalculator = testCriteriaClass(firstDate, letzteDate)
+        testCriteriaRSI = pd.DataFrame(criteriaCalculator.calculateCriteria("rsi", investorRSI.record), index=[j])
+        testCriteriaMACDGrad = pd.DataFrame(criteriaCalculator.calculateCriteria("macdGrad", investorMACDGrad.record), index=[j])
+        testCriteriaMACDZero = pd.DataFrame(criteriaCalculator.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
+        testCriteriaMACDSignal = pd.DataFrame(criteriaCalculator.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
+        testCriteriaBB = pd.DataFrame(criteriaCalculator.calculateCriteria("bb", investorBB.record), index=[j])
+        testCriteriaRandom = pd.DataFrame(criteriaCalculator.calculateCriteria("random", investorRandom.record), index=[j])
+        testCriteriaBIA = pd.DataFrame(criteriaCalculator.calculateCriteria("bia", investorBIA.record),
+                                          index=[j])
+        testCriteriaWIA = pd.DataFrame(criteriaCalculator.calculateCriteria("wia", investorWIA.record),
+                                          index=[j])
+        testCriteriaCA = pd.DataFrame(criteriaCalculator.calculateCriteria("ca", investorCA.record),
+                                       index=[j])
+        testCriteriaBaH = pd.DataFrame(criteriaCalculator.calculateCriteria("bah", investorBaH.record),
+                                      index=[j])
+        testCriteriaIdle = pd.DataFrame(criteriaCalculator.calculateCriteria("idle", investorIdle.record),
+                                       index=[j])
         dfTestCriteriaAux = pd.concat(
-            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB])
+            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB,
+             testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle])
 
         # Plot test criteria
         title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
-        testCriteriaClass.plotCriteria(dfTestCriteriaAux, title)
+        criteriaCalculator.plotCriteria(dfTestCriteriaAux, title)
 
         dfTestCriteria = pd.concat([dfTestCriteria, dfTestCriteriaAux])
 
@@ -181,15 +253,21 @@ def main():
         # investorMACDZero.plotEvolution(macdResults, df)
         # investorMACDSignal.plotEvolution(macdResults, df)
         # investorBB.plotEvolution(bbResults, df)
+        investorRandom.plotEvolution(None, df)
+        investorBIA.plotEvolution(None, df)
+        investorWIA.plotEvolution(None, df)
+        investorCA.plotEvolution(None, df)
+        investorBaH.plotEvolution(None, df)
+        investorIdle.plotEvolution(None, df)
 
     # Plot summary of test criteria
-    result = testCriteriaClass.calculateCriteriaVariousExperiments(dfTestCriteria)
+    result = criteriaCalculator.calculateCriteriaVariousExperiments(dfTestCriteria)
     title = "Summary of the test criteria"
-    testCriteriaClass.plotCriteriaVariousExperiments(result, title)
+    criteriaCalculator.plotCriteriaVariousExperiments(result, title)
 
     # Push the data into files for later inspection
-    now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    dfTestCriteria.to_csv("data/" + now + ".csv", index_label="n")
+    # now = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    # dfTestCriteria.to_csv("data/" + now + ".csv", index_label="n")
     # advancedData.to_csv("data/" + now + "_advancedData.csv", index_label="n")
     #
     # with open("data/" + now + ".txt", "w") as f:

@@ -6,11 +6,21 @@ import pandas_datareader as web
 
 
 class testCriteriaClass:
-	def __init__(self):
-		pass
-	
-	@staticmethod
-	def calculateCriteria(name, record):
+	def __init__(self, firstDate, lastDate):
+		self.firstDate = firstDate
+		self.lastDate = lastDate
+		self.rfr = self.calculateRFR()
+
+	def calculateRFR(self):
+		"""
+		This function calculates the Risk-Free Return using the treasury bills as a proxy.
+		:param firstDate:  First date from when data will be retrieved
+		:param lastDate:  Last date until when data will be retrieved
+		"""
+		dfTreasuryBills = web.DataReader("^IRX", 'yahoo', self.firstDate, self.lastDate)
+		return dfTreasuryBills.iloc[-1]["Open"] - dfTreasuryBills.iloc[0]["Open"]
+
+	def calculateCriteria(self, name, record):
 		"""
 		Function that calculates the test criteria for a given investor (strategy) in a single experiment (2 week run)
 		- Mean Portfolio Value (MPV)
@@ -64,7 +74,7 @@ class testCriteriaClass:
 
 		# Calculation of the nOperation
 		nOperation = record["moneyInvestedToday"][record["moneyInvestedToday"] != 0].count() + \
-						record["moneySoldToday"][record["moneySoldToday"] != 0].count()
+					 record["moneySoldToday"][record["moneySoldToday"] != 0].count()
 		nOperation = nOperation if nOperation != 0 else 0
 		results["nOperation"] = nOperation
 
@@ -102,47 +112,50 @@ class testCriteriaClass:
 		results["maxLossOneDay"] = maxLossOneDay
 
 		# Calculation of TreynorMeasure
-		beta = np.cov(record["totalValue"].diff()[1:].values, record["openValue"].diff()[1:].values)[0][1] / np.var(record["openValue"].diff()[1:].values)
-		rfr = calculateRFR(record.index.values[0], record.index.values[-1])
-		TreynorMeasure = (PerGain - rfr) / beta
+		beta = np.cov(record["totalValue"].diff()[1:].values, record["openValue"].diff()[1:].values)[0][1] / np.var(
+			record["openValue"].diff()[1:].values)
+		TreynorMeasure = (PerGain - self.rfr) / beta
 		results["TreynorMeasure"] = TreynorMeasure
 
 		# Calculation of SharpeRatio
 		SP500std = record["openValue"].std()
-		SharpeRatio = (PerGain - rfr) / SP500std
+		SharpeRatio = (PerGain - self.rfr) / SP500std
 		results["SharpeRatio"] = SharpeRatio
 
 		# Calculation of JensenMeasure
-		capm = rfr + beta
+		marketReturn = record["openValue"].diff()[1:].sum() / 100
+		betaJensen = beta * (marketReturn - self.rfr)
+		capm = self.rfr + betaJensen
 		JensonMeasure = PerGain - capm
 		results["JensenMeasure"] = JensonMeasure
 
 		return results
 
-	@staticmethod
-	def plotCriteria(dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+	def plotCriteria(self, dfResult, title):
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
 							subplot_titles=["MPV(StdPV)", "maxPV-minPV", "%Gain-AbsGain", "nOp",
 											"GainPerOp-max1Day-max1Day", "Treynor-Sharpe-Jensen",
 											"MNotInv-MInv-MBuy-MSell"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
-								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False},
+									{"secondary_y": False}]])
 
 		fig.add_trace(go.Scatter(name="MPV", x=dfResult["name"], y=dfResult["MPV"],
 								 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
-					  			 col=1)
+					  col=1)
 
 		fig.add_trace(go.Scatter(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"]), row=1, col=2)
 		fig.add_trace(go.Scatter(name="minPV", x=dfResult["name"], y=dfResult["minPV"]), row=1, col=2)
 
 		fig.add_trace(go.Scatter(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"]), row=1, col=3)
-		fig.add_trace(go.Scatter(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3, secondary_y=True)
+		fig.add_trace(go.Scatter(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3,
+					  secondary_y=True)
 
 		fig.add_trace(go.Scatter(name="nOperation", x=dfResult["name"], y=dfResult["nOperation"]), row=2, col=1)
 
 		fig.add_trace(go.Scatter(name="GainPerOperation", x=dfResult["name"],
-							 	 y=dfResult["GainPerOperation"]), row=2, col=2)
+								 y=dfResult["GainPerOperation"]), row=2, col=2)
 		fig.add_trace(go.Scatter(name="maxGainOneDay", x=dfResult["name"],
 								 y=dfResult["maxGainOneDay"]), row=2, col=2)
 		fig.add_trace(go.Scatter(name="maxLossOneDay", x=dfResult["name"],
@@ -168,8 +181,7 @@ class testCriteriaClass:
 
 		fig.show()
 
-	@staticmethod
-	def calculateCriteriaVariousExperiments(dfResults):
+	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
 		Function that calculates the test criteria for various experiments
 		- Mean of Mean Portfolio Value (MMPV)
@@ -324,15 +336,15 @@ class testCriteriaClass:
 
 		return result
 
-	@staticmethod
-	def plotCriteriaVariousExperiments(dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.1, horizontal_spacing=0.04,
+	def plotCriteriaVariousExperiments(self, dfResult, title):
+		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
 							subplot_titles=["MMPV", "MStdPV", "M%Gain-MAbsGain", "MnOp",
 											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen",
 											"MMNotInv-MMInv-MMBuy-MMSell"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
-								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False},
+									{"secondary_y": False}]])
 
 		fig.add_trace(go.Scatter(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"],
 								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
@@ -364,11 +376,11 @@ class testCriteriaClass:
 					  row=2, col=2)
 
 		fig.add_trace(go.Scatter(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
-								 row=2, col=3)
+					  row=2, col=3)
 		fig.add_trace(go.Scatter(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"]),
-								 row=2, col=3)
+					  row=2, col=3)
 		fig.add_trace(go.Scatter(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
-								 row=2, col=3)
+					  row=2, col=3)
 
 		fig.add_trace(go.Scatter(name="MMNotInvested,", x=dfResult["name"], y=dfResult["MMNotInvested"],
 								 error_y=dict(type='data', array=dfResult["StdMNotInvested"].values, visible=True)),
@@ -385,13 +397,3 @@ class testCriteriaClass:
 		fig.update_layout(title_text=title, hovermode="x unified")
 
 		fig.show()
-
-
-def calculateRFR(firstDate, lastDate):
-	"""
-	This function calculates the Risk-Free Return using the treasury bills as a proxy.
-	:param firstDate:  First date from when data will be retrieved
-	:param lastDate:  Last date until when data will be retrieved
-	"""
-	dfTreasuryBills = web.DataReader("^IRX", 'yahoo', firstDate, lastDate)
-	return dfTreasuryBills.iloc[-1]["Open"] - dfTreasuryBills.iloc[0]["Open"]

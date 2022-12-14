@@ -164,7 +164,7 @@ def main():
     print(f'Money not invested: {money_notinv}, Money worth invested: {current_money_inv}')
     print(f'Total Money: {money_notinv + current_money_inv}')
 
-    # Benchmark
+    # Benchmarks
     df_open = df.Open
     gain_bench = ((df_open.iloc[-1] - df_open.iloc[0]) / df_open.iloc[0]) * 100
     print(f'Gain Benchmark: {gain_bench} %')

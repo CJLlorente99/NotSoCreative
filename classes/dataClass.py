@@ -13,10 +13,13 @@ class DataManager:
         self.pastStockValue = 0
         self.actualStockValue = 0
         self.nextStockValue = 0
+        self.nextnextStockValueOpen = 0
+        self.nextStockValueOpen = 0
         self.date = dt.date.today()
         self.rsi = 0
         self.macd = None
         self.bb = None
+        self.nDay = 0
 
 
 class DataGetter:
@@ -79,6 +82,20 @@ class DataGetter:
         nextDay = self.today
         while True:
             nextDay += CDay(calendar=USFederalHolidayCalendar())
+            try:
+                data = web.DataReader(self.ticker, 'yahoo', nextDay, nextDay)
+                return data
+            except:
+                continue
+
+    def getNextNextDay(self):
+        """
+        Function to advance one day and get new data. Try/except clause to deal with days when the stock was closed.
+        :return: Next day's data
+        """
+        nextDay = self.today
+        while True:
+            nextDay += CDay(2, calendar=USFederalHolidayCalendar())
             try:
                 data = web.DataReader(self.ticker, 'yahoo', nextDay, nextDay)
                 return data
