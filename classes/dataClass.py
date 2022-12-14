@@ -94,8 +94,9 @@ class DataGetter:
         :return: Next day's data
         """
         nextDay = self.today
+        nextDay += CDay(calendar=USFederalHolidayCalendar())
         while True:
-            nextDay += CDay(2, calendar=USFederalHolidayCalendar())
+            nextDay += CDay(calendar=USFederalHolidayCalendar())
             try:
                 data = web.DataReader(self.ticker, 'yahoo', nextDay, nextDay)
                 return data

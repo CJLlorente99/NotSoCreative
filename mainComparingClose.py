@@ -21,7 +21,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 3
+    numExperiments = 2
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
