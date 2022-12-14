@@ -12,8 +12,8 @@ class InvestorBIA(Investor):
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		return pd.DataFrame(
 			{'nextStockValue': [data.nextStockValue], 'actualStockValue': [data.actualStockValue],
-			 'moneyToInvestBB': [moneyInvestedToday], 'moneyToSellBB': [moneySoldToday],
-			 'investedMoneyBB': [self.investedMoney], 'nonInvestedMoneyBB': [self.nonInvestedMoney]})
+			 'moneyToInvestBIA': [moneyInvestedToday], 'moneyToSellBIA': [moneySoldToday],
+			 'investedMoneyBIA': [self.investedMoney], 'nonInvestedMoneyBIA': [self.nonInvestedMoney]})
 
 	def possiblyInvestTomorrow(self, data: DataManager):
 		"""
