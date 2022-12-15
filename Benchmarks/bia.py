@@ -34,13 +34,15 @@ class InvestorBIA(Investor):
 
 	def buyPredictionBIA(self, nextStockValueOpen, nextnextStockValueOpen, actualStockValueOpen):
 		if nextnextStockValueOpen > nextStockValueOpen:
-			return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			# return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			return 1
 		else:
 			return 0
 
 	def sellPredictionBIA(self, nextStockValueOpen, nextnextStockValueOpen, actualStockValueOpen):
 		if nextnextStockValueOpen < nextStockValueOpen:
-			return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			# return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			return 1
 		else:
 			return 0
 
