@@ -21,7 +21,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 2
+    numExperiments = 1
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -41,11 +41,9 @@ def main():
         RSIwindow = 3
         upperBound = 61
         lowerBound = 27.5
-        maxBuy = 10000
-        maxSell = 10000
         a = 1.1
         b = 2.4
-        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, maxBuy, maxSell, a, b)
+        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
         investorRSI = InvestorRSI(10000, rsiParams)
 
         # Create investor MACD grad
@@ -54,12 +52,10 @@ def main():
         macdFastWindow = 2
         macdSlowWindow = 6
         signal = 7
-        maxBuy = 10000
-        maxSell = 10000
         a = 0.7
         b = 2.5
-        macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
-                                        maxSell, a, b, "grad")
+        macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+                                            a, b, "grad")
         investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
 
         # Create investor MACD zero
@@ -68,12 +64,10 @@ def main():
         macdFastWindow = 2
         macdSlowWindow = 9
         signal = 7
-        maxBuy = 10000
-        maxSell = 10000
         a = 0.7
         b = 2.5
-        macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
-                                        maxSell, a, b, "grad_crossZero")
+        macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+                                            a, b, "grad_crossZero")
         investorMACDZero = InvestorMACD(10000, macdParamsZero)
 
         # Create investor MACD signal
@@ -82,12 +76,10 @@ def main():
         macdFastWindow = 2
         macdSlowWindow = 6
         signal = 5
-        maxBuy = 10000
-        maxSell = 10000
         a = 0.7
         b = 2.5
-        macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal, maxBuy,
-                                        maxSell, a, b, "grad_crossSignal")
+        macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+                                        a, b, "grad_crossSignal")
         investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
 
         # Create investor BB
@@ -95,11 +87,9 @@ def main():
         bbStdDev = 1.5
         lowerBound = 1.9
         upperBound = 0.8
-        maxBuy = 10000
-        maxSell = 10000
         a = 2.4
         b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, maxBuy, maxSell, a, b)
+        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
         investorBB = InvestorBB(10000, bbParams)
 
         # Create investor Random
@@ -112,7 +102,7 @@ def main():
         investorWIA = InvestorWIA(10000)
 
         # Create investor CA
-        investorCA = InvestorCA(10000, 1100)
+        investorCA = InvestorCA(10000, 0.1)
 
         # Create investor BaH
         investorBaH = InvestorBaH(10000)
@@ -135,9 +125,9 @@ def main():
         auxLoop = pd.DataFrame()
 
         # Run for loop as if days passed
-        for i in range(nDays):
+        for i in range(nDays+1):
             dataManager.nDay = i
-            # print()
+
             todayData = dataGetter.getToday()
             df = dataGetter.getUntilToday()
 
@@ -248,11 +238,11 @@ def main():
         dfTestCriteria = pd.concat([dfTestCriteria, dfTestCriteriaAux])
 
         # Plot the evolution per experiment
-        # investorRSI.plotEvolution(rsiResults, df)
-        # investorMACDGrad.plotEvolution(macdResults, df)
-        # investorMACDZero.plotEvolution(macdResults, df)
-        # investorMACDSignal.plotEvolution(macdResults, df)
-        # investorBB.plotEvolution(bbResults, df)
+        investorRSI.plotEvolution(rsiResults, df)
+        investorMACDGrad.plotEvolution(macdResults, df)
+        investorMACDZero.plotEvolution(macdResults, df)
+        investorMACDSignal.plotEvolution(macdResults, df)
+        investorBB.plotEvolution(bbResults, df)
         investorRandom.plotEvolution(None, df)
         investorBIA.plotEvolution(None, df)
         investorWIA.plotEvolution(None, df)

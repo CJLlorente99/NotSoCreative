@@ -10,6 +10,7 @@ This strategy consists on buying everything the first day and holding for the re
 class InvestorBaH(Investor):
 	def __init__(self, initialInvestment=10000):
 		super().__init__(initialInvestment)
+		self.perToInvest = 1
 
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		return pd.DataFrame(
@@ -22,18 +23,17 @@ class InvestorBaH(Investor):
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToInvest = self.buyPredictionBaH(data)
+		self.perToInvest = self.buyPredictionBaH(data)
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToSell = self.sellPredictionBaH()
+		self.perToSell = self.sellPredictionBaH()
 
 	def buyPredictionBaH(self, data: DataManager):
-		if data.nDay == 0:
-			return self.nonInvestedMoney
+		# Buy action done in the initialization
 		return 0
 
 	def sellPredictionBaH(self):
@@ -45,6 +45,7 @@ class InvestorBaH(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
+		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(

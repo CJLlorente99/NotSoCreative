@@ -23,24 +23,24 @@ class InvestorWIA(Investor):
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToInvest = self.buyPredictionWIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
+		self.perToInvest = self.buyPredictionWIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToSell = self.sellPredictionWIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
+		self.perToSell = self.sellPredictionWIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
 
 	def buyPredictionWIA(self, nextStockValueOpen, nextnextStockValueOpen, actualStockValueOpen):
 		if nextnextStockValueOpen < nextStockValueOpen:
-			return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			return 1
 		else:
 			return 0
 
 	def sellPredictionWIA(self, nextStockValueOpen, nextnextStockValueOpen, actualStockValueOpen):
 		if nextnextStockValueOpen > nextStockValueOpen:
-			return self.nonInvestedMoney + self.investedMoney * nextStockValueOpen / actualStockValueOpen
+			return 1
 		else:
 			return 0
 
@@ -50,6 +50,7 @@ class InvestorWIA(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
+		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(

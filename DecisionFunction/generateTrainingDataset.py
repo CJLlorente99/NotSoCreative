@@ -14,7 +14,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 
 
 def main():
-	nDays = 5000
+	nDays = 10000
 
 	# Get data
 	data = web.DataReader('^GSPC', 'yahoo',

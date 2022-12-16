@@ -5,29 +5,33 @@ import plotly.graph_objects as go
 
 df = pd.read_csv("../data/optimizationTrainingSet.csv", index_col=["n"])
 
-# nnRSI = NNDecisionFunction(1)
-# nnRSI.train_model(df["rsiResults"], df["output"])
-#
-# nnRSI.summary()
-#
-# x = np.arange(0, 100, 1)
-# y = nnRSI.predict(x)
-#
-# fig = go.Figure()
-# fig.add_trace(go.Scatter(x=x, y=y[:, 0]))
-# fig.show()
-#
-# nnBB = NNDecisionFunction(1)
-# nnBB.train_model(df["bbResults"], df["output"])
-#
-# nnBB.summary()
-#
-# x = np.arange(-2, 2, 0.05)
-# y = nnBB.predict(x)
-#
-# fig = go.Figure()
-# fig.add_trace(go.Scatter(x=x, y=y[:, 0]))
-# fig.show()
+nnRSI = NNDecisionFunction(1)
+nnRSI.train_model(df["rsiResults"], df["output"])
+
+nnRSI.summary()
+
+x = np.arange(0, 100, 1)
+y = nnRSI.predict(x)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x, y=y[:, 0]))
+fig.update_xaxes(title_text='RSI')
+fig.update_yaxes(title_text='% Buy/Sell')
+fig.show()
+
+nnBB = NNDecisionFunction(1)
+nnBB.train_model(df["bbResults"], df["output"])
+
+nnBB.summary()
+
+x = np.arange(-2, 2, 0.05)
+y = nnBB.predict(x)
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=x, y=y[:, 0]))
+fig.update_xaxes(title_text='BB')
+fig.update_yaxes(title_text='% Buy/Sell')
+fig.show()
 
 nnTwo = NNDecisionFunction(2)
 nnTwo.summary()

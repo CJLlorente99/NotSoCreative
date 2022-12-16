@@ -24,14 +24,14 @@ class InvestorRSI(Investor):
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.moneyToInvest = self.buyPredictionRSI(data.rsi)
+        self.perToInvest = self.buyPredictionRSI(data.rsi)
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.moneyToSell = self.sellPredictionRSI(data.rsi)
+        self.perToSell = self.sellPredictionRSI(data.rsi)
 
     def buyPredictionRSI(self, rsi):
         """
@@ -41,7 +41,7 @@ class InvestorRSI(Investor):
         params = self.rsiParams
 
         if rsi < params.lowerBound:  # Buy linearly then with factor f
-            return params.maxBuy * math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
+            return math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
         else:
             return 0
 
@@ -51,7 +51,7 @@ class InvestorRSI(Investor):
         """
         params = self.rsiParams
         if rsi > params.upperBound:  # Buy linearly then with factor f
-            return params.maxSell * math.tanh(params.a * (rsi - params.upperBound) ** params.b)
+            return math.tanh(params.a * (rsi - params.upperBound) ** params.b)
         else:
             return 0
 
@@ -82,6 +82,7 @@ class InvestorRSI(Investor):
         :param stockMarketData: df with the stock market data
         :param recordPredictedValue: Predicted data dataframe
         """
+        self.record = self.record.iloc[1:]
         # Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
         fig = go.Figure()
         fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))

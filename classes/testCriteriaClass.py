@@ -138,58 +138,61 @@ class testCriteriaClass:
 		TDD = math.sqrt(1/returns.size * returns[returns < 0].sub(T).pow(2).sum())
 		results["SortinoRatio"] = (PerGain - self.rfr) / TDD
 
-
 		return results
 
 	def plotCriteria(self, dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
-							subplot_titles=["MPV(StdPV)", "maxPV-minPV", "%Gain-AbsGain", "nOp",
-											"GainPerOp-max1Day-max1Day", "Treynor-Sharpe-Jensen",
-											"MNotInv-MInv-MBuy-MSell"],
+		fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
+							subplot_titles=["MPV(StdPV)", "maxPV/minPV", "%Gain/AbsGain", "nOp",
+											"GainPerOp/max1Day/max1Day", "Treynor/Sharpe/Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
-								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False},
-									{"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
 
-		fig.add_trace(go.Scatter(name="MPV", x=dfResult["name"], y=dfResult["MPV"], mode='markers',
+		fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"],
 								 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
 					  col=1)
 
-		fig.add_trace(go.Scatter(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"], mode='markers'), row=1, col=2)
-		fig.add_trace(go.Scatter(name="minPV", x=dfResult["name"], y=dfResult["minPV"], mode='markers'), row=1, col=2)
+		fig.add_trace(go.Bar(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"]), row=1, col=2)
+		fig.add_trace(go.Bar(name="minPV", x=dfResult["name"], y=dfResult["minPV"]), row=1, col=2)
 
-		fig.add_trace(go.Scatter(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"], mode='markers'), row=1, col=3)
-		fig.add_trace(go.Scatter(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"], mode='markers'), row=1, col=3,
+		fig.add_trace(go.Bar(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"]), row=1, col=3)
+		fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3,
 					  secondary_y=True)
 
-		fig.add_trace(go.Scatter(name="nOperation", x=dfResult["name"], y=dfResult["nOperation"], mode='markers'), row=2, col=1)
+		fig.add_trace(go.Bar(name="nOperation", x=dfResult["name"], y=dfResult["nOperation"]), row=2, col=1)
 
-		fig.add_trace(go.Scatter(name="GainPerOperation", x=dfResult["name"],
-								 y=dfResult["GainPerOperation"], mode='markers'), row=2, col=2)
-		fig.add_trace(go.Scatter(name="maxGainOneDay", x=dfResult["name"],
-								 y=dfResult["maxGainOneDay"], mode='markers'), row=2, col=2)
-		fig.add_trace(go.Scatter(name="maxLossOneDay", x=dfResult["name"],
-								 y=dfResult["maxLossOneDay"], mode='markers'), row=2, col=2)
+		fig.add_trace(go.Bar(name="GainPerOperation", x=dfResult["name"],
+								 y=dfResult["GainPerOperation"]), row=2, col=2)
+		fig.add_trace(go.Bar(name="maxGainOneDay", x=dfResult["name"],
+								 y=dfResult["maxGainOneDay"]), row=2, col=2)
+		fig.add_trace(go.Bar(name="maxLossOneDay", x=dfResult["name"],
+								 y=dfResult["maxLossOneDay"]), row=2, col=2)
 
-		fig.add_trace(go.Scatter(name="TreynorMeasure", x=dfResult["name"],
-								 y=dfResult["TreynorMeasure"], mode='markers'), row=2, col=3)
-		fig.add_trace(go.Scatter(name="SharpeRatio", x=dfResult["name"],
-								 y=dfResult["SharpeRatio"], mode='markers'), row=2, col=3)
-		fig.add_trace(go.Scatter(name="JensenMeasure", x=dfResult["name"],
-								 y=dfResult["JensenMeasure"], mode='markers'), row=2, col=3)
-		fig.add_trace(go.Scatter(name="SortinoRatio", x=dfResult["name"],
-								 y=dfResult["SortinoRatio"], mode='markers'), row=2, col=3)
+		fig.add_trace(go.Bar(name="TreynorMeasure", x=dfResult["name"],
+								 y=dfResult["TreynorMeasure"]), row=2, col=3)
+		fig.add_trace(go.Bar(name="SharpeRatio", x=dfResult["name"],
+								 y=dfResult["SharpeRatio"]), row=2, col=3)
+		fig.add_trace(go.Bar(name="JensenMeasure", x=dfResult["name"],
+								 y=dfResult["JensenMeasure"]), row=2, col=3)
+		fig.add_trace(go.Bar(name="SortinoRatio", x=dfResult["name"],
+								 y=dfResult["SortinoRatio"]), row=2, col=3)
 
-		fig.add_trace(go.Scatter(name="MNotInvested,", x=dfResult["name"],
-								 y=dfResult["meanNotInvested"], mode='markers'), row=3, col=1)
-		fig.add_trace(go.Scatter(name="MInvested", x=dfResult["name"],
-								 y=dfResult["meanInvested"], mode='markers'), row=3, col=1)
-		fig.add_trace(go.Scatter(name="MBuying", x=dfResult["name"],
-								 y=dfResult["meanBuying"], mode='markers'), row=3, col=1)
-		fig.add_trace(go.Scatter(name="MSelling", x=dfResult["name"],
-								 y=dfResult["meanSelling"], mode='markers'), row=3, col=1)
+		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
 
-		fig.update_layout(title_text=title, hovermode="x unified")
+		fig.show()
+
+		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.15, horizontal_spacing=0.04,
+							subplot_titles=["MNotInv/MInv", "MBuy/MSell"])
+
+		fig.add_trace(go.Bar(name="MNotInvested,", x=dfResult["name"],
+								 y=dfResult["meanNotInvested"], marker_color="red"), row=1, col=1)
+		fig.add_trace(go.Bar(name="MInvested", x=dfResult["name"],
+								 y=dfResult["meanInvested"], marker_color="green"), row=1, col=1)
+		fig.add_trace(go.Bar(name="MBuying", x=dfResult["name"],
+								 y=dfResult["meanBuying"], marker_color="green"), row=2, col=1)
+		fig.add_trace(go.Bar(name="MSelling", x=dfResult["name"],
+								 y=-dfResult["meanSelling"], marker_color="red"), row=2, col=1)
+
+		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
 
 		fig.show()
 
@@ -354,66 +357,71 @@ class testCriteriaClass:
 		return result
 
 	def plotCriteriaVariousExperiments(self, dfResult, title):
-		fig = make_subplots(rows=3, cols=3, vertical_spacing=0.15, horizontal_spacing=0.04,
+		fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
 							subplot_titles=["MMPV", "MStdPV", "M%Gain-MAbsGain", "MnOp",
-											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen",
-											"MMNotInv-MMInv-MMBuy-MMSell"],
+											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}],
-								   [{"secondary_y": False, "colspan": 3}, {"secondary_y": False},
-									{"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
 
-		fig.add_trace(go.Scatter(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"], mode='markers',
+		fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"],
 								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
 					  col=1)
 
-		fig.add_trace(go.Scatter(name="MStdPV", x=dfResult["name"], y=dfResult["MStdPV"], mode='markers',
+		fig.add_trace(go.Bar(name="MStdPV", x=dfResult["name"], y=dfResult["MStdPV"],
 								 error_y=dict(type='data', array=dfResult["StdStdPV"].values, visible=True)), row=1,
 					  col=2)
 
-		fig.add_trace(go.Scatter(name="MPerGain", x=dfResult["name"], y=dfResult["MPerGain"], mode='markers',
+		fig.add_trace(go.Bar(name="MPerGain", x=dfResult["name"], y=dfResult["MPerGain"],
 								 error_y=dict(type='data', array=dfResult["StdPerGain"].values, visible=True)), row=1,
 					  col=3)
-		fig.add_trace(go.Scatter(name="MAbsGain", x=dfResult["name"], y=dfResult["MAbsGain"], mode='markers',
+		fig.add_trace(go.Bar(name="MAbsGain", x=dfResult["name"], y=dfResult["MAbsGain"],
 								 error_y=dict(type='data', array=dfResult["StdAbsGain"].values, visible=True)), row=1,
 					  col=3, secondary_y=True)
 
-		fig.add_trace(go.Scatter(name="MnOperation", x=dfResult["name"], y=dfResult["MnOperation"], mode='markers',
+		fig.add_trace(go.Bar(name="MnOperation", x=dfResult["name"], y=dfResult["MnOperation"],
 								 error_y=dict(type='data', array=dfResult["StdnOperation"].values, visible=True)),
 					  row=2, col=1)
 
-		fig.add_trace(go.Scatter(name="MGainPerOperation", x=dfResult["name"], y=dfResult["MGainPerOperation"], mode='markers',
+		fig.add_trace(go.Bar(name="MGainPerOperation", x=dfResult["name"], y=dfResult["MGainPerOperation"],
 								 error_y=dict(type='data', array=dfResult["StdGainPerOperation"].values, visible=True)),
 					  row=2, col=2)
-		fig.add_trace(go.Scatter(name="MmaxGainOneDay", x=dfResult["name"], y=dfResult["MmaxGainOneDay"], mode='markers',
+		fig.add_trace(go.Bar(name="MmaxGainOneDay", x=dfResult["name"], y=dfResult["MmaxGainOneDay"],
 								 error_y=dict(type='data', array=dfResult["StdmaxGainOneDay"].values, visible=True)),
 					  row=2, col=2)
-		fig.add_trace(go.Scatter(name="MmaxLossOneDay", x=dfResult["name"], y=dfResult["MmaxLossOneDay"], mode='markers',
+		fig.add_trace(go.Bar(name="MmaxLossOneDay", x=dfResult["name"], y=dfResult["MmaxLossOneDay"],
 								 error_y=dict(type='data', array=dfResult["StdmaxLossOneDay"].values, visible=True)),
 					  row=2, col=2)
 
-		fig.add_trace(go.Scatter(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"], mode='markers'),
+		fig.add_trace(go.Bar(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
 					  row=2, col=3)
-		fig.add_trace(go.Scatter(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"], mode='markers'),
+		fig.add_trace(go.Bar(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"]),
 					  row=2, col=3)
-		fig.add_trace(go.Scatter(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"], mode='markers'),
+		fig.add_trace(go.Bar(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
 					  row=2, col=3)
 		fig.add_trace(
-			go.Scatter(name="MSortinoRatio", x=dfResult["name"], y=dfResult["MSortinoRatio"], mode='markers'),
+			go.Bar(name="MSortinoRatio", x=dfResult["name"], y=dfResult["MSortinoRatio"]),
 			row=2, col=3)
 
-		fig.add_trace(go.Scatter(name="MMNotInvested,", x=dfResult["name"], y=dfResult["MMNotInvested"], mode='markers',
+		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
+
+		fig.show()
+
+		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.15, horizontal_spacing=0.04,
+							subplot_titles=["MMNotInvested/MMInvested", "MMBuying/MMSelling"])
+
+		fig.add_trace(go.Bar(name="MMNotInvested,", x=dfResult["name"], y=dfResult["MMNotInvested"], marker_color="red",
 								 error_y=dict(type='data', array=dfResult["StdMNotInvested"].values, visible=True)),
-					  row=3, col=1)
-		fig.add_trace(go.Scatter(name="MMInvested", x=dfResult["name"], y=dfResult["MMInvested"], mode='markers',
+					  row=1, col=1)
+		fig.add_trace(go.Bar(name="MMInvested", x=dfResult["name"], y=dfResult["MMInvested"], marker_color="green",
 								 error_y=dict(type='data', array=dfResult["StdMInvested"].values, visible=True)),
-					  row=3, col=1)
-		fig.add_trace(go.Scatter(name="MMBuying", x=dfResult["name"], y=dfResult["MMBuying"], mode='markers',
+					  row=1, col=1)
+		fig.add_trace(go.Bar(name="MMBuying", x=dfResult["name"], y=dfResult["MMBuying"], marker_color="green",
 								 error_y=dict(type='data', array=dfResult["StdMBuying"].values, visible=True)),
-					  row=3, col=1)
-		fig.add_trace(go.Scatter(name="MMSelling", x=dfResult["name"], y=dfResult["MMSelling"], mode='markers',
+					  row=2, col=1)
+		fig.add_trace(go.Bar(name="MMSelling", x=dfResult["name"], y=dfResult["MMSelling"], marker_color="red",
 								 error_y=dict(type='data', array=dfResult["StdMSelling"].values, visible=True)),
-					  row=3, col=1)
-		fig.update_layout(title_text=title, hovermode="x unified")
+					  row=2, col=1)
+
+		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
 
 		fig.show()

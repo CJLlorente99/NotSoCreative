@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 This strategy consists on buying a fixed quantity periodically
 """
 class InvestorCA(Investor):
-	def __init__(self, initialInvestment=10000, dailyWindow=100):
+	def __init__(self, initialInvestment=10000, dailyWindow=0.1):
 		super().__init__(initialInvestment)
 		self.dailyWindow = dailyWindow
 
@@ -23,17 +23,19 @@ class InvestorCA(Investor):
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToInvest = self.buyPredictionCA()
+		self.perToInvest = self.buyPredictionCA(data)
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.moneyToSell = self.sellPredictionCA()
+		self.perToSell = self.sellPredictionCA()
 
-	def buyPredictionCA(self):
-		return self.dailyWindow
+	def buyPredictionCA(self, data: DataManager):
+		if 1 - data.nDay * self.dailyWindow > 0:
+			return self.dailyWindow / (1 - data.nDay * self.dailyWindow)
+		return 0
 
 	def sellPredictionCA(self):
 		return 0
@@ -44,6 +46,7 @@ class InvestorCA(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
+		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(

@@ -28,14 +28,14 @@ class InvestorMACD(Investor):
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        firstGradient, secondGradient, self.moneyToInvest = self.buyPredictionMACD(data.macd)
+        firstGradient, secondGradient, self.perToInvest = self.buyPredictionMACD(data.macd)
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.moneyToSell = self.sellPredictionMACD(data.macd)
+        self.perToSell = self.sellPredictionMACD(data.macd)
 
     def buyPredictionMACD(self, macdDict):
         """
@@ -61,18 +61,16 @@ class InvestorMACD(Investor):
             if params.buyGradients.lowerBoundGradient < firstGradient[
                 -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < \
                     secondGradient[-1]:
-                return firstGradient, secondGradient, params.maxBuy * math.tanh(
+                return firstGradient, secondGradient, math.tanh(
                     params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
             return firstGradient, secondGradient, 0
         elif type == "grad_crossZero":
             if macd.values[-2] < 0 < macd.values[-1]:
-                return firstGradient, secondGradient, params.maxBuy * math.tanh(
-                    params.a * firstGradient[-1] ** params.b)
+                return firstGradient, secondGradient, math.tanh(params.a * firstGradient[-1] ** params.b)
             return firstGradient, secondGradient, 0
         elif type == "grad_crossSignal":
             if (signal.values[-2] - macd.values[-2]) > 0 > (signal.values[-1] - macd.values[-1]):
-                return firstGradient, secondGradient, params.maxBuy * math.tanh(
-                    params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
+                return firstGradient, secondGradient, math.tanh(params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
             return firstGradient, secondGradient, 0
 
     def sellPredictionMACD(self, macdDict):
@@ -99,17 +97,17 @@ class InvestorMACD(Investor):
             if params.sellGradients.lowerBoundGradient < firstGradient[
                 -1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > \
                     secondGradient[-1]:
-                return params.maxSell * math.tanh(
+                return math.tanh(
                     params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
             else:
                 return 0
         elif type == "grad_crossZero":
             if macd.values[-2] > 0 > macd.values[-1]:
-                return params.maxSell * math.tanh(params.a * (-firstGradient[-1]) ** params.b)
+                return math.tanh(params.a * (-firstGradient[-1]) ** params.b)
             return 0
         elif type == "grad_crossSignal":
             if (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
-                return params.maxSell * math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
+                return math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
             return 0
 
     def plotDecisionRules(self):
@@ -159,6 +157,7 @@ class InvestorMACD(Investor):
         :param stockMarketData: df with the stock market data
         :param recordPredictedValue: Predicted data dataframe
         """
+        self.record = self.record.iloc[1:]
         # Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
         fig = go.Figure()
         fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))

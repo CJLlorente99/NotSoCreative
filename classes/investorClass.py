@@ -18,8 +18,8 @@ class Investor(ABC):
         self.investedMoney = 0  # Value of money actually invested
         self.nonInvestedMoney = initialInvestment  # Value of money not currently invested
         self.record = pd.DataFrame()
-        self.moneyToInvest = 0
-        self.moneyToSell = 0
+        self.perToInvest = 0  # [0,1], being 1 = 100% of the non invested money
+        self.perToSell = 0  # [0,1], being 1 = 100% of the invested money
 
     """
     CONCRETE METHODS
@@ -32,13 +32,14 @@ class Investor(ABC):
         """
         # Update investedMoney value
         self.investedMoney *= data.actualStockValue / data.pastStockValue
+
         # Broker operation for today
-        self.__investAndSellToday()
-        out1, out2 = self.moneyToInvest, self.moneyToSell
+        moneyInvested, moneySold = self.__investAndSellToday()
+        out1, out2 = self.perToInvest, self.perToSell
 
         # Update porfolio record
         aux = pd.DataFrame({"moneyInvested": self.investedMoney, "moneyNotInvested": self.nonInvestedMoney,
-                            "moneyInvestedToday": self.moneyToInvest, "moneySoldToday": self.moneyToSell,
+                            "moneyInvestedToday": moneyInvested, "moneySoldToday": moneySold,
                             "totalValue": (self.investedMoney + self.nonInvestedMoney), "openValue": data.actualStockValue}, index=[data.date])
         self.record = pd.concat([self.record, aux])
 
@@ -49,7 +50,7 @@ class Investor(ABC):
         self.possiblyInvestTomorrow(data)
 
         # print(f'\nToday-> invest {out1}, sell {out2}')
-        # print(f'Tomorrow-> invest {self.moneyToInvest}, sell {self.moneyToSell}')
+        # print(f'Tomorrow-> invest {self.perToInvest}, sell {self.perToSell}')
 
         return self.returnBrokerUpdate(out1, out2, data)
 
@@ -58,26 +59,22 @@ class Investor(ABC):
         This function performs the operation given by signals established the day before
         """
         # In one day, we should only be able to sell or buy (not both at the same time)
-        if self.moneyToInvest > self.moneyToSell:
-            self.moneyToInvest -= self.moneyToSell
-            self.moneyToSell = 0
-        elif self.moneyToInvest < self.moneyToSell:
-            self.moneyToSell -= self.moneyToInvest
-            self.moneyToInvest = 0
+        if self.perToInvest > self.perToSell:
+            self.perToInvest -= self.perToSell
+            self.perToSell = 0
+        elif self.perToInvest < self.perToSell:
+            self.perToSell -= self.perToInvest
+            self.perToInvest = 0
 
-        if self.moneyToInvest > self.nonInvestedMoney:
-            self.investedMoney += self.nonInvestedMoney
-            self.nonInvestedMoney = 0
-        else:
-            self.investedMoney += self.moneyToInvest
-            self.nonInvestedMoney -= self.moneyToInvest
+        moneyInvested = self.perToInvest * self.nonInvestedMoney
+        self.investedMoney += self.perToInvest * self.nonInvestedMoney
+        self.nonInvestedMoney -= self.perToInvest * self.nonInvestedMoney
 
-        if self.moneyToSell > self.investedMoney:
-            self.nonInvestedMoney += self.investedMoney
-            self.investedMoney = 0
-        else:
-            self.investedMoney -= self.moneyToSell
-            self.nonInvestedMoney += self.moneyToSell
+        moneySold = self.perToSell * self.investedMoney
+        self.nonInvestedMoney += self.perToSell * self.investedMoney
+        self.investedMoney -= self.perToSell * self.investedMoney
+
+        return moneyInvested, moneySold
 
     """
     ABSTRACT METHODS

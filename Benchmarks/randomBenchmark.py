@@ -25,9 +25,9 @@ class InvestorRandom(Investor):
 		:param data: Decision data based on the type of indicator
 		"""
 		if self.rand > 0:
-			self.moneyToInvest = self.rand * self.nonInvestedMoney
+			self.perToInvest = self.rand
 		else:
-			self.moneyToInvest = 0
+			self.perToInvest = 0
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
@@ -37,11 +37,12 @@ class InvestorRandom(Investor):
 		self.rand = random.uniform(-1, 1)
 
 		if self.rand < 0:
-			self.moneyToSell = -self.rand * self.investedMoney
+			self.perToSell = -self.rand
 		else:
-			self.moneyToSell = 0
+			self.perToSell = 0
 
 	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
