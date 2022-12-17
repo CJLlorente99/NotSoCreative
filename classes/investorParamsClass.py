@@ -69,6 +69,86 @@ class RSIInvestorParams(InvestorParams):
                f'{self.lowerBound},{self.window},{self.a},{self.b}'
 
 
+class StochasticRSIInvestorParams(InvestorParams):
+    def __init__(self, window, smooth1, smooth2, a=1, b=3):
+        super().__init__()
+        self.window = window
+        self.smooth1 = smooth1
+        self.smooth2 = smooth2
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'StochRSI, Window, Smooth1, Smooth2, a, b\nStochRSI,{self.window},' \
+               f'{self.smooth1},{self.smooth2},{self.a},{self.b}'
+
+
+class ADXInvestorParams(InvestorParams):
+    def __init__(self, window, a=1, b=3):
+        super().__init__()
+        self.window = window
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'ADX, Window, a, b\nADX,{self.window},' \
+               f'{self.a},{self.b}'
+
+
+class AroonInvestorParams(InvestorParams):
+    def __init__(self, window, a=1, b=3):
+        super().__init__()
+        self.window = window
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'Aroon, Window, a, b\nAroon,{self.window},' \
+               f'{self.a},{self.b}'
+
+
+class ADIInvestorParams(InvestorParams):
+    def __init__(self, a=1, b=3):
+        super().__init__()
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'ADI, a, b\nADI,' \
+               f'{self.a},{self.b}'
+
+
+class OBVInvestorParams(InvestorParams):
+    def __init__(self, a=1, b=3):
+        super().__init__()
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'OBV, a, b\nOBV,' \
+               f'{self.a},{self.b}'
+
+
+class ATRInvestorParams(InvestorParams):
+    def __init__(self, window, a=1, b=3):
+        super().__init__()
+        self.window = window
+        self.a = a
+        self.b = b
+
+    def __str__(self):
+        return f'OBV, a, b\nOBV,' \
+               f'{self.a},{self.b}'
+
+class NNInvestorParams(InvestorParams):
+    def __init__(self, file):
+        super().__init__()
+        self.file = file
+
+    def __str__(self):
+        return f'NN, File\nNN,{self.file}'
+
+
 # Useful classes
 class GradientQuarter:
     def __init__(self, lowerBoundGradient, upperBoundGradient, lowBoundSquareGradient, upperBoundSquareGradient):

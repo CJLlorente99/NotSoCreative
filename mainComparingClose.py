@@ -2,8 +2,8 @@ import pandas as pd
 from classes.dataClass import DataManager, DataGetter
 from TAIndicators.rsi import relativeStrengthIndex, InvestorRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence, InvestorMACD
-from TAIndicators.bb import bollingerBands, InvestorBB
-from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter
+from TAIndicators.bb import bollingerBands, InvestorBB, InvestorBBNN
+from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
 from Benchmarks.wia import InvestorWIA
@@ -45,6 +45,7 @@ def main():
         b = 2.4
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
         investorRSI = InvestorRSI(10000, rsiParams)
+        print("investorRSI created")
 
         # Create investor MACD grad
         sellGradient = GradientQuarter(-50, 150, 0, 0)
@@ -57,6 +58,7 @@ def main():
         macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
                                             a, b, "grad")
         investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
+        print("investorMACDGrad created")
 
         # Create investor MACD zero
         sellGradient = GradientQuarter(-50, 0, 150, 0)
@@ -69,6 +71,7 @@ def main():
         macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
                                             a, b, "grad_crossZero")
         investorMACDZero = InvestorMACD(10000, macdParamsZero)
+        print("investorMACDZero created")
 
         # Create investor MACD signal
         sellGradient = GradientQuarter(-150, 150, -200, 0)
@@ -81,6 +84,7 @@ def main():
         macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
                                         a, b, "grad_crossSignal")
         investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
+        print("investorMACDSignal created")
 
         # Create investor BB
         bbWindow = 10
@@ -91,24 +95,37 @@ def main():
         b = 0.5
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
         investorBB = InvestorBB(10000, bbParams)
+        print("investorBB created")
+
+        # Create investor BBNN
+        file = "data/modelnnBB.h5"
+        nnParams = NNInvestorParams(file)
+        investorBBNN = InvestorBBNN(10000, nnParams)
+        print("investorBBNN created")
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
+        print("investorRandom created")
 
         # Create investor BIA
         investorBIA = InvestorBIA(10000)
+        print("investorBIA created")
 
         # Create investor WIA
         investorWIA = InvestorWIA(10000)
+        print("investorWIA created")
 
         # Create investor CA
         investorCA = InvestorCA(10000, 0.1)
+        print("investorCA created")
 
         # Create investor BaH
         investorBaH = InvestorBaH(10000)
+        print("investorBaH created")
 
         # Create investor Idle
         investorIdle = InvestorIdle(10000)
+        print("investorIdle created")
 
         # Variables to store data
         auxRsi = pd.DataFrame()
@@ -116,6 +133,7 @@ def main():
         auxMacdZero = pd.DataFrame()
         auxMacdSignal = pd.DataFrame()
         auxBb = pd.DataFrame()
+        auxBbnn = pd.DataFrame()
         auxRandom = pd.DataFrame()
         auxBIA = pd.DataFrame()
         auxWIA = pd.DataFrame()
@@ -144,56 +162,74 @@ def main():
             dataManager.rsi = rsiResults[-1]
             aux = investorRSI.broker(dataManager)
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} RSI Completed")
 
             # MACD Grad try
             macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsGrad)
             dataManager.macd = macdResults
             aux = investorMACDGrad.broker(dataManager)
             auxMacdGrad = pd.concat([auxMacdGrad, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} MACD Grad Completed")
 
             # MACD Zero try
             macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsZero)
             dataManager.macd = macdResults
             aux = investorMACDZero.broker(dataManager)
             auxMacdZero = pd.concat([auxMacdZero, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} MACD Zero Completed")
 
             # MACD Signal try
             macdResults = movingAverageConvergenceDivergence(df.Close, macdParamsSignal)
             dataManager.macd = macdResults
             aux = investorMACDSignal.broker(dataManager)
             auxMacdSignal = pd.concat([auxMacdSignal, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} MACD Signal Completed")
 
             # BB try
             bbResults = bollingerBands(df.Close, bbParams)
-            dataManager.bb = bbResults["pband"][-1]
+            dataManager.bb = bbResults["pband"][-2:]
             aux = investorBB.broker(dataManager)
             auxBb = pd.concat([auxBb, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BB Completed")
+
+            # BBNN try
+            bbResults = bollingerBands(df.Close, bbParams)
+            dataManager.bb = bbResults["pband"][-2:]
+            auxBbnn = investorBBNN.broker(dataManager)
+            auxBbnn = pd.concat([auxBbnn, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BBNN Completed")
 
             # Random try
             aux = investorRandom.broker(dataManager)
             auxRandom = pd.concat([auxRandom, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} Random Completed")
 
             # BIA try
             dataManager.nextnextStockValueOpen = dataGetter.getNextNextDay().Open.values[0]
             dataManager.nextStockValueOpen = dataGetter.getNextDay().Open.values[0]
             aux = investorBIA.broker(dataManager)
             auxBIA = pd.concat([auxBIA, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BIA Completed")
 
             # WIA try
             aux = investorWIA.broker(dataManager)
             auxWIA = pd.concat([auxWIA, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} WIA Completed")
 
             # CA try
             aux = investorCA.broker(dataManager)
             auxCA = pd.concat([auxCA, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} CA Completed")
 
             # BaH try
             aux = investorBaH.broker(dataManager)
             auxBaH = pd.concat([auxBaH, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BaH Completed")
 
             # Idle try
             aux = investorIdle.broker(dataManager)
             auxIdle = pd.concat([auxIdle, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} Idle Completed")
 
             # Refresh for next day
             dataManager.pastStockValue = todayData.Open.values[0]
@@ -204,7 +240,8 @@ def main():
         dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
-        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxRandom], axis=1)
+        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxBbnn, auxRandom,
+                         auxBIA, auxWIA, auxCA, auxBaH, auxIdle], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
@@ -216,6 +253,7 @@ def main():
         testCriteriaMACDZero = pd.DataFrame(criteriaCalculator.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
         testCriteriaMACDSignal = pd.DataFrame(criteriaCalculator.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
         testCriteriaBB = pd.DataFrame(criteriaCalculator.calculateCriteria("bb", investorBB.record), index=[j])
+        testCriteriaBBNN = pd.DataFrame(criteriaCalculator.calculateCriteria("bbnn", investorBBNN.record), index=[j])
         testCriteriaRandom = pd.DataFrame(criteriaCalculator.calculateCriteria("random", investorRandom.record), index=[j])
         testCriteriaBIA = pd.DataFrame(criteriaCalculator.calculateCriteria("bia", investorBIA.record),
                                           index=[j])
@@ -228,7 +266,7 @@ def main():
         testCriteriaIdle = pd.DataFrame(criteriaCalculator.calculateCriteria("idle", investorIdle.record),
                                        index=[j])
         dfTestCriteriaAux = pd.concat(
-            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB,
+            [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB, testCriteriaBBNN,
              testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle])
 
         # Plot test criteria
@@ -243,6 +281,7 @@ def main():
         investorMACDZero.plotEvolution(macdResults, df)
         investorMACDSignal.plotEvolution(macdResults, df)
         investorBB.plotEvolution(bbResults, df)
+        investorBBNN.plotEvolution(bbResults, df)
         investorRandom.plotEvolution(None, df)
         investorBIA.plotEvolution(None, df)
         investorWIA.plotEvolution(None, df)
