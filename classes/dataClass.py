@@ -1,6 +1,7 @@
-import datetime as dt
+from datetime import datetime
 import pandas_datareader as web
 import pandas as pd
+import yfinance as yf
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
@@ -15,7 +16,7 @@ class DataManager:
         self.nextStockValue = 0
         self.nextnextStockValueOpen = 0
         self.nextStockValueOpen = 0
-        self.date = dt.date.today()
+        self.date = datetime.date.today()
         self.rsi = 0
         self.stochrsi = 0
         self.adx = 0
@@ -38,7 +39,7 @@ class DataGetter:
         self.ticker = '^GSPC'
         # define US business days
         us_bus = CDay(calendar=USFederalHolidayCalendar())
-        self.today = pd.bdate_range('2014-01-01', '2014-01-31', freq=us_bus)[0]
+        self.today = pd.bdate_range('2018-01-01', '2018-01-31', freq=us_bus)[0]
         self.start = self.today - CDay(self.dataLen)
 
     def getPastData(self):
