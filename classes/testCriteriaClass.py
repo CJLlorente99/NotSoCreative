@@ -1,10 +1,10 @@
 import math
-
+import yfinance as yf
 import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import numpy as np
-import pandas_datareader as web
+from pandas_datareader import data as pdr
 
 
 class testCriteriaClass:
@@ -19,7 +19,8 @@ class testCriteriaClass:
 		:param firstDate:  First date from when data will be retrieved
 		:param lastDate:  Last date until when data will be retrieved
 		"""
-		dfTreasuryBills = web.DataReader("^IRX", 'yahoo', self.firstDate, self.lastDate)
+		yf.pdr_override()
+		dfTreasuryBills = yf.download("^IRX", pd.Timestamp(self.firstDate), pd.Timestamp(self.lastDate))
 		return dfTreasuryBills.iloc[-1]["Open"] - dfTreasuryBills.iloc[0]["Open"]
 
 	def calculateCriteria(self, name, record):

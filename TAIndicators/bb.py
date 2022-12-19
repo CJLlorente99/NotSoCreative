@@ -166,8 +166,7 @@ class InvestorBBNN(Investor):
         """
         inputs = [bb[-1], bb[-2]]
         inputs = np.asarray(inputs)
-        y = self.model.predict(inputs.transpose())
-        print(y)
+        y = self.model.predict(inputs.transpose())[0]
         if y > 0:
             return y
         return 0
@@ -180,8 +179,7 @@ class InvestorBBNN(Investor):
         """
         inputs = [bb[-1], bb[-2]]
         inputs = np.asarray(inputs)
-        y = self.model.predict(inputs.transpose())
-        print(y)
+        y = self.model.predict(inputs.transpose())[0]
         if y < 0:
             return y
         return 0
@@ -200,7 +198,7 @@ class InvestorBBNN(Investor):
         fig.add_trace(go.Scatter(name="Money Not Invested", x=self.record.index, y=self.record["moneyNotInvested"], stackgroup="one"))
         fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
         fig.update_layout(
-            title="Evolution of Porfolio using BB (" + self.record.index[0].strftime(
+            title="Evolution of Porfolio using BBNN (" + self.record.index[0].strftime(
                 "%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
             yaxis_title="Value [$]", hovermode='x unified')
@@ -235,7 +233,7 @@ class InvestorBBNN(Investor):
         fig.update_xaxes(title_text="Date", row=1, col=1)
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(
-            title="Decision making under BB (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+            title="Decision making under BBNN (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
         fig.show()
 

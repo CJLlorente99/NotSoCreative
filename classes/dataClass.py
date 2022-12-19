@@ -16,7 +16,7 @@ class DataManager:
         self.nextStockValue = 0
         self.nextnextStockValueOpen = 0
         self.nextStockValueOpen = 0
-        self.date = datetime.date.today()
+        self.date = datetime.today()
         self.rsi = 0
         self.stochrsi = 0
         self.adx = 0
@@ -36,10 +36,11 @@ class DataGetter:
         """
         Initialization function for the DataGetter. This class is supposed to be used as intermediary to get new data
         """
-        self.ticker = '^GSPC'
+        yf.pdr_override()
+        self.ticker = "^GSPC"
         # define US business days
         us_bus = CDay(calendar=USFederalHolidayCalendar())
-        self.today = pd.bdate_range('2018-01-01', '2018-01-31', freq=us_bus)[0]
+        self.today = pd.bdate_range('2014-01-01', '2018-01-31', freq=us_bus)[0]
         self.start = self.today - CDay(self.dataLen)
 
     def getPastData(self):
@@ -51,7 +52,7 @@ class DataGetter:
         while True:
             yesterday -= CDay(calendar=USFederalHolidayCalendar())
             try:
-                data = web.DataReader(self.ticker, 'yahoo', yesterday, yesterday)
+                data = yf.download(self.ticker, yesterday, self.today)
                 return data
             except:
                 continue
@@ -64,7 +65,7 @@ class DataGetter:
         while True:
             self.start = self.today - CDay(self.dataLen)
             try:
-                data = web.DataReader(self.ticker, 'yahoo', self.start, self.today)
+                data = yf.download(self.ticker, self.start, self.today)
                 return data
             except:
                 self.today += CDay(calendar=USFederalHolidayCalendar())
@@ -74,12 +75,15 @@ class DataGetter:
         Function to get today's data. Try/except clause to deal with days when the stock was closed.
         :return: Today's data
         """
+        aux = self.today
+        aux += CDay(calendar=USFederalHolidayCalendar())
         while True:
             try:
-                data = web.DataReader(self.ticker, 'yahoo', self.today, self.today)
+                data = yf.download(self.ticker, self.today, aux)
                 return data
             except:
                 self.today += CDay(calendar=USFederalHolidayCalendar())
+                aux += CDay(calendar=USFederalHolidayCalendar())
 
     def getNextDay(self):
         """
@@ -87,10 +91,12 @@ class DataGetter:
         :return: Next day's data
         """
         nextDay = self.today
+        aux = nextDay + CDay(calendar=USFederalHolidayCalendar())
         while True:
             nextDay += CDay(calendar=USFederalHolidayCalendar())
+            aux += CDay(calendar=USFederalHolidayCalendar())
             try:
-                data = web.DataReader(self.ticker, 'yahoo', nextDay, nextDay)
+                data = yf.download(self.ticker, nextDay, aux)
                 return data
             except:
                 continue
@@ -102,10 +108,12 @@ class DataGetter:
         """
         nextDay = self.today
         nextDay += CDay(calendar=USFederalHolidayCalendar())
+        aux = nextDay + CDay(calendar=USFederalHolidayCalendar())
         while True:
             nextDay += CDay(calendar=USFederalHolidayCalendar())
+            aux += CDay(calendar=USFederalHolidayCalendar())
             try:
-                data = web.DataReader(self.ticker, 'yahoo', nextDay, nextDay)
+                data = yf.download(self.ticker, nextDay, aux)
                 return data
             except:
                 continue
