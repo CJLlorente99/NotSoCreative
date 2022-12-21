@@ -3,6 +3,9 @@ from decisionFunctionNN import NNDecisionFunction, NNDecisionFunctionClassificat
 import numpy as np
 import plotly.graph_objects as go
 from keras.utils import to_categorical
+from datetime import datetime
+
+tag = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
 # Load data from .csv containing TA values + BIA signal
 df = pd.read_csv("../data/optimizationTrainingSet.csv", index_col=["n"])
@@ -31,7 +34,7 @@ inputsTrain = np.asmatrix(inputs).transpose()
 nnRSI.train_model(inputsTrain, dfTrain["output"][2:])
 
 # Save model
-# nnRSI.save("nnRSI")
+nnRSI.save("nnRSI" + tag)
 nnRSI.summary()
 
 # Plot comparison with test
@@ -74,7 +77,7 @@ inputsTrain = np.asmatrix(inputs).transpose()
 nnRSIClassification.train_model(inputsTrain, to_categorical(dfTrain["output"][2:]))
 
 # Save model
-# nnRSIClassification.save("nnRSI")
+nnRSIClassification.save("nnRSIClass" + tag)
 nnRSIClassification.summary()
 
 # Plot comparison with test
@@ -101,7 +104,7 @@ inputs = np.asarray(inputs)
 nnBB.train_model(inputs.transpose(), dfTrain["output"][1:])
 
 # Save model
-# nnBB.save("nnBB")
+nnBB.save("nn2BB" + tag)
 nnBB.summary()
 
 # Plot comparison with test
@@ -143,7 +146,7 @@ inputs = np.asarray(inputs).transpose()
 nnBBClassification.train_model(inputs, to_categorical(dfTrain["output"][1:]))
 
 # Save model
-# nnBBClassification.save("nnBB")
+nnBBClassification.save("nn2BBClass" + tag)
 nnBBClassification.summary()
 
 # Plot comparison with test
@@ -166,12 +169,13 @@ Try for NN with 4 inputs, both BB and RSI values
 # Create NN with 4 inputs (yesterday and the day before yesterday BB value, and yesterday and the day before yesterday BB value)
 nnTwo = NNDecisionFunction(4)
 nnTwo.summary()
-inputs = [dfTrain["bbResults"].iloc[1:].to_numpy(), dfTrain["bbResults"].iloc[0:-1].to_numpy(), dfTrain["rsiResults"].iloc[1:].to_numpy(), dfTrain["bbResults"].iloc[0:-1].to_numpy()]
+inputs = [dfTrain["bbResults"].iloc[1:].to_numpy(), dfTrain["bbResults"].iloc[0:-1].to_numpy(), dfTrain["rsiResults"].iloc[1:].to_numpy(), dfTrain["rsiResults"].iloc[0:-1].to_numpy()]
 inputs = np.asarray(inputs)
 nnTwo.train_model(inputs.transpose(), dfTrain["output"].iloc[1:].to_numpy())
+nnTwo.save("nn2BB_2RSI" + tag)
 
 # Plot comparison with test
-inputs = [dfTest["bbResults"].iloc[1:-1].to_numpy(), dfTest["bbResults"].iloc[0:-2].to_numpy(), dfTest["rsiResults"].iloc[1:-1].to_numpy(), dfTest["bbResults"].iloc[0:-2].to_numpy()]
+inputs = [dfTest["bbResults"].iloc[1:-1].to_numpy(), dfTest["bbResults"].iloc[0:-2].to_numpy(), dfTest["rsiResults"].iloc[1:-1].to_numpy(), dfTest["rsiResults"].iloc[0:-2].to_numpy()]
 inputsTest = np.asmatrix(inputs).transpose()
 y = nnTwo.predict(inputsTest)[:,0]
 
@@ -188,13 +192,13 @@ Try for NN with 4 inputs, both BB and RSI values. Classification game
 """
 # Create NN with 4 input as classification game
 nnClassification = NNDecisionFunctionClassification(4)
-
-inputs = [dfTrainClassification["bbResults"].iloc[1:-1].to_numpy(), dfTrainClassification["bbResults"].iloc[0:-2].to_numpy(), dfTrainClassification["rsiResults"].iloc[1:-1].to_numpy(), dfTrainClassification["bbResults"].iloc[0:-2].to_numpy()]
+inputs = [dfTrainClassification["bbResults"].iloc[1:-1].to_numpy(), dfTrainClassification["bbResults"].iloc[0:-2].to_numpy(), dfTrainClassification["rsiResults"].iloc[1:-1].to_numpy(), dfTrainClassification["rsiResults"].iloc[0:-2].to_numpy()]
 inputs = np.asarray(inputs).transpose()
 nnClassification.train_model(inputs, to_categorical(dfTrainClassification["output"][2:]))
+nnClassification.save("nn2BB_2RSIClass" + tag)
 
 # Plot comparison with test
-inputs = [dfTestClassification["bbResults"].iloc[1:-1].to_numpy(), dfTestClassification["bbResults"].iloc[0:-2].to_numpy(), dfTestClassification["rsiResults"].iloc[1:-1].to_numpy(), dfTestClassification["bbResults"].iloc[0:-2].to_numpy()]
+inputs = [dfTestClassification["bbResults"].iloc[1:-1].to_numpy(), dfTestClassification["bbResults"].iloc[0:-2].to_numpy(), dfTestClassification["rsiResults"].iloc[1:-1].to_numpy(), dfTestClassification["rsiResults"].iloc[0:-2].to_numpy()]
 inputsTest = np.asmatrix(inputs).transpose()
 y = nnClassification.predict(inputsTest)
 

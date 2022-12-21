@@ -27,6 +27,7 @@ class DataManager:
         self.macd = None
         self.bb = None
         self.nDay = 0
+        self.dt = {}
 
 
 class DataGetter:

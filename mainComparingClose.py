@@ -2,8 +2,16 @@ import pandas as pd
 from classes.dataClass import DataManager, DataGetter
 from TAIndicators.rsi import relativeStrengthIndex, InvestorRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence, InvestorMACD
-from TAIndicators.bb import bollingerBands, InvestorBB, InvestorBBNN
-from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams
+from TAIndicators.bb import bollingerBands, InvestorBB
+from TAIndicators.adi import accDistIndexIndicator
+from TAIndicators.adx import averageDirectionalMovementIndex
+from TAIndicators.aroon import aroon
+from TAIndicators.atr import averageTrueRange
+from TAIndicators.obv import on_balance_volume
+from TAIndicators.stochasticRsi import stochasticRSI
+from DecisionFunction.investorNN import InvestorBBNN, InvestorBBRSINNClass, InvestorBBRSINN
+from DecisionFunction.investorDecisionTree import InvestorDecisionTree
+from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
 from Benchmarks.wia import InvestorWIA
@@ -14,6 +22,7 @@ from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from classes.testCriteriaClass import testCriteriaClass
 import datetime as dt
+import numpy as np
 
 
 def main():
@@ -21,7 +30,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 1
+    numExperiments = 5
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -98,10 +107,32 @@ def main():
         print("investorBB created")
 
         # Create investor BBNN
-        file = "data/modelnnBB.h5"
+        file = "data/modelnn2BB2022_12_20_11_27_08.h5"
         nnParams = NNInvestorParams(file)
         investorBBNN = InvestorBBNN(10000, nnParams)
         print("investorBBNN created")
+
+        # Create investor BB+RSI NN Class
+        file = "data/modelnn2BB_2RSIClass2022_12_20_11_27_08.h5"
+        nnParams = NNInvestorParams(file)
+        investorBBRSINNClass = InvestorBBRSINNClass(10000, nnParams)
+        print("investorBBRSINNClass created")
+
+        # Create investor BB+RSI NN
+        file = "data/modelnn2BB_2RSI2022_12_20_11_27_08.h5"
+        nnParams = NNInvestorParams(file)
+        investorBBRSINN = InvestorBBRSINN(10000, nnParams)
+        print("investorBBRSINN created")
+
+        # Create investor based on DT
+        adxParams = ADXInvestorParams(14)
+        aroonParams = AroonInvestorParams(25)
+        atrParams = ATRInvestorParams(5)
+        stochParams = StochasticRSIInvestorParams(14, 3, 3)
+        file = "data/dt"
+        dtParams = DTInvestorParams(file)
+        investorDT = InvestorDecisionTree(10000, dtParams)
+        print("investorDT created")
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
@@ -134,6 +165,9 @@ def main():
         auxMacdSignal = pd.DataFrame()
         auxBb = pd.DataFrame()
         auxBbnn = pd.DataFrame()
+        auxBbRsiClassnn = pd.DataFrame()
+        auxBbRsinn = pd.DataFrame()
+        auxDt = pd.DataFrame()
         auxRandom = pd.DataFrame()
         auxBIA = pd.DataFrame()
         auxWIA = pd.DataFrame()
@@ -199,6 +233,47 @@ def main():
             auxBbnn = pd.concat([auxBbnn, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} BBNN Completed")
 
+            # BB+RSI NN Try Class
+            bbResults = bollingerBands(df.Close, bbParams)
+            rsiResults = relativeStrengthIndex(df.Close, rsiParams)
+            dataManager.bb = bbResults["pband"][-2:]
+            dataManager.rsi = rsiResults[-2:]
+            auxBbRsiClassnn = investorBBRSINNClass.broker(dataManager)
+            auxBbRsiClassnn = pd.concat([auxBbRsiClassnn, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BBRSINNClass Completed")
+
+            # BB+RSI NN Try
+            bbResults = bollingerBands(df.Close, bbParams)
+            rsiResults = relativeStrengthIndex(df.Close, rsiParams)
+            dataManager.bb = bbResults["pband"][-2:]
+            dataManager.rsi = rsiResults [-2:]
+            auxBbRsinn = investorBBRSINN.broker(dataManager)
+            auxBbRsinn = pd.concat([auxBbRsinn, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} BBRSINN Completed")
+
+            # Dt Try
+            adiResults = accDistIndexIndicator(df.High, df.Low, df.Close, df.Volume)["acc_dist_index"]
+            adxResults = averageDirectionalMovementIndex(df.High, df.Low, df.Close, adxParams)["adx"]
+            aroonResults = aroon(df.Close, aroonParams)["aroon_indicator"]
+            atrResults = averageTrueRange(df.High, df.Low, df.Close, atrParams)["average_true_range"]
+            obvResults = on_balance_volume(df.Close, df.Volume)["on_balance_volume"]
+            stochRsiResults = stochasticRSI(df.Close, stochParams)["stochrsi"]
+            bbResults = bollingerBands(df.Close, bbParams)["pband"]
+            rsiResults = relativeStrengthIndex(df.Close, rsiParams)
+            dataManager.dt["adi"] = adiResults.values[-1]
+            dataManager.dt["adx"] = adxResults.values[-1]
+            dataManager.dt["aroon" ]= aroonResults.values[-1]
+            dataManager.dt["atr"] = atrResults.values[-1]
+            dataManager.dt["obv"] = obvResults.values[-1]
+            dataManager.dt["stochrsi"] = stochRsiResults.values[-1]
+            dataManager.dt["bb"] = bbResults.values[-1]
+            dataManager.dt["rsi"] = rsiResults.values[-1]
+            dataManager.dt["aggregated"] = [np.asarray([rsiResults.values[-1], bbResults.values[-1], adiResults.values[-1], adxResults.values[-1], aroonResults.values[-1],
+                        atrResults.values[-1], obvResults.values[-1], stochRsiResults.values[-1]]).transpose()]
+            auxDt = investorDT.broker(dataManager)
+            auxDt = pd.concat([auxDt, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} DT Completed")
+
             # Random try
             aux = investorRandom.broker(dataManager)
             auxRandom = pd.concat([auxRandom, aux], ignore_index=True)
@@ -240,8 +315,8 @@ def main():
         dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
-        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxBbnn, auxRandom,
-                         auxBIA, auxWIA, auxCA, auxBaH, auxIdle], axis=1)
+        aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxBbnn, auxBbRsiClassnn, auxBbRsinn,
+                         auxDt, auxRandom, auxBIA, auxWIA, auxCA, auxBaH, auxIdle], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
@@ -254,6 +329,12 @@ def main():
         testCriteriaMACDSignal = pd.DataFrame(criteriaCalculator.calculateCriteria("macdSignal", investorMACDSignal.record), index=[j])
         testCriteriaBB = pd.DataFrame(criteriaCalculator.calculateCriteria("bb", investorBB.record), index=[j])
         testCriteriaBBNN = pd.DataFrame(criteriaCalculator.calculateCriteria("bbnn", investorBBNN.record), index=[j])
+        testCriteriaBBRSINNClass = pd.DataFrame(
+            criteriaCalculator.calculateCriteria("BBRSINNClass", investorBBRSINNClass.record), index=[j])
+        testCriteriaBBRSINN = pd.DataFrame(
+            criteriaCalculator.calculateCriteria("BBRSINNC", investorBBRSINN.record), index=[j])
+        testCriteriaDT = pd.DataFrame(
+            criteriaCalculator.calculateCriteria("DT", investorDT.record), index=[j])
         testCriteriaRandom = pd.DataFrame(criteriaCalculator.calculateCriteria("random", investorRandom.record), index=[j])
         testCriteriaBIA = pd.DataFrame(criteriaCalculator.calculateCriteria("bia", investorBIA.record),
                                           index=[j])
@@ -267,7 +348,8 @@ def main():
                                        index=[j])
         dfTestCriteriaAux = pd.concat(
             [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB, testCriteriaBBNN,
-             testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle])
+             testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle,
+             testCriteriaBBRSINNClass, testCriteriaBBRSINN,testCriteriaDT])
 
         # Plot test criteria
         title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
@@ -276,18 +358,22 @@ def main():
         dfTestCriteria = pd.concat([dfTestCriteria, dfTestCriteriaAux])
 
         # Plot the evolution per experiment
-        investorRSI.plotEvolution(rsiResults, df)
-        investorMACDGrad.plotEvolution(macdResults, df)
-        investorMACDZero.plotEvolution(macdResults, df)
-        investorMACDSignal.plotEvolution(macdResults, df)
-        investorBB.plotEvolution(bbResults, df)
-        investorBBNN.plotEvolution(bbResults, df)
-        investorRandom.plotEvolution(None, df)
-        investorBIA.plotEvolution(None, df)
-        investorWIA.plotEvolution(None, df)
-        investorCA.plotEvolution(None, df)
-        investorBaH.plotEvolution(None, df)
-        investorIdle.plotEvolution(None, df)
+        # investorRSI.plotEvolution(rsiResults, df)
+        # investorMACDGrad.plotEvolution(macdResults, df)
+        # investorMACDZero.plotEvolution(macdResults, df)
+        # investorMACDSignal.plotEvolution(macdResults, df)
+        # investorBB.plotEvolution(bbResults, df)
+        # investorBBNN.plotEvolution(bbResults, df)
+        # investorBBRSINNClass.plotEvolution({"bb":bbResults, "rsi":rsiResults}, df)
+        # investorBBRSINN.plotEvolution({"bb": bbResults, "rsi": rsiResults}, df)
+        # investorDT.plotEvolution({"bb": bbResults, "rsi": rsiResults, "adi": adiResults, "adx":adxResults, "aroon":aroonResults
+        #                           , "atr": atrResults, "obv": obvResults, "stochRsi":stochRsiResults}, df)
+        # investorRandom.plotEvolution(None, df)
+        # investorBIA.plotEvolution(None, df)
+        # investorWIA.plotEvolution(None, df)
+        # investorCA.plotEvolution(None, df)
+        # investorBaH.plotEvolution(None, df)
+        # investorIdle.plotEvolution(None, df)
 
     # Plot summary of test criteria
     result = criteriaCalculator.calculateCriteriaVariousExperiments(dfTestCriteria)

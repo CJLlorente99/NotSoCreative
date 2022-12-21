@@ -1,61 +1,65 @@
-import math
-from ta.volume import AccDistIndexIndicator
-from classes.investorParamsClass import ADIInvestorParams
-import numpy as np
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
 from classes.investorClass import Investor
+from classes.investorParamsClass import DTInvestorParams
+from DecisionFunction.decisionFunctionTree import DecisionFunctionTree
 from classes.dataClass import DataManager
 import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-
-class InvestorMACD(Investor):
-	def __init__(self, initialInvestment=10000, adiParams=None):
+class InvestorDecisionTree(Investor):
+	def __init__(self, initialInvestment=10000, decisionTreeParams: DTInvestorParams = None):
 		super().__init__(initialInvestment)
-		self.adiParams = adiParams
+		self.dtParams = decisionTreeParams
+		self.model = DecisionFunctionTree()
+		self.model.load(self.dtParams.filename)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
-		return pd.DataFrame(
-			{'adi': [data.adi["acc_dist_index"][-1]], 'moneyToInvestADI': [moneyInvestedToday],
-			 'moneyToSellADI': [moneySoldToday], 'investedMoneyADI': [self.investedMoney],
-			 'nonInvestedMoneyADI': [self.nonInvestedMoney]})
+	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
+		aux = pd.DataFrame()
+		for key in data.dt:
+			if key == "aggregated":
+				continue
+			aux = pd.concat([aux, pd.DataFrame({key: [data.dt[key]]})], axis=1)
+
+		return pd.concat([aux,pd.DataFrame(
+			{'moneyToInvestDT': [moneyInvestedToday], 'moneyToSellDT': [moneySoldToday],
+			 'investedMoneyDT': [self.investedMoney], 'nonInvestedMoneyDT': [self.nonInvestedMoney]})], axis=1)
 
 	def possiblyInvestTomorrow(self, data: DataManager):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPredictionADI(data.adi)
+		self.perToInvest = self.buyPrediction(data.dt)
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPredictionADI(data.adi)
+		self.perToSell = self.sellPrediction(data.dt)
 
-	def buyPredictionADI(self, adi):
+	def buyPrediction(self, data):
 		"""
-		Function that is used to predict next day buying behavior
-		:param adx: Dict with the values of the adx
+		Function that returns the money to be invested
+		:param bb: bollinger_pband() value
+		:return:
 		"""
-		params = self.adiParams
-		# Unpackage macdDict
-		acc_dist_index = adi["acc_dist_index"]
-
+		inputs = data["aggregated"]
+		y = self.model.predict(inputs)
+		if y > 0.5:
+			return (y - 0.5) *  2
 		return 0
 
-
-	def sellPredictionADI(self, adi):
+	def sellPrediction(self, data):
 		"""
-		Function that is used to predict next day selling behavior
-		:param adx: Dict with the values of the adx
+		Function that returns the money to be sold
+		:param bb: bollinger_pband() value
+		:return:
 		"""
-		params = self.adiParams
-		# Unpackage macdDict
-		acc_dist_index = adi["acc_dist_index"]
-
+		inputs = data["aggregated"]
+		y = self.model.predict(inputs)
+		if y < 0.5:
+			return -(y - 0.5) *  2
 		return 0
 
 	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
@@ -72,21 +76,24 @@ class InvestorMACD(Investor):
 		fig.add_trace(go.Scatter(name="Money Not Invested", x=self.record.index, y=self.record["moneyNotInvested"], stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using ADI " + self.macdParams.type + " (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using DT (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
 		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
+		fig = go.Figure()
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 		if recordPredictedValue is not None:
 			fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
 									 y=recordPredictedValue[0]), row=1, col=1,
 						  secondary_y=False)
-		fig.add_trace(go.Scatter(name="ADI " + self.macdParams.type, x=self.record.index,
-								 y=indicatorData["acc_dist_index"][-len(self.record.index):]), row=1, col=1,
-					  secondary_y=True)
+
+		for name in indicatorData:
+			fig.add_trace(go.Scatter(name=name, x=self.record.index,
+									 y=indicatorData[name][-len(self.record.index):]), row=1, col=1,
+						  secondary_y=True)
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
@@ -96,21 +103,6 @@ class InvestorMACD(Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under ADI " + self.macdParams.type + " (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under DT (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
 		fig.show()
-
-
-def accDistIndexIndicator(high, low, close, volume, params: ADIInvestorParams=None):
-	"""
-
-	:param values:
-	:param params:
-	:return:
-	"""
-	adi = AccDistIndexIndicator(high, low, close, volume, True)
-	return {"acc_dist_index" : adi.acc_dist_index()}
-
-
-
-

@@ -101,7 +101,7 @@ class InvestorMACD(Investor):
         fig.show()
 
 
-def on_balance_volume(close, volume, params: OBVInvestorParams):
+def on_balance_volume(close, volume, params: OBVInvestorParams =None):
     """
 
     :param values:

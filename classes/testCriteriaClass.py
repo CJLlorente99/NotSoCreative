@@ -191,9 +191,9 @@ class testCriteriaClass:
 		fig.add_trace(go.Bar(name="MBuying", x=dfResult["name"],
 								 y=dfResult["meanBuying"], marker_color="green"), row=2, col=1)
 		fig.add_trace(go.Bar(name="MSelling", x=dfResult["name"],
-								 y=-dfResult["meanSelling"], marker_color="red"), row=2, col=1)
+								 y=dfResult["meanSelling"], marker_color="red"), row=2, col=1)
 
-		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
+		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="group")
 
 		fig.show()
 

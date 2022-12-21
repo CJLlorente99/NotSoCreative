@@ -35,27 +35,27 @@ class InvestorMACD(Investor):
         """
         self.perToSell = self.sellPredictionATR(data.atr)
 
-	def buyPredictionATR(self, atr):
-		"""
-		Function that is used to predict next day buying behavior
-		:param adx: Dict with the values of the adx
-		"""
-		params = self.atrParams
-		# Unpackage macdDict
-		average_true_range = atr["average_true_range"]
+    def buyPredictionATR(self, atr):
+        """
+        Function that is used to predict next day buying behavior
+        :param adx: Dict with the values of the adx
+        """
+        params = self.atrParams
+        # Unpackage macdDict
+        average_true_range = atr["average_true_range"]
 
-		return 0
+        return 0
 
-	def sellPredictionATR(self, atr):
-		"""
-		Function that is used to predict next day selling behavior
-		:param adx: Dict with the values of the adx
-		"""
-		params = self.atrParams
-		# Unpackage macdDict
-		average_true_range = atr["average_true_range"]
+    def sellPredictionATR(self, atr):
+        """
+        Function that is used to predict next day selling behavior
+        :param adx: Dict with the values of the adx
+        """
+        params = self.atrParams
+        # Unpackage macdDict
+        average_true_range = atr["average_true_range"]
 
-		return 0
+        return 0
 
     def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
         """

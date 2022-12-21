@@ -148,6 +148,14 @@ class NNInvestorParams(InvestorParams):
     def __str__(self):
         return f'NN, File\nNN,{self.file}'
 
+class DTInvestorParams(InvestorParams):
+    def __init__(self, filename):
+        super().__init__()
+        self.filename = filename
+
+    def __str__(self):
+        return f'DT, filename\nNN,{self.filename}'
+
 
 # Useful classes
 class GradientQuarter:

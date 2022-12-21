@@ -108,11 +108,11 @@ class InvestorRSI(Investor):
         fig.show()
 
 
-def stochasticRSI(values, params: StochasticRSIInvestorParams):
+def stochasticRSI(close, params: StochasticRSIInvestorParams):
     """
     Function that calculates the RSI values
     :param values:
     :param params: StochRSI parameters
     """
-    stochRsi = ta.momentum.StochRSIIndicator(values, params.window, params.smooth1, params.smooth2, True)
+    stochRsi = ta.momentum.StochRSIIndicator(close, params.window, params.smooth1, params.smooth2, True)
     return {"stochrsi": stochRsi.stochrsi(), "k": stochRsi.stochrsi_k(), "d": stochRsi.stochrsi_d()}
