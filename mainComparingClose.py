@@ -11,7 +11,8 @@ from TAIndicators.obv import on_balance_volume
 from TAIndicators.stochasticRsi import stochasticRSI
 from DecisionFunction.investorNN import InvestorBBNN, InvestorBBRSINNClass, InvestorBBRSINN
 from DecisionFunction.investorDecisionTree import InvestorDecisionTree
-from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams
+from LSTM.investorLSTM import InvestorLSTM
+from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
 from Benchmarks.wia import InvestorWIA
@@ -20,9 +21,10 @@ from Benchmarks.bah import InvestorBaH
 from Benchmarks.idle import InvestorIdle
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
-from classes.testCriteriaClass import testCriteriaClass
+from classes.TestCriteriaClass import TestCriteriaClass
 import datetime as dt
 import numpy as np
+import ta
 
 
 def main():
@@ -30,7 +32,7 @@ def main():
     dataGetter = DataGetter()
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 1
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -134,6 +136,12 @@ def main():
         investorDT = InvestorDecisionTree(10000, dtParams)
         print("investorDT created")
 
+        # Create investor based on LSTM
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTM = InvestorLSTM(10000, lstmParams)
+        print("investorLSTM created")
+
         # Create investor Random
         investorRandom = InvestorRandom(10000)
         print("investorRandom created")
@@ -168,6 +176,7 @@ def main():
         auxBbRsiClassnn = pd.DataFrame()
         auxBbRsinn = pd.DataFrame()
         auxDt = pd.DataFrame()
+        auxLstm = pd.DataFrame()
         auxRandom = pd.DataFrame()
         auxBIA = pd.DataFrame()
         auxWIA = pd.DataFrame()
@@ -176,6 +185,7 @@ def main():
         auxIdle = pd.DataFrame()
         auxLoop = pd.DataFrame()
 
+        lstmValues = pd.DataFrame()
         # Run for loop as if days passed
         for i in range(nDays+1):
             dataManager.nDay = i
@@ -274,6 +284,16 @@ def main():
             auxDt = pd.concat([auxDt, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} DT Completed")
 
+            # LSTM try
+            yClass = investorLSTM.model.trainAndPredictClassification(df)
+            dataManager.lstm = {"return": investorLSTM.model.trainAndPredict(df)[0],
+                                "prob0": yClass[:, 0],
+                                "prob1": yClass[:, 1]}
+            lstmValues = pd.concat([lstmValues, pd.DataFrame(dataManager.lstm)], ignore_index=True)
+            auxLstm = investorLSTM.broker(dataManager)
+            auxLstm = pd.concat([auxLstm, aux], ignore_index=True)
+            print(f"Experiment {j} Day {i} LSTM Completed")
+
             # Random try
             aux = investorRandom.broker(dataManager)
             auxRandom = pd.concat([auxRandom, aux], ignore_index=True)
@@ -312,17 +332,17 @@ def main():
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
         # Reset day to have a different 2 weeks window
-        dataGetter.today += CDay(50, calendar=USFederalHolidayCalendar())
+        dataGetter.today += CDay(10, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, auxRsi, auxMacdGrad, auxMacdZero, auxMacdSignal, auxBb, auxBbnn, auxBbRsiClassnn, auxBbRsinn,
-                         auxDt, auxRandom, auxBIA, auxWIA, auxCA, auxBaH, auxIdle], axis=1)
+                         auxDt, auxLstm, auxRandom, auxBIA, auxWIA, auxCA, auxBaH, auxIdle], axis=1)
         advancedData = pd.concat([advancedData, aux])
 
         # Calculate summary results
         firstDate = investorRSI.record.index.values[0]
         letzteDate = investorRSI.record.index.values[-1]
-        criteriaCalculator = testCriteriaClass(firstDate, letzteDate)
+        criteriaCalculator = TestCriteriaClass(firstDate, letzteDate)
         testCriteriaRSI = pd.DataFrame(criteriaCalculator.calculateCriteria("rsi", investorRSI.record), index=[j])
         testCriteriaMACDGrad = pd.DataFrame(criteriaCalculator.calculateCriteria("macdGrad", investorMACDGrad.record), index=[j])
         testCriteriaMACDZero = pd.DataFrame(criteriaCalculator.calculateCriteria("macdZero", investorMACDZero.record), index=[j])
@@ -335,6 +355,8 @@ def main():
             criteriaCalculator.calculateCriteria("BBRSINNC", investorBBRSINN.record), index=[j])
         testCriteriaDT = pd.DataFrame(
             criteriaCalculator.calculateCriteria("DT", investorDT.record), index=[j])
+        testCriteriaLSTM = pd.DataFrame(
+            criteriaCalculator.calculateCriteria("LSTM", investorLSTM.record), index=[j])
         testCriteriaRandom = pd.DataFrame(criteriaCalculator.calculateCriteria("random", investorRandom.record), index=[j])
         testCriteriaBIA = pd.DataFrame(criteriaCalculator.calculateCriteria("bia", investorBIA.record),
                                           index=[j])
@@ -349,7 +371,7 @@ def main():
         dfTestCriteriaAux = pd.concat(
             [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB, testCriteriaBBNN,
              testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle,
-             testCriteriaBBRSINNClass, testCriteriaBBRSINN,testCriteriaDT])
+             testCriteriaBBRSINNClass, testCriteriaBBRSINN, testCriteriaDT, testCriteriaLSTM])
 
         # Plot test criteria
         title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
@@ -366,8 +388,9 @@ def main():
         # investorBBNN.plotEvolution(bbResults, df)
         # investorBBRSINNClass.plotEvolution({"bb":bbResults, "rsi":rsiResults}, df)
         # investorBBRSINN.plotEvolution({"bb": bbResults, "rsi": rsiResults}, df)
-        # investorDT.plotEvolution({"bb": bbResults, "rsi": rsiResults, "adi": adiResults, "adx":adxResults, "aroon":aroonResults
-        #                           , "atr": atrResults, "obv": obvResults, "stochRsi":stochRsiResults}, df)
+        investorDT.plotEvolution({"bb": bbResults, "rsi": rsiResults, "adi": adiResults, "adx":adxResults, "aroon":aroonResults
+                                  , "atr": atrResults, "obv": obvResults, "stochRsi":stochRsiResults}, df)
+        investorLSTM.plotEvolution(lstmValues, df)
         # investorRandom.plotEvolution(None, df)
         # investorBIA.plotEvolution(None, df)
         # investorWIA.plotEvolution(None, df)

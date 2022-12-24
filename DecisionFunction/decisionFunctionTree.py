@@ -4,6 +4,11 @@ from sklearn import tree
 import graphviz
 import pickle
 
+"""
+This script contains a class that represents a decision tree classifier that could be use as a decision function.
+This is, the inputs given to this model could be TI's/LSTM/Other
+"""
+
 class DecisionFunctionTree:
 	def __init__(self, max_depth=None, min_samples=None, criterion=None, predictors_list=None):
 		if max_depth and min_samples and criterion and predictors_list:
@@ -17,7 +22,6 @@ class DecisionFunctionTree:
 
 	def show(self):
 		dot_data = tree.export_graphviz(self.model, out_file=None,filled=True,feature_names=self.predictors_list)
-		print(dot_data)
 		graphviz.Source(dot_data).view()
 
 	def save(self, filename):

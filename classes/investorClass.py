@@ -12,12 +12,11 @@ class Investor(ABC):
         """
         Initialization function for the Investor class
         :param initialInvestment: Initial money to be invested
-        :param date: Day when the investment begins
         """
         self.initialInvestment = initialInvestment
         self.investedMoney = 0  # Value of money actually invested
         self.nonInvestedMoney = initialInvestment  # Value of money not currently invested
-        self.record = pd.DataFrame()
+        self.record = pd.DataFrame() # Record that is further use for the calculation of testCriteria (contains basic metrics)
         self.perToInvest = 0  # [0,1], being 1 = 100% of the non invested money
         self.perToSell = 0  # [0,1], being 1 = 100% of the invested money
 
@@ -25,17 +24,18 @@ class Investor(ABC):
     CONCRETE METHODS
     """
 
-    def broker(self, data: DataManager):
+    def broker(self, data: DataManager) -> pd.DataFrame:
         """
         Function that takes decisions on buy/sell/hold based on today's value and predicted value for tomorrow
         :param data: Decision data based on the type of indicator
+        :return dataFrame with the data relevant to the actual strategy used and actions taken out that day
         """
         # Update investedMoney value
         self.investedMoney *= data.actualStockValue / data.pastStockValue
 
         # Broker operation for today
         moneyInvested, moneySold = self.__investAndSellToday()
-        out1, out2 = self.perToInvest, self.perToSell
+        todayBuy, todaySell = self.perToInvest, self.perToSell
 
         # Update porfolio record
         aux = pd.DataFrame({"moneyInvested": self.investedMoney, "moneyNotInvested": self.nonInvestedMoney,
@@ -52,11 +52,12 @@ class Investor(ABC):
         # print(f'\nToday-> invest {out1}, sell {out2}')
         # print(f'Tomorrow-> invest {self.perToInvest}, sell {self.perToSell}')
 
-        return self.returnBrokerUpdate(out1, out2, data)
+        return self.returnBrokerUpdate(todayBuy, todaySell, data)
 
-    def __investAndSellToday(self):
+    def __investAndSellToday(self) -> (float, float):
         """
         This function performs the operation given by signals established the day before
+        :return tuple of float representing the money that has been finally bought and sold
         """
         # In one day, we should only be able to sell or buy (not both at the same time)
         if self.perToInvest > self.perToSell:
@@ -66,6 +67,8 @@ class Investor(ABC):
             self.perToSell -= self.perToInvest
             self.perToInvest = 0
 
+        # Calculate the money bought and sold depending on the actual nonInvested and Invested.
+        # Even though money Invested and money sold are returned, only one of those actually contains data
         moneyInvested = self.perToInvest * self.nonInvestedMoney
         self.investedMoney += self.perToInvest * self.nonInvestedMoney
         self.nonInvestedMoney -= self.perToInvest * self.nonInvestedMoney
@@ -81,28 +84,31 @@ class Investor(ABC):
     """
 
     @abstractmethod
-    def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+    def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data) -> pd.DataFrame:
         """
         Function prototype that should return a df
         :param moneyInvestedToday:
         :param moneySoldToday:
         :param data:
+        :return dataFrame with all the data important for proper debugging or further plotting after the operation
         """
         pass
 
     @abstractmethod
-    def possiblyInvestTomorrow(self, data: DataManager):
+    def possiblyInvestTomorrow(self, data: DataManager) -> float:
         """
         Function prototype that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
+        :return percentage of moneyNotInvested (between 0 and 1) that should be boght tomorrow
         """
         pass
 
     @abstractmethod
-    def possiblySellTomorrow(self, data: DataManager):
+    def possiblySellTomorrow(self, data: DataManager) -> float:
         """
         Function prototype that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
+        :return percentage of moneyInvested (between 0 and 1) that should be sold tomorrow
         """
         pass
 

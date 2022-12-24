@@ -4,6 +4,11 @@ from keras import metrics
 from keras.models import load_model
 import tensorflow as tf
 
+"""
+This file creates various classes that represent different NN to be possibly use as decision function.
+This is, the inputs could be the output of different TI's/LSTM/Other
+Two NN classes have been created, one for a value prediction decision and the other for a bi-classification game
+"""
 
 class NNDecisionFunction:
 	def __init__(self, nInputs=1):

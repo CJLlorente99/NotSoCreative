@@ -31,7 +31,7 @@ X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size=0
 
 decisionTree1 = DecisionFunctionTree(10, 6, "gini", ["RSI", "BB", "ADI", "ADX", "Aroon" ,"ATR", "OBV", "StochRSI"])
 decisionTree1.train(X_train, y_train)
-# decisionTree1.show()
+decisionTree1.show()
 decisionTree1.save("../data/dt")
 y = decisionTree1.predict_test(X_test, y_test, True)
 

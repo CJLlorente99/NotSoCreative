@@ -4,10 +4,9 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import numpy as np
-from pandas_datareader import data as pdr
 
 
-class testCriteriaClass:
+class TestCriteriaClass:
 	def __init__(self, firstDate, lastDate):
 		self.firstDate = firstDate
 		self.lastDate = lastDate
@@ -16,10 +15,7 @@ class testCriteriaClass:
 	def calculateRFR(self):
 		"""
 		This function calculates the Risk-Free Return using the treasury bills as a proxy.
-		:param firstDate:  First date from when data will be retrieved
-		:param lastDate:  Last date until when data will be retrieved
 		"""
-		yf.pdr_override()
 		dfTreasuryBills = yf.download("^IRX", pd.Timestamp(self.firstDate), pd.Timestamp(self.lastDate))
 		return dfTreasuryBills.iloc[-1]["Open"] - dfTreasuryBills.iloc[0]["Open"]
 
@@ -142,9 +138,15 @@ class testCriteriaClass:
 		return results
 
 	def plotCriteria(self, dfResult, title):
+		"""
+		This function plots the test criteria of all strategies belonging to one experiment.
+		:param dfResult: dataFrame that contains the record of a specific strategy
+		:param title: Title to be given to the whole figure (should identify uniquely the strategy)
+		"""
+		# Create one figure to show the first sets of test criteria
 		fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
 							subplot_titles=["MPV(StdPV)", "maxPV/minPV", "%Gain/AbsGain", "nOp",
-											"GainPerOp/max1Day/max1Day", "Treynor/Sharpe/Jensen"],
+											"Sharpe/Sortino", "Treynor/Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
 
@@ -155,32 +157,27 @@ class testCriteriaClass:
 		fig.add_trace(go.Bar(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"]), row=1, col=2)
 		fig.add_trace(go.Bar(name="minPV", x=dfResult["name"], y=dfResult["minPV"]), row=1, col=2)
 
-		fig.add_trace(go.Bar(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"]), row=1, col=3)
+		fig.add_trace(go.Bar(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"], visible="legendonly"), row=1, col=3)
 		fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3,
 					  secondary_y=True)
 
 		fig.add_trace(go.Bar(name="nOperation", x=dfResult["name"], y=dfResult["nOperation"]), row=2, col=1)
 
-		fig.add_trace(go.Bar(name="GainPerOperation", x=dfResult["name"],
-								 y=dfResult["GainPerOperation"]), row=2, col=2)
-		fig.add_trace(go.Bar(name="maxGainOneDay", x=dfResult["name"],
-								 y=dfResult["maxGainOneDay"]), row=2, col=2)
-		fig.add_trace(go.Bar(name="maxLossOneDay", x=dfResult["name"],
-								 y=dfResult["maxLossOneDay"]), row=2, col=2)
+		fig.add_trace(go.Bar(name="SharpeRatio", x=dfResult["name"],
+								 y=dfResult["SharpeRatio"]), row=2, col=2)
+		fig.add_trace(go.Bar(name="SortinoRatio", x=dfResult["name"],
+							 y=dfResult["SortinoRatio"]), row=2, col=2)
 
 		fig.add_trace(go.Bar(name="TreynorMeasure", x=dfResult["name"],
-								 y=dfResult["TreynorMeasure"]), row=2, col=3)
-		fig.add_trace(go.Bar(name="SharpeRatio", x=dfResult["name"],
-								 y=dfResult["SharpeRatio"]), row=2, col=3)
+							 y=dfResult["TreynorMeasure"]), row=2, col=3)
 		fig.add_trace(go.Bar(name="JensenMeasure", x=dfResult["name"],
 								 y=dfResult["JensenMeasure"]), row=2, col=3)
-		fig.add_trace(go.Bar(name="SortinoRatio", x=dfResult["name"],
-								 y=dfResult["SortinoRatio"]), row=2, col=3)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
 
 		fig.show()
 
+		# Create one figure showing the second set of test criteria
 		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.15, horizontal_spacing=0.04,
 							subplot_titles=["MNotInv/MInv", "MBuy/MSell"])
 
@@ -358,9 +355,14 @@ class testCriteriaClass:
 		return result
 
 	def plotCriteriaVariousExperiments(self, dfResult, title):
+		"""
+		Function used as a summary of all the experiments run in a given execution
+		:param dfResult: dataFrame that contains the summaty test criteria of all strategies used in a given script execution
+		:param title: Title to be given to the figure
+		"""
 		fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
-							subplot_titles=["MMPV", "MStdPV", "M%Gain-MAbsGain", "MnOp",
-											"MGainPerOp-Mmax1Day-Mmax1Day", "Treynor-Sharpe-Jensen"],
+							subplot_titles=["MMPV", "MStdPV", "M%Gain/MAbsGain", "MnOp",
+											"Sharpe/Sortino", "Treynor/Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
 
@@ -383,25 +385,16 @@ class testCriteriaClass:
 								 error_y=dict(type='data', array=dfResult["StdnOperation"].values, visible=True)),
 					  row=2, col=1)
 
-		fig.add_trace(go.Bar(name="MGainPerOperation", x=dfResult["name"], y=dfResult["MGainPerOperation"],
-								 error_y=dict(type='data', array=dfResult["StdGainPerOperation"].values, visible=True)),
-					  row=2, col=2)
-		fig.add_trace(go.Bar(name="MmaxGainOneDay", x=dfResult["name"], y=dfResult["MmaxGainOneDay"],
-								 error_y=dict(type='data', array=dfResult["StdmaxGainOneDay"].values, visible=True)),
-					  row=2, col=2)
-		fig.add_trace(go.Bar(name="MmaxLossOneDay", x=dfResult["name"], y=dfResult["MmaxLossOneDay"],
-								 error_y=dict(type='data', array=dfResult["StdmaxLossOneDay"].values, visible=True)),
-					  row=2, col=2)
-
-		fig.add_trace(go.Bar(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
-					  row=2, col=3)
 		fig.add_trace(go.Bar(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"]),
-					  row=2, col=3)
-		fig.add_trace(go.Bar(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
-					  row=2, col=3)
+					  row=2, col=2)
 		fig.add_trace(
 			go.Bar(name="MSortinoRatio", x=dfResult["name"], y=dfResult["MSortinoRatio"]),
-			row=2, col=3)
+			row=2, col=2)
+		fig.add_trace(go.Bar(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
+					  row=2, col=3)
+
+		fig.add_trace(go.Bar(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
+					  row=2, col=3)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
 

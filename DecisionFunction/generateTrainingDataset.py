@@ -18,10 +18,12 @@ import yfinance as yf
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 
-
+"""
+This script is used to create a training dataset used to train the different decision functions.
+"""
 
 def main():
-	nDays = 10000
+	nDays = 10000  #
 
 	# Get data
 	yf.pdr_override()

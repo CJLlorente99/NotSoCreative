@@ -1,9 +1,8 @@
 class InvestorParams:
     def __init__(self):
         """
-        Basic parent class inherited by all the other investor parameters classes
-        :param maxBuy: Maximum money to be invested in a single operation
-        :param maxSell: Maximum money to be sold in a single operation
+        Basic parent class inherited by all the other investor parameters classes.
+        All children classes should have an initializer method and a overriding of the __str__ method
         """
 
 
@@ -155,6 +154,15 @@ class DTInvestorParams(InvestorParams):
 
     def __str__(self):
         return f'DT, filename\nNN,{self.filename}'
+
+class LSTMInvestorParams(InvestorParams):
+    def __init__(self, filename, threshold):
+        super().__init__()
+        self.filename = filename
+        self.threshold = threshold
+
+    def __str__(self):
+        return f'LSTM, filename, threshold\nNN,{self.filename},{self.threshold}'
 
 
 # Useful classes
