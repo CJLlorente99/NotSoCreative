@@ -103,10 +103,11 @@ class InvestorMACD(Investor):
 
 def on_balance_volume(close, volume, params: OBVInvestorParams =None):
     """
-
-    :param values:
-    :param params:
-    :return:
+    Function that calculates the different returns for the OBV indicator
+    :param close: Market close
+    :param volume: Market volume
+    :param params: Parameters for the indicator calculation (None)
+    :return: dict with the following keys ["on_balance_volume"]
     """
     obv = OnBalanceVolumeIndicator(close, volume, True)
     return {"on_balance_volume" : obv.on_balance_volume()}

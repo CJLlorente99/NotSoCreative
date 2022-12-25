@@ -110,9 +110,10 @@ class InvestorRSI(Investor):
 
 def stochasticRSI(close, params: StochasticRSIInvestorParams):
     """
-    Function that calculates the RSI values
-    :param values:
+    Function that calculates the stochastic RSI values
+    :param close: Market close value
     :param params: StochRSI parameters
+    :return dict with the following keys ["stochrsi", "k", "d"]
     """
     stochRsi = ta.momentum.StochRSIIndicator(close, params.window, params.smooth1, params.smooth2, True)
     return {"stochrsi": stochRsi.stochrsi(), "k": stochRsi.stochrsi_k(), "d": stochRsi.stochrsi_d()}

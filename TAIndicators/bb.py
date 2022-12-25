@@ -137,7 +137,7 @@ def bollingerBands(values, params: BBInvestorParams):
     Function that calcualtes the bollinger bands
     :param values: Open or Close value from the stock market series
     :param params: BB investor parameters
-    :return: Dictionary with all the relevant features of the BB
+    :return: dict with the following keys ["pband", "mavg", "hband", "lband"]
     """
     bb = BollingerBands(values, params.window, params.stdDev, fillna=True)
     return {"pband": bb.bollinger_pband(), "mavg": bb.bollinger_mavg(), "hband": bb.bollinger_hband(), "lband": bb.bollinger_lband()}

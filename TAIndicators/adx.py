@@ -109,10 +109,12 @@ class InvestorMACD(Investor):
 
 def averageDirectionalMovementIndex(high, low, close, params: ADXInvestorParams):
 	"""
-
-	:param values:
-	:param params:
-	:return:
+	Function that returns the ADX values
+	:param high: Market high value
+	:param low: Market low value
+	:param close: Market close value
+	:param params: Parameters for the ADX indicator (only window)
+	:return: dict with the following keys ["adx", "adx_neg", "adx_pos"]
 	"""
 	adx = ADXIndicator(high, low, close, params.window, True)
 	return {"adx" : adx.adx(), "adx_neg" : adx.adx_neg(), "adx_pos": adx.adx_pos()}

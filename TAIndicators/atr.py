@@ -102,10 +102,12 @@ class InvestorMACD(Investor):
 
 def averageTrueRange(high, low, close, params: ATRInvestorParams):
     """
-
-    :param values:
-    :param params:
-    :return:
+    Function that returns the values for ATR indicator
+    :param high: Market high value
+    :param low: Market low value
+    :param close: Market close value
+    :param params: Parameters to be used for the indicator calculation (window)
+    :return: dict with the following keys ["average_true_range"]
     """
     obv = AverageTrueRange(high, low, close, params.window, True)
     return {"average_true_range" : obv.average_true_range()}

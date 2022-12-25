@@ -197,14 +197,14 @@ class InvestorMACD(Investor):
         fig.show()
 
 
-def movingAverageConvergenceDivergence(values, params: MACDInvestorParams):
+def movingAverageConvergenceDivergence(close, params: MACDInvestorParams):
     """
-
-    :param values:
-    :param params:
-    :return:
+    Function that calculates the different returns of the MACD indicator
+    :param close: Close market values
+    :param params: Parameters to be used for the indicator calculation (fastWindow, slowWindow, signal)
+    :return: dict with the following keys ["macd", "signal"]
     """
-    macd = MACD(values, params.fastWindow, params.slowWindow, params.signal, True)
+    macd = MACD(close, params.fastWindow, params.slowWindow, params.signal, True)
     return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
 
 

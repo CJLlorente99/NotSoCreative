@@ -148,7 +148,7 @@ class TestCriteriaClass:
 							subplot_titles=["MPV(StdPV)", "maxPV/minPV", "%Gain/AbsGain", "nOp",
 											"Sharpe/Sortino", "Treynor/Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
 
 		fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"],
 								 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
@@ -166,7 +166,7 @@ class TestCriteriaClass:
 		fig.add_trace(go.Bar(name="SharpeRatio", x=dfResult["name"],
 								 y=dfResult["SharpeRatio"]), row=2, col=2)
 		fig.add_trace(go.Bar(name="SortinoRatio", x=dfResult["name"],
-							 y=dfResult["SortinoRatio"]), row=2, col=2)
+							 y=dfResult["SortinoRatio"]), row=2, col=2, secondary_y=True)
 
 		fig.add_trace(go.Bar(name="TreynorMeasure", x=dfResult["name"],
 							 y=dfResult["TreynorMeasure"]), row=2, col=3)
@@ -364,7 +364,7 @@ class TestCriteriaClass:
 							subplot_titles=["MMPV", "MStdPV", "M%Gain/MAbsGain", "MnOp",
 											"Sharpe/Sortino", "Treynor/Jensen"],
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-								   [{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]])
+								   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
 
 		fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"],
 								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
@@ -389,7 +389,7 @@ class TestCriteriaClass:
 					  row=2, col=2)
 		fig.add_trace(
 			go.Bar(name="MSortinoRatio", x=dfResult["name"], y=dfResult["MSortinoRatio"]),
-			row=2, col=2)
+			row=2, col=2, secondary_y=True)
 		fig.add_trace(go.Bar(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
 					  row=2, col=3)
 

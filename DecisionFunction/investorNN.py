@@ -188,7 +188,6 @@ class InvestorBBRSINNClass(Investor):
 		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
-		fig = go.Figure()
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 		if recordPredictedValue is not None:
 			fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
@@ -196,7 +195,7 @@ class InvestorBBRSINNClass(Investor):
 						  secondary_y=False)
 
 		fig.add_trace(go.Scatter(name="RSI", x=self.record.index,
-								 y=rsiData[-len(self.record.index):]), row=1, col=1,
+								 y=rsiData["rsi"][-len(self.record.index):]), row=1, col=1,
 					  secondary_y=True)
 		fig.add_trace(go.Scatter(name="BB PBand", x=self.record.index,
 								 y=bbData["pband"][-len(self.record.index):]), row=1, col=1,
@@ -306,7 +305,7 @@ class InvestorBBRSINN(Investor):
 						  secondary_y=False)
 
 		fig.add_trace(go.Scatter(name="RSI", x=self.record.index,
-								 y=rsiData[-len(self.record.index):]), row=1, col=1,
+								 y=rsiData["rsi"][-len(self.record.index):]), row=1, col=1,
 					  secondary_y=True)
 		fig.add_trace(go.Scatter(name="BB PBand", x=self.record.index,
 								 y=bbData["pband"][-len(self.record.index):]), row=1, col=1,

@@ -103,7 +103,7 @@ class InvestorRSI(Investor):
                                      y=recordPredictedValue[0]), row=1, col=1,
                           secondary_y=False)
         fig.add_trace(
-            go.Scatter(name="RSI", x=self.record.index, y=indicatorData[-len(self.record.index):]), row=1,
+            go.Scatter(name="RSI", x=self.record.index, y=indicatorData["rsi"][-len(self.record.index):]), row=1,
             col=1, secondary_y=True)
         fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
@@ -124,6 +124,7 @@ def relativeStrengthIndex(values, params: RSIInvestorParams):
     Function that calculates the RSI values
     :param values:
     :param params: RSI parameters
+    :return dict with the following keys ["rsi"]
     """
     rsi = ta.momentum.RSIIndicator(values, params.window, True)
-    return rsi.rsi()
+    return {"rsi": rsi.rsi()}

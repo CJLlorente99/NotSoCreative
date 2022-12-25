@@ -109,10 +109,10 @@ class InvestorMACD(Investor):
 
 def aroon(close, params: AroonInvestorParams):
 	"""
-
-	:param values:
-	:param params:
-	:return:
+	Function that returns the different values related to the Aroon Indicator
+	:param close: market close value
+	:param params: Parameters to be used for the indicator calculation (window)
+	:return: dict with the following keys ["aroon_indicator", "aroon_down", "aroon_up"]
 	"""
 	aroon = AroonIndicator(close, params.window, True)
 	return {"aroon_indicator" : aroon.aroon_indicator(), "aroon_down" : aroon.aroon_down(), "aroon_up": aroon.aroon_up()}

@@ -10,7 +10,7 @@ from classes.dataClass import DataManager
 import pandas as pd
 
 
-class InvestorMACD(Investor):
+class InvestorADI(Investor):
 	def __init__(self, initialInvestment=10000, adiParams=None):
 		super().__init__(initialInvestment)
 		self.adiParams = adiParams
@@ -103,10 +103,13 @@ class InvestorMACD(Investor):
 
 def accDistIndexIndicator(high, low, close, volume, params: ADIInvestorParams=None):
 	"""
-
-	:param values:
-	:param params:
-	:return:
+	Function that returns the ADI values
+	:param high: Market high value
+	:param low: Market low value
+	:param close: Market close value
+	:param volume: Market volume value
+	:param params: Possible ADI params, not used now
+	:return: dict with only ["acc_dist_index"] as keys
 	"""
 	adi = AccDistIndexIndicator(high, low, close, volume, True)
 	return {"acc_dist_index" : adi.acc_dist_index()}

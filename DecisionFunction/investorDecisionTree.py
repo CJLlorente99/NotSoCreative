@@ -87,8 +87,9 @@ class InvestorDecisionTree(Investor):
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 
 		for name in indicatorData:
+			key = list(indicatorData[name].keys())[0]
 			fig.add_trace(go.Scatter(name=name, x=self.record.index,
-									 y=indicatorData[name][-len(self.record.index):], visible='legendonly'), row=1, col=1,
+									 y=indicatorData[name][key][-len(self.record.index):], visible='legendonly'), row=1, col=1,
 						  secondary_y=True)
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)

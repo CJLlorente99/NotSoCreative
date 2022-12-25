@@ -203,7 +203,7 @@ def main():
 
             # RSI try
             rsiResults = relativeStrengthIndex(df.Close, rsiParams)
-            dataManager.rsi = rsiResults[-1]
+            dataManager.rsi = rsiResults["rsi"][-1]
             aux = investorRSI.broker(dataManager)
             auxRsi = pd.concat([auxRsi, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} RSI Completed")
@@ -247,7 +247,7 @@ def main():
             bbResults = bollingerBands(df.Close, bbParams)
             rsiResults = relativeStrengthIndex(df.Close, rsiParams)
             dataManager.bb = bbResults["pband"][-2:]
-            dataManager.rsi = rsiResults[-2:]
+            dataManager.rsi = rsiResults["rsi"][-2:]
             auxBbRsiClassnn = investorBBRSINNClass.broker(dataManager)
             auxBbRsiClassnn = pd.concat([auxBbRsiClassnn, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} BBRSINNClass Completed")
@@ -256,43 +256,43 @@ def main():
             bbResults = bollingerBands(df.Close, bbParams)
             rsiResults = relativeStrengthIndex(df.Close, rsiParams)
             dataManager.bb = bbResults["pband"][-2:]
-            dataManager.rsi = rsiResults [-2:]
+            dataManager.rsi = rsiResults ["rsi"][-2:]
             auxBbRsinn = investorBBRSINN.broker(dataManager)
             auxBbRsinn = pd.concat([auxBbRsinn, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} BBRSINN Completed")
 
             # Dt Try
-            adiResults = accDistIndexIndicator(df.High, df.Low, df.Close, df.Volume)["acc_dist_index"]
-            adxResults = averageDirectionalMovementIndex(df.High, df.Low, df.Close, adxParams)["adx"]
-            aroonResults = aroon(df.Close, aroonParams)["aroon_indicator"]
-            atrResults = averageTrueRange(df.High, df.Low, df.Close, atrParams)["average_true_range"]
-            obvResults = on_balance_volume(df.Close, df.Volume)["on_balance_volume"]
-            stochRsiResults = stochasticRSI(df.Close, stochParams)["stochrsi"]
-            bbResults = bollingerBands(df.Close, bbParams)["pband"]
+            adiResults = accDistIndexIndicator(df.High, df.Low, df.Close, df.Volume)
+            adxResults = averageDirectionalMovementIndex(df.High, df.Low, df.Close, adxParams)
+            aroonResults = aroon(df.Close, aroonParams)
+            atrResults = averageTrueRange(df.High, df.Low, df.Close, atrParams)
+            obvResults = on_balance_volume(df.Close, df.Volume)
+            stochRsiResults = stochasticRSI(df.Close, stochParams)
+            bbResults = bollingerBands(df.Close, bbParams)
             rsiResults = relativeStrengthIndex(df.Close, rsiParams)
-            dataManager.dt["adi"] = adiResults.values[-1]
-            dataManager.dt["adx"] = adxResults.values[-1]
-            dataManager.dt["aroon" ]= aroonResults.values[-1]
-            dataManager.dt["atr"] = atrResults.values[-1]
-            dataManager.dt["obv"] = obvResults.values[-1]
-            dataManager.dt["stochrsi"] = stochRsiResults.values[-1]
-            dataManager.dt["bb"] = bbResults.values[-1]
-            dataManager.dt["rsi"] = rsiResults.values[-1]
-            dataManager.dt["aggregated"] = [np.asarray([rsiResults.values[-1], bbResults.values[-1], adiResults.values[-1], adxResults.values[-1], aroonResults.values[-1],
-                        atrResults.values[-1], obvResults.values[-1], stochRsiResults.values[-1]]).transpose()]
+            dataManager.dt["adi"] = adiAux = adiResults["acc_dist_index"].values[-1]
+            dataManager.dt["adx"] = adxAux = adxResults["adx"].values[-1]
+            dataManager.dt["aroon"] = aroonAux = aroonResults["aroon_indicator"].values[-1]
+            dataManager.dt["atr"] = atrAux = atrResults["average_true_range"].values[-1]
+            dataManager.dt["obv"] = obvAux = obvResults["on_balance_volume"].values[-1]
+            dataManager.dt["stochrsi"] = stochRsiAux = stochRsiResults["stochrsi"].values[-1]
+            dataManager.dt["bb"] = bbAux = bbResults["pband"].values[-1]
+            dataManager.dt["rsi"] = rsiAux = rsiResults["rsi"].values[-1]
+            dataManager.dt["aggregated"] = [np.asarray([rsiAux, bbAux, adiAux, adxAux, aroonAux,
+                        atrAux, obvAux, stochRsiAux]).transpose()]
             auxDt = investorDT.broker(dataManager)
             auxDt = pd.concat([auxDt, aux], ignore_index=True)
             print(f"Experiment {j} Day {i} DT Completed")
 
             # LSTM try
-            yClass = investorLSTM.model.trainAndPredictClassification(df)
-            dataManager.lstm = {"return": investorLSTM.model.trainAndPredict(df)[0],
-                                "prob0": yClass[:, 0],
-                                "prob1": yClass[:, 1]}
-            lstmValues = pd.concat([lstmValues, pd.DataFrame(dataManager.lstm)], ignore_index=True)
-            auxLstm = investorLSTM.broker(dataManager)
-            auxLstm = pd.concat([auxLstm, aux], ignore_index=True)
-            print(f"Experiment {j} Day {i} LSTM Completed")
+            # yClass = investorLSTM.model.trainAndPredictClassification(df)
+            # dataManager.lstm = {"return": investorLSTM.model.trainAndPredict(df)[0],
+            #                     "prob0": yClass[:, 0],
+            #                     "prob1": yClass[:, 1]}
+            # lstmValues = pd.concat([lstmValues, pd.DataFrame(dataManager.lstm)], ignore_index=True)
+            # auxLstm = investorLSTM.broker(dataManager)
+            # auxLstm = pd.concat([auxLstm, aux], ignore_index=True)
+            # print(f"Experiment {j} Day {i} LSTM Completed")
 
             # Random try
             aux = investorRandom.broker(dataManager)
@@ -355,8 +355,8 @@ def main():
             criteriaCalculator.calculateCriteria("BBRSINNC", investorBBRSINN.record), index=[j])
         testCriteriaDT = pd.DataFrame(
             criteriaCalculator.calculateCriteria("DT", investorDT.record), index=[j])
-        testCriteriaLSTM = pd.DataFrame(
-            criteriaCalculator.calculateCriteria("LSTM", investorLSTM.record), index=[j])
+        # testCriteriaLSTM = pd.DataFrame(
+        #     criteriaCalculator.calculateCriteria("LSTM", investorLSTM.record), index=[j])
         testCriteriaRandom = pd.DataFrame(criteriaCalculator.calculateCriteria("random", investorRandom.record), index=[j])
         testCriteriaBIA = pd.DataFrame(criteriaCalculator.calculateCriteria("bia", investorBIA.record),
                                           index=[j])
@@ -371,7 +371,7 @@ def main():
         dfTestCriteriaAux = pd.concat(
             [testCriteriaRSI, testCriteriaMACDGrad, testCriteriaMACDZero, testCriteriaMACDSignal, testCriteriaBB, testCriteriaBBNN,
              testCriteriaRandom, testCriteriaBIA, testCriteriaWIA, testCriteriaCA, testCriteriaBaH, testCriteriaIdle,
-             testCriteriaBBRSINNClass, testCriteriaBBRSINN, testCriteriaDT, testCriteriaLSTM])
+             testCriteriaBBRSINNClass, testCriteriaBBRSINN, testCriteriaDT])
 
         # Plot test criteria
         title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
@@ -380,23 +380,23 @@ def main():
         dfTestCriteria = pd.concat([dfTestCriteria, dfTestCriteriaAux])
 
         # Plot the evolution per experiment
-        # investorRSI.plotEvolution(rsiResults, df)
-        # investorMACDGrad.plotEvolution(macdResults, df)
-        # investorMACDZero.plotEvolution(macdResults, df)
-        # investorMACDSignal.plotEvolution(macdResults, df)
-        # investorBB.plotEvolution(bbResults, df)
-        # investorBBNN.plotEvolution(bbResults, df)
-        # investorBBRSINNClass.plotEvolution({"bb":bbResults, "rsi":rsiResults}, df)
-        # investorBBRSINN.plotEvolution({"bb": bbResults, "rsi": rsiResults}, df)
+        investorRSI.plotEvolution(rsiResults, df)
+        investorMACDGrad.plotEvolution(macdResults, df)
+        investorMACDZero.plotEvolution(macdResults, df)
+        investorMACDSignal.plotEvolution(macdResults, df)
+        investorBB.plotEvolution(bbResults, df)
+        investorBBNN.plotEvolution(bbResults, df)
+        investorBBRSINNClass.plotEvolution({"bb":bbResults, "rsi":rsiResults}, df)
+        investorBBRSINN.plotEvolution({"bb": bbResults, "rsi": rsiResults}, df)
         investorDT.plotEvolution({"bb": bbResults, "rsi": rsiResults, "adi": adiResults, "adx":adxResults, "aroon":aroonResults
                                   , "atr": atrResults, "obv": obvResults, "stochRsi":stochRsiResults}, df)
-        investorLSTM.plotEvolution(lstmValues, df)
-        # investorRandom.plotEvolution(None, df)
-        # investorBIA.plotEvolution(None, df)
-        # investorWIA.plotEvolution(None, df)
-        # investorCA.plotEvolution(None, df)
-        # investorBaH.plotEvolution(None, df)
-        # investorIdle.plotEvolution(None, df)
+        # investorLSTM.plotEvolution(lstmValues, df)
+        investorRandom.plotEvolution(None, df)
+        investorBIA.plotEvolution(None, df)
+        investorWIA.plotEvolution(None, df)
+        investorCA.plotEvolution(None, df)
+        investorBaH.plotEvolution(None, df)
+        investorIdle.plotEvolution(None, df)
 
     # Plot summary of test criteria
     result = criteriaCalculator.calculateCriteriaVariousExperiments(dfTestCriteria)

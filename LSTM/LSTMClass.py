@@ -8,6 +8,10 @@ import numpy as np
 from keras.utils import to_categorical
 from keras.backend import clear_session
 
+"""
+This file contains a class that abstracts the LSTM network
+"""
+
 class LSTMClass:
 	def __init__(self):
 		self.data = pd.DataFrame()

@@ -23,7 +23,7 @@ dfStochRSI = df.stochasticRsi
 dfOutput = df.output
 
 """
-Decision tree based on 
+Decision tree based on RSI, BB, ADI, ADX, Aroon, ATR, OBV, StochRSI
 """
 inputs = np.asarray([dfRSI.values[:-1], dfBB.values[:-1], dfADI.values[:-1], dfADX.values[:-1], dfAroon.values[:-1], dfATR.values[:-1], dfOBV.values[:-1], dfStochRSI.values[:-1]]).transpose()
 outputs = dfOutput.values[1:]

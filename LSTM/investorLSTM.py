@@ -37,7 +37,7 @@ class InvestorLSTM(Investor):
 	def buyPrediction(self, data):
 		"""
 		Function that returns the money to be invested
-		:param bb: bollinger_pband() value
+		:param data: predicted return value by LSTM
 		:return:
 		"""
 		if data > self.lstmParams.threshold:
@@ -47,7 +47,7 @@ class InvestorLSTM(Investor):
 	def sellPrediction(self, data):
 		"""
 		Function that returns the money to be sold
-		:param bb: bollinger_pband() value
+		:param data: predicted return value by LSTM
 		:return:
 		"""
 		if data < -self.lstmParams.threshold:
