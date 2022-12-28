@@ -1,7 +1,6 @@
 from classes.investorClass import Investor
 from classes.investorParamsClass import LSTMInvestorParams
 from LSTM.LSTMClass import LSTMClass
-from classes.dataClass import DataManager
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -14,20 +13,20 @@ class InvestorLSTMThreshold(Investor):
 		self.lstmParams = lstmParams
 		self.model = LSTMClass()
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
+	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
 		return pd.DataFrame(
 			{"lstmReturn": data["lstm"]["return"], "lstmProb0": data["lstm"]["prob0"], "lstmProb1": data["lstm"]["prob1"],
 			 'moneyToInvestLSTM': moneyInvestedToday, 'moneyToSellLSTM': moneySoldToday,
 			 'investedMoneyLSTM': self.investedMoney, 'nonInvestedMoneyLSTM': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data: DataManager):
+	def possiblyInvestTomorrow(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = self.buyPrediction(data["lstm"]["return"][0])
 
-	def possiblySellTomorrow(self, data: DataManager):
+	def possiblySellTomorrow(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
@@ -80,7 +79,7 @@ class InvestorLSTMThreshold(Investor):
 		fig.add_trace(go.Scatter(name="lstmPredictedReturn", x=self.record.index,
 								 y=expData["lstmReturn"][-len(self.record.index):]), row=1, col=1,
 					  secondary_y=True)
-		realReturn = np.log(stockMarketData.Open.shift(+1)[-len(self.record.index):]) - np.log(stockMarketData.Open[-len(self.record.index):])
+		realReturn = np.log(stockMarketData.Open.shift(-1)[-len(self.record.index):]) - np.log(stockMarketData.Open[-len(self.record.index):])
 		fig.add_trace(go.Scatter(name="realReturn", x=self.record.index, y=realReturn[-len(self.record.index):]), row=1, col=1, secondary_y=True)
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
@@ -108,20 +107,20 @@ class InvestorLSTMProb(Investor):
 		self.lstmParams = lstmParams
 		self.model = LSTMClass()
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
+	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
 		return pd.DataFrame(
 			{"lstmReturn": data["lstm"]["return"], "lstmProb0": data["lstm"]["prob0"], "lstmProb1": data["lstm"]["prob1"],
 			 'moneyToInvestLSTM': moneyInvestedToday, 'moneyToSellLSTM': moneySoldToday,
 			 'investedMoneyLSTM': self.investedMoney, 'nonInvestedMoneyLSTM': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data: DataManager):
+	def possiblyInvestTomorrow(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = self.buyPrediction(data["lstm"]["return"][0], data["lstm"]["prob1"][0])
 
-	def possiblySellTomorrow(self, data: DataManager):
+	def possiblySellTomorrow(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
@@ -135,6 +134,7 @@ class InvestorLSTMProb(Investor):
 		:return:
 		"""
 		if data > 0:
+			print(data*probBuy)
 			return data * probBuy
 		return 0
 
@@ -145,7 +145,8 @@ class InvestorLSTMProb(Investor):
 		:return:
 		"""
 		if data < 0:
-			return data * probSell
+			print(-data*probSell)
+			return -data * probSell
 		return 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
@@ -174,7 +175,7 @@ class InvestorLSTMProb(Investor):
 		fig.add_trace(go.Scatter(name="lstmPredictedReturn", x=self.record.index,
 								 y=expData["lstmReturn"][-len(self.record.index):]), row=1, col=1,
 					  secondary_y=True)
-		realReturn = np.log(stockMarketData.Open[-len(self.record.index):].shift(+1)) - np.log(stockMarketData.Open[-len(self.record.index):])
+		realReturn = np.log(stockMarketData.Open[-len(self.record.index):].shift(-1)) - np.log(stockMarketData.Open[-len(self.record.index):])
 		fig.add_trace(go.Scatter(name="realReturn", x=self.record.index, y=realReturn[-len(self.record.index):]), row=1, col=1, secondary_y=True)
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)

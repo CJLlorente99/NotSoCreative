@@ -1,5 +1,4 @@
 from classes.investorClass import Investor
-from classes.dataClass import DataManager
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -12,20 +11,20 @@ class InvestorWIA(Investor):
 	def __init__(self, initialInvestment=10000):
 		super().__init__(initialInvestment)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
+	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
 		return pd.DataFrame(
 			{'nextStockValue': [data["nextStockValueOpen"]], 'actualStockValue': [data["actualStockValue"]],
 			 'moneyToInvestWIA': [moneyInvestedToday], 'moneyToSellWIA': [moneySoldToday],
 			 'investedMoneyWIA': [self.investedMoney], 'nonInvestedMoneyWIA': [self.nonInvestedMoney]})
 
-	def possiblyInvestTomorrow(self, data: DataManager):
+	def possiblyInvestTomorrow(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = self.buyPredictionWIA(data["nextStockValueOpen"], data["nextnextStockValueOpen"], data["actualStockValue"])
 
-	def possiblySellTomorrow(self, data: DataManager):
+	def possiblySellTomorrow(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator

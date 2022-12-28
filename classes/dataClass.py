@@ -1,35 +1,8 @@
 from datetime import datetime
-import pandas_datareader as web
 import pandas as pd
 import yfinance as yf
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
-
-
-class DataManager:
-    def __init__(self):
-        """
-        Initialization function for DataManager. This function is used as a common wrapper for info used during
-        broker activity.
-        """
-        self.pastStockValue = 0
-        self.actualStockValue = 0
-        self.nextStockValue = 0
-        self.nextnextStockValueOpen = 0
-        self.nextStockValueOpen = 0
-        self.date = datetime.today()
-        self.rsi = 0
-        self.stochrsi = 0
-        self.adx = 0
-        self.aroon = 0
-        self.obv = 0
-        self.atr = 0
-        self.adi = 0
-        self.macd = None
-        self.bb = None
-        self.nDay = 0
-        self.dt = {}
-        self.lstm = {}
 
 
 class DataGetter:
@@ -39,7 +12,6 @@ class DataGetter:
         """
         Initialization function for the DataGetter. This class is supposed to be used as intermediary to get new data
         """
-        yf.pdr_override()
         self.ticker = "^GSPC"
         # define US business days
         us_bus = CDay(calendar=USFederalHolidayCalendar())

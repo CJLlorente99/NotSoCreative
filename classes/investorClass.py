@@ -1,5 +1,4 @@
 import pandas as pd
-from dataClass import DataManager
 from abc import ABC, abstractmethod
 
 
@@ -95,7 +94,7 @@ class Investor(ABC):
         pass
 
     @abstractmethod
-    def possiblyInvestTomorrow(self, data: DataManager) -> float:
+    def possiblyInvestTomorrow(self, data) -> float:
         """
         Function prototype that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
@@ -104,7 +103,7 @@ class Investor(ABC):
         pass
 
     @abstractmethod
-    def possiblySellTomorrow(self, data: DataManager) -> float:
+    def possiblySellTomorrow(self, data) -> float:
         """
         Function prototype that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
@@ -113,7 +112,7 @@ class Investor(ABC):
         pass
 
     @abstractmethod
-    def plotEvolution(self, stockMarketData, recordPredictedValue=None):
+    def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
         Function prototype that plots the actual status of the investor investment as well as the decisions that
         have been made

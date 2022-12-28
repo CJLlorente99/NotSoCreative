@@ -1,9 +1,7 @@
 import numpy as np
-
 from classes.investorClass import Investor
 from classes.investorParamsClass import DTInvestorParams
 from DecisionFunction.decisionFunctionTree import DecisionFunctionTree
-from classes.dataClass import DataManager
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -15,7 +13,7 @@ class InvestorDecisionTree(Investor):
 		self.model = DecisionFunctionTree()
 		self.model.load(self.dtParams.filename)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
+	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
 		aux = pd.DataFrame()
 		for indicator in self.dtParams.orderedListArguments:
 			aux = pd.concat([aux, pd.DataFrame({indicator: data[indicator]}, index=[0])], axis=1)
@@ -24,14 +22,14 @@ class InvestorDecisionTree(Investor):
 			{'moneyToInvestDT': moneyInvestedToday, 'moneyToSellDT': moneySoldToday,
 			 'investedMoneyDT': self.investedMoney, 'nonInvestedMoneyDT': self.nonInvestedMoney}, index=[0])], axis=1)
 
-	def possiblyInvestTomorrow(self, data: DataManager):
+	def possiblyInvestTomorrow(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = self.buyPrediction(data)
 
-	def possiblySellTomorrow(self, data: DataManager):
+	def possiblySellTomorrow(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator

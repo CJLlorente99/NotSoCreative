@@ -1,5 +1,4 @@
 import pandas as pd
-from dataClass import DataManager
 from classes.investorClass import Investor
 from numpy import random
 import plotly.graph_objects as go
@@ -19,7 +18,7 @@ class InvestorRandom(Investor):
 			{'moneyToInvestRandom': [moneyInvestedToday], 'moneyToSellRandom': [moneySoldToday],
 			 'investedMoneyRandom': [self.investedMoney], 'nonInvestedMoneyRandom': [self.nonInvestedMoney]})
 
-	def possiblyInvestTomorrow(self, data: DataManager):
+	def possiblyInvestTomorrow(self, data):
 		"""
 		Function prototype that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
@@ -29,7 +28,7 @@ class InvestorRandom(Investor):
 		else:
 			self.perToInvest = 0
 
-	def possiblySellTomorrow(self, data: DataManager):
+	def possiblySellTomorrow(self, data):
 		"""
 		Function prototype that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator

@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import math
 from classes.investorClass import Investor
-from classes.dataClass import DataManager
 import pandas as pd
 
 
@@ -19,14 +18,14 @@ class InvestorRSI(Investor):
                 {'rsi': data["rsirsi"], 'moneyToInvestRSI': moneyInvestedToday, 'moneyToSellRSI': moneySoldToday,
                  'investedMoneyRSI': self.investedMoney, 'nonInvestedMoneyRSI': self.nonInvestedMoney}, index=[0])
 
-    def possiblyInvestTomorrow(self, data: DataManager):
+    def possiblyInvestTomorrow(self, data):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
         self.perToInvest = self.buyPredictionRSI(data["rsirsi"])
 
-    def possiblySellTomorrow(self, data: DataManager):
+    def possiblySellTomorrow(self, data):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator

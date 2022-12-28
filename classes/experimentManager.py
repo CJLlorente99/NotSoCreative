@@ -1,6 +1,5 @@
 import pandas as pd
 from investorClass import Investor
-from dataClass import DataManager
 from TAIndicators.adi import accDistIndexIndicator
 from TAIndicators.adx import averageDirectionalMovementIndex
 from TAIndicators.aroon import aroon

@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 from classes.investorClass import Investor
-from classes.dataClass import DataManager
 import pandas as pd
 from DecisionFunction.decisionFunctionNN import NNDecisionFunction
 
@@ -20,14 +19,14 @@ class InvestorBB(Investor):
             {'bb': data["bbpband"], 'moneyToInvestBB': moneyInvestedToday, 'moneyToSellBB': moneySoldToday,
              'investedMoneyBB': self.investedMoney, 'nonInvestedMoneyBB': self.nonInvestedMoney}, index=[0])
 
-    def possiblyInvestTomorrow(self, data: DataManager):
+    def possiblyInvestTomorrow(self, data):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
         self.perToInvest = self.buyPredictionBB(data["bbpband"])
 
-    def possiblySellTomorrow(self, data: DataManager):
+    def possiblySellTomorrow(self, data):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator

@@ -1,12 +1,11 @@
 import math
-from ta.trend import MACD
-from classes.investorParamsClass import MACDInvestorParams
+from ta.trend import MACD, EMAIndicator
+from classes.investorParamsClass import MACDInvestorParams, MAInvestorParams
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 from classes.investorClass import Investor
-from classes.dataClass import DataManager
 import pandas as pd
 
 
@@ -32,14 +31,14 @@ class InvestorMACD(Investor):
                  'investedMoneyMACD' + self.macdParams.type: self.investedMoney,
                  'nonInvestedMoneyMACD' + self.macdParams.type: self.nonInvestedMoney}, index=[0])
 
-    def possiblyInvestTomorrow(self, data: DataManager):
+    def possiblyInvestTomorrow(self, data):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
         firstGradient, secondGradient, self.perToInvest = self.buyPredictionMACD(data["macdmacd"], data["macdsignal"])
 
-    def possiblySellTomorrow(self, data: DataManager):
+    def possiblySellTomorrow(self, data):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
@@ -209,6 +208,10 @@ def movingAverageConvergenceDivergence(close, params: MACDInvestorParams):
     """
     macd = MACD(close, params.fastWindow, params.slowWindow, params.signal, True)
     return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
+
+def exponentialMovingAverage(close, params: MAInvestorParams):
+    ema = EMAIndicator(close, params.window, True)
+    return {"ema" : ema.ema_indicator()}
 
 
 
