@@ -1,3 +1,5 @@
+import numpy as np
+
 from classes.investorClass import Investor
 from classes.investorParamsClass import DTInvestorParams
 from DecisionFunction.decisionFunctionTree import DecisionFunctionTree
@@ -15,28 +17,26 @@ class InvestorDecisionTree(Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		aux = pd.DataFrame()
-		for key in data.dt:
-			if key == "aggregated":
-				continue
-			aux = pd.concat([aux, pd.DataFrame({key: [data.dt[key]]})], axis=1)
+		for indicator in self.dtParams.orderedListArguments:
+			aux = pd.concat([aux, pd.DataFrame({indicator: data[indicator]}, index=[0])], axis=1)
 
-		return pd.concat([aux,pd.DataFrame(
-			{'moneyToInvestDT': [moneyInvestedToday], 'moneyToSellDT': [moneySoldToday],
-			 'investedMoneyDT': [self.investedMoney], 'nonInvestedMoneyDT': [self.nonInvestedMoney]})], axis=1)
+		return pd.concat([aux, pd.DataFrame(
+			{'moneyToInvestDT': moneyInvestedToday, 'moneyToSellDT': moneySoldToday,
+			 'investedMoneyDT': self.investedMoney, 'nonInvestedMoneyDT': self.nonInvestedMoney}, index=[0])], axis=1)
 
 	def possiblyInvestTomorrow(self, data: DataManager):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPrediction(data.dt)
+		self.perToInvest = self.buyPrediction(data)
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPrediction(data.dt)
+		self.perToSell = self.sellPrediction(data)
 
 	def buyPrediction(self, data):
 		"""
@@ -44,8 +44,11 @@ class InvestorDecisionTree(Investor):
 		:param bb: bollinger_pband() value
 		:return:
 		"""
-		inputs = data["aggregated"]
-		y = self.model.predict(inputs)
+		agg = []
+		for indicator in self.dtParams.orderedListArguments:
+			agg.append(data[indicator])
+		agg = np.asarray(agg).transpose()
+		y = self.model.predict(agg)
 		if y > 0.5:
 			return (y - 0.5) *  2
 		return 0
@@ -56,13 +59,16 @@ class InvestorDecisionTree(Investor):
 		:param bb: bollinger_pband() value
 		:return:
 		"""
-		inputs = data["aggregated"]
-		y = self.model.predict(inputs)
+		agg = []
+		for indicator in self.dtParams.orderedListArguments:
+			agg.append(data[indicator])
+		agg = np.asarray(agg).transpose()
+		y = self.model.predict(agg)
 		if y < 0.5:
 			return -(y - 0.5) *  2
 		return 0
 
-	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
 		Function that plots the actual status of the investor investment as well as the decisions that have been made
 		:param indicatorData: Data belonging to the indicator used to take decisions
@@ -83,13 +89,11 @@ class InvestorDecisionTree(Investor):
 		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
-		fig = go.Figure()
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 
-		for name in indicatorData:
-			key = list(indicatorData[name].keys())[0]
-			fig.add_trace(go.Scatter(name=name, x=self.record.index,
-									 y=indicatorData[name][key][-len(self.record.index):], visible='legendonly'), row=1, col=1,
+		for indicator in self.dtParams.orderedListArguments:
+			fig.add_trace(go.Scatter(name=indicator, x=self.record.index,
+									 y=expData[indicator][-len(self.record.index):], visible='legendonly'), row=1, col=1,
 						  secondary_y=True)
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)

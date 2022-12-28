@@ -16,7 +16,7 @@ class InvestorRSI(Investor):
 
     def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
         return pd.DataFrame(
-                {'stochrsi': [data.stochrsi], 'moneyToInvestStochRSI': [moneyInvestedToday], 'moneyToSellStochRSI': [moneySoldToday],
+                {'stochrsi': [data["stochrsistochrsi"]], 'moneyToInvestStochRSI': [moneyInvestedToday], 'moneyToSellStochRSI': [moneySoldToday],
                  'investedMoneyStochRSI': [self.investedMoney], 'nonInvestedMoneyStochRSI': [self.nonInvestedMoney]})
 
     def possiblyInvestTomorrow(self, data: DataManager):
@@ -24,14 +24,14 @@ class InvestorRSI(Investor):
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToInvest = self.buyPredictionStochRSI(data.stochrsi)
+        self.perToInvest = self.buyPredictionStochRSI(data["stochrsistochrsi"])
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionStochRSI(data.stochrsi)
+        self.perToSell = self.sellPredictionStochRSI(data["stochrsistochrsi"])
 
     def buyPredictionStochRSI(self, stochrsi):
         """
@@ -40,8 +40,8 @@ class InvestorRSI(Investor):
         """
         params = self.stochasticRSIparams
 
-        if stochrsi["stochrsi"] < params.lowerBound:  # Buy linearly then with factor f
-            return math.tanh(params.a * (params.lowerBound - stochrsi["stochrsi"]) ** params.b)
+        if stochrsi < params.lowerBound:  # Buy linearly then with factor f
+            return math.tanh(params.a * (params.lowerBound - stochrsi) ** params.b)
         else:
             return 0
 
@@ -51,8 +51,8 @@ class InvestorRSI(Investor):
         :param stochrsi: stochrsi value for today
         """
         params = self.stochasticRSIparams
-        if stochrsi["stochrsi"] > params.upperBound:  # Buy linearly then with factor f
-            return math.tanh(params.a * (stochrsi["stochrsi"] - params.upperBound) ** params.b)
+        if stochrsi > params.upperBound:  # Buy linearly then with factor f
+            return math.tanh(params.a * (stochrsi - params.upperBound) ** params.b)
         else:
             return 0
 

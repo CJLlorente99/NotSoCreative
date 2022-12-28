@@ -17,7 +17,7 @@ class InvestorMACD(Investor):
 
     def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
         return pd.DataFrame(
-            {'obv': [data.obv["on_balance_volume"][-1]], 'moneyToInvestOBV': [moneyInvestedToday],
+            {'obv': [data["obvon_balance_volume"][-1]], 'moneyToInvestOBV': [moneyInvestedToday],
              'moneyToSellOBV': [moneySoldToday], 'investedMoneyOBV': [self.investedMoney],
              'nonInvestedMoneyOBV': [self.nonInvestedMoney]})
 
@@ -26,24 +26,20 @@ class InvestorMACD(Investor):
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToInvest = self.buyPredictionOBV(data.obv)
+        self.perToInvest = self.buyPredictionOBV(data["obvon_balance_volume"])
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionOBV(data.obv)
+        self.perToSell = self.sellPredictionOBV(data["obvon_balance_volume"])
 
     def buyPredictionOBV(self, obv):
         """
         Function that is used to predict next day buying behavior
         :param adx: Dict with the values of the adx
         """
-        params = self.obvParams
-        # Unpackage macdDict
-        on_balance_volume = obv["on_balance_volume"]
-
         return 0
 
 
@@ -52,9 +48,6 @@ class InvestorMACD(Investor):
         Function that is used to predict next day selling behavior
         :param adx: Dict with the values of the adx
         """
-        params = self.obvParams
-        # Unpackage macdDict
-        on_balance_volume = obv["on_balance_volume"]
 
         return 0
 

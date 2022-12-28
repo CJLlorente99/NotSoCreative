@@ -16,22 +16,22 @@ class InvestorRSI(Investor):
 
     def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
         return pd.DataFrame(
-                {'rsi': [data.rsi], 'moneyToInvestRSI': [moneyInvestedToday], 'moneyToSellRSI': [moneySoldToday],
-                 'investedMoneyRSI': [self.investedMoney], 'nonInvestedMoneyRSI': [self.nonInvestedMoney]})
+                {'rsi': data["rsirsi"], 'moneyToInvestRSI': moneyInvestedToday, 'moneyToSellRSI': moneySoldToday,
+                 'investedMoneyRSI': self.investedMoney, 'nonInvestedMoneyRSI': self.nonInvestedMoney}, index=[0])
 
     def possiblyInvestTomorrow(self, data: DataManager):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToInvest = self.buyPredictionRSI(data.rsi)
+        self.perToInvest = self.buyPredictionRSI(data["rsirsi"])
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionRSI(data.rsi)
+        self.perToSell = self.sellPredictionRSI(data["rsirsi"])
 
     def buyPredictionRSI(self, rsi):
         """
@@ -75,7 +75,7 @@ class InvestorRSI(Investor):
                           yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
         fig.show()
 
-    def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+    def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
         Function that plots the actual status of the investor investment as well as the decisions that have been made
         :param indicatorData: Data belonging to the indicator used to take decisions
@@ -96,14 +96,13 @@ class InvestorRSI(Investor):
         fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
-        fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
         if recordPredictedValue is not None:
             fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
                                      y=recordPredictedValue[0]), row=1, col=1,
                           secondary_y=False)
         fig.add_trace(
-            go.Scatter(name="RSI", x=self.record.index, y=indicatorData["rsi"][-len(self.record.index):]), row=1,
+            go.Scatter(name="RSI", x=self.record.index, y=expData["rsi"][-len(self.record.index):]), row=1,
             col=1, secondary_y=True)
         fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
@@ -119,12 +118,12 @@ class InvestorRSI(Investor):
         fig.show()
 
 
-def relativeStrengthIndex(values, params: RSIInvestorParams):
+def relativeStrengthIndex(close, params: RSIInvestorParams):
     """
     Function that calculates the RSI values
-    :param values:
+    :param close:
     :param params: RSI parameters
     :return dict with the following keys ["rsi"]
     """
-    rsi = ta.momentum.RSIIndicator(values, params.window, True)
+    rsi = ta.momentum.RSIIndicator(close, params.window, True)
     return {"rsi": rsi.rsi()}

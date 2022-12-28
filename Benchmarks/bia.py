@@ -14,7 +14,7 @@ class InvestorBIA(Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		return pd.DataFrame(
-			{'nextStockValue': [data.nextStockValue], 'actualStockValue': [data.actualStockValue],
+			{'nextStockValue': [data["nextStockValueOpen"]], 'actualStockValue': [data["actualStockValue"]],
 			 'moneyToInvestBIA': [moneyInvestedToday], 'moneyToSellBIA': [moneySoldToday],
 			 'investedMoneyBIA': [self.investedMoney], 'nonInvestedMoneyBIA': [self.nonInvestedMoney]})
 
@@ -23,14 +23,14 @@ class InvestorBIA(Investor):
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPredictionBIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
+		self.perToInvest = self.buyPredictionBIA(data["nextStockValueOpen"], data["nextnextStockValueOpen"], data["actualStockValue"])
 
 	def possiblySellTomorrow(self, data: DataManager):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPredictionBIA(data.nextStockValueOpen, data.nextnextStockValueOpen, data.actualStockValue)
+		self.perToSell = self.sellPredictionBIA(data["nextStockValueOpen"], data["nextnextStockValueOpen"], data["actualStockValue"])
 
 	def buyPredictionBIA(self, nextStockValueOpen, nextnextStockValueOpen, actualStockValueOpen):
 		if nextnextStockValueOpen > nextStockValueOpen:
@@ -44,7 +44,7 @@ class InvestorBIA(Investor):
 		else:
 			return 0
 
-	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
 		Function that plots the actual status of the investor investment as well as the decisions that have been made
 		:param stockMarketData: df with the stock market data

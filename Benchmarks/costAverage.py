@@ -14,7 +14,7 @@ class InvestorCA(Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		return pd.DataFrame(
-			{'nextStockValue': [data.nextStockValue], 'actualStockValue': [data.actualStockValue],
+			{'actualStockValue': [data["actualStockValue"]],
 			 'moneyToInvestCA': [moneyInvestedToday], 'moneyToSellCA': [moneySoldToday],
 			 'investedMoneyCA': [self.investedMoney], 'nonInvestedMoneyCA': [self.nonInvestedMoney]})
 
@@ -33,14 +33,14 @@ class InvestorCA(Investor):
 		self.perToSell = self.sellPredictionCA()
 
 	def buyPredictionCA(self, data: DataManager):
-		if 1 - data.nDay * self.dailyWindow > 0:
-			return self.dailyWindow / (1 - data.nDay * self.dailyWindow)
+		if 1 - data["nDay"] * self.dailyWindow > 0:
+			return self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
 		return 0
 
 	def sellPredictionCA(self):
 		return 0
 
-	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
 		Function that plots the actual status of the investor investment as well as the decisions that have been made
 		:param stockMarketData: df with the stock market data

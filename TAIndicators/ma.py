@@ -16,37 +16,43 @@ class InvestorMACD(Investor):
         self.macdParams = macdParams
 
     def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
-        return pd.DataFrame(
-            {'macd' + self.macdParams.type: [data.macd["macd"][-1]],
-             'moneyToInvestMACD' + self.macdParams.type: [moneyInvestedToday],
-             'moneyToSellMACD' + self.macdParams.type: [moneySoldToday],
-             'investedMoneyMACD' + self.macdParams.type: [self.investedMoney],
-             'nonInvestedMoneyMACD' + self.macdParams.type: [self.nonInvestedMoney]})
+        if self.macdParams.type == "grad":
+            return pd.DataFrame(
+                {'macd' + self.macdParams.type + "macd": data["macdmacd"][-1],
+                 'moneyToInvestMACD' + self.macdParams.type: moneyInvestedToday,
+                 'moneyToSellMACD' + self.macdParams.type: moneySoldToday,
+                 'investedMoneyMACD' + self.macdParams.type: self.investedMoney,
+                 'nonInvestedMoneyMACD' + self.macdParams.type: self.nonInvestedMoney}, index=[0])
+        else:
+            return pd.DataFrame(
+                {'macd' + self.macdParams.type + "macd": data["macdmacd"][-1],
+                 'macd' + self.macdParams.type + "signal": data["macdsignal"][-1],
+                 'moneyToInvestMACD' + self.macdParams.type: moneyInvestedToday,
+                 'moneyToSellMACD' + self.macdParams.type: moneySoldToday,
+                 'investedMoneyMACD' + self.macdParams.type: self.investedMoney,
+                 'nonInvestedMoneyMACD' + self.macdParams.type: self.nonInvestedMoney}, index=[0])
 
     def possiblyInvestTomorrow(self, data: DataManager):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        firstGradient, secondGradient, self.perToInvest = self.buyPredictionMACD(data.macd)
+        firstGradient, secondGradient, self.perToInvest = self.buyPredictionMACD(data["macdmacd"], data["macdsignal"])
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionMACD(data.macd)
+        self.perToSell = self.sellPredictionMACD(data["macdmacd"], data["macdsignal"])
 
-    def buyPredictionMACD(self, macdDict):
+    def buyPredictionMACD(self, macd, signal):
         """
         Function that is used to predict next day buying behavior
         :param macdDict: Dict with the values of the MACD (signal and macd)
         :param params: MACD params
         """
         params = self.macdParams
-        # Unpackage macdDict
-        macd = macdDict["macd"]
-        signal = macdDict["signal"]
         type = params.type
 
         # Calculate gradients of the macd value
@@ -73,16 +79,13 @@ class InvestorMACD(Investor):
                 return firstGradient, secondGradient, math.tanh(params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
             return firstGradient, secondGradient, 0
 
-    def sellPredictionMACD(self, macdDict):
+    def sellPredictionMACD(self, macd, signal):
         """
         Function that is used to predict next day selling behavior
         :param macdDict: Dict with the values of the MACD (signal and macd)
         :param params: MACD params
         """
         params = self.macdParams
-        # Unpackage macdDict
-        macd = macdDict["macd"]
-        signal = macdDict["signal"]
         type = params.type
 
         # Calculate gradients of the macd value
@@ -150,7 +153,7 @@ class InvestorMACD(Investor):
                               yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
         fig.show()
 
-    def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+    def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
         Function that plots the actual status of the investor investment as well as the decisions that have been made
         :param indicatorData: Data belonging to the indicator used to take decisions
@@ -171,18 +174,18 @@ class InvestorMACD(Investor):
         fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
-        fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
         if recordPredictedValue is not None:
             fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
                                      y=recordPredictedValue[0]), row=1, col=1,
                           secondary_y=False)
         fig.add_trace(go.Scatter(name="MACD " + self.macdParams.type, x=self.record.index,
-                                 y=indicatorData["macd"][-len(self.record.index):]), row=1, col=1,
+                                 y=expData['macd' + self.macdParams.type + "macd"][-len(self.record.index):]), row=1, col=1,
                       secondary_y=True)
-        fig.add_trace(go.Scatter(name="MACD " + self.macdParams.type + " Signal", x=self.record.index,
-                                 y=indicatorData["signal"][-len(self.record.index):]), row=1, col=1,
-                          secondary_y=True)
+        if self.macdParams.type != "grad":
+            fig.add_trace(go.Scatter(name="MACD " + self.macdParams.type + " Signal", x=self.record.index,
+                                     y=expData['macd' + self.macdParams.type + "signal"][-len(self.record.index):]), row=1, col=1,
+                              secondary_y=True)
         fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
         fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,

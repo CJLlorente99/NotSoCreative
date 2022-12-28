@@ -41,7 +41,7 @@ class InvestorRandom(Investor):
 		else:
 			self.perToSell = 0
 
-	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
@@ -56,7 +56,6 @@ class InvestorRandom(Investor):
 		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
-		fig = go.Figure()
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 		if recordPredictedValue is not None:
 			fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,

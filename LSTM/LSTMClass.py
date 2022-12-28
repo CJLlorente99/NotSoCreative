@@ -109,13 +109,13 @@ class LSTMClass:
 
 		# Change nr of inputs
 		lstm_input = Input(shape=(backcandles, len(list)), name='lstm_input')
-		inputs = LSTM(150, name='first_layer')(lstm_input)
-		inputs = Dense(1, name='dense_layer')(inputs)
+		inputs = LSTM(100, name='first_layer')(lstm_input)
+		inputs = Dense(20, name='second_layer')(inputs)
+		inputs = Dense(10, name='dense_layer')(inputs)
 		output = Dense(2, name='softmax', activation='softmax')(inputs)
 		self.model = Model(inputs=lstm_input, outputs=output)
 		adam = optimizers.Adam()
 		self.model.compile(optimizer=adam, loss='mse')
-		# self.model.compile(optimizer=tf.keras.optimizers.Adam(), loss='categorical_crossentropy', metrics=['accuracy'])
 		self.model.fit(x=X_train, y=y_train, batch_size=15, epochs=40, shuffle=True, validation_split=0)
 
 		result = self.model.predict(X_test)

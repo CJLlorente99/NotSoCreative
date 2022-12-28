@@ -17,22 +17,22 @@ class InvestorBB(Investor):
 
     def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
         return pd.DataFrame(
-            {'bb': [data.bb], 'moneyToInvestBB': [moneyInvestedToday], 'moneyToSellBB': [moneySoldToday],
-             'investedMoneyBB': [self.investedMoney], 'nonInvestedMoneyBB': [self.nonInvestedMoney]})
+            {'bb': data["bbpband"], 'moneyToInvestBB': moneyInvestedToday, 'moneyToSellBB': moneySoldToday,
+             'investedMoneyBB': self.investedMoney, 'nonInvestedMoneyBB': self.nonInvestedMoney}, index=[0])
 
     def possiblyInvestTomorrow(self, data: DataManager):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToInvest = self.buyPredictionBB(data.bb[-1])
+        self.perToInvest = self.buyPredictionBB(data["bbpband"])
 
     def possiblySellTomorrow(self, data: DataManager):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionBB(data.bb[-1])
+        self.perToSell = self.sellPredictionBB(data["bbpband"])
 
     def buyPredictionBB(self, bb):
         """
@@ -78,7 +78,7 @@ class InvestorBB(Investor):
                           yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
         fig.show()
 
-    def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+    def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
         Function that plots the actual status of the investor investment as well as the decisions that have been made
         :param indicatorData: Data belonging to the indicator used to take decisions
@@ -99,7 +99,6 @@ class InvestorBB(Investor):
         fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
-        fig = go.Figure()
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
         if recordPredictedValue is not None:
             fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
@@ -107,17 +106,8 @@ class InvestorBB(Investor):
                           secondary_y=False)
 
         fig.add_trace(go.Scatter(name="BB PBand", x=self.record.index,
-                                 y=indicatorData["pband"][-len(self.record.index):]), row=1, col=1,
+                                 y=expData["bb"][-len(self.record.index):]), row=1, col=1,
                       secondary_y=True)
-        fig.add_trace(go.Scatter(name="BB HBand", x=self.record.index,
-                                 y=indicatorData["hband"][-len(self.record.index):], line = dict(color='black', width=2, dash='dash')), row=1, col=1,
-                      secondary_y=False)
-        fig.add_trace(go.Scatter(name="BB LBand", x=self.record.index,
-                                 y=indicatorData["lband"][-len(self.record.index):], line = dict(color='black', width=2, dash='dash')), row=1, col=1,
-                      secondary_y=False)
-        fig.add_trace(go.Scatter(name="BB MAvg", x=self.record.index,
-                                 y=indicatorData["mavg"][-len(self.record.index):], line = dict(color='black', width=2, dash='dot')), row=1, col=1,
-                      secondary_y=False)
         fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
         fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
@@ -132,13 +122,13 @@ class InvestorBB(Investor):
         fig.show()
 
 
-def bollingerBands(values, params: BBInvestorParams):
+def bollingerBands(close, params: BBInvestorParams):
     """
     Function that calcualtes the bollinger bands
     :param values: Open or Close value from the stock market series
     :param params: BB investor parameters
     :return: dict with the following keys ["pband", "mavg", "hband", "lband"]
     """
-    bb = BollingerBands(values, params.window, params.stdDev, fillna=True)
+    bb = BollingerBands(close, params.window, params.stdDev, fillna=True)
     return {"pband": bb.bollinger_pband(), "mavg": bb.bollinger_mavg(), "hband": bb.bollinger_hband(), "lband": bb.bollinger_lband()}
 

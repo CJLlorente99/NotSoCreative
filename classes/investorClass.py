@@ -24,14 +24,14 @@ class Investor(ABC):
     CONCRETE METHODS
     """
 
-    def broker(self, data: DataManager) -> pd.DataFrame:
+    def broker(self, data) -> pd.DataFrame:
         """
         Function that takes decisions on buy/sell/hold based on today's value and predicted value for tomorrow
         :param data: Decision data based on the type of indicator
         :return dataFrame with the data relevant to the actual strategy used and actions taken out that day
         """
         # Update investedMoney value
-        self.investedMoney *= data.actualStockValue / data.pastStockValue
+        self.investedMoney *= data["actualStockValue"] / data["pastStockValue"]
 
         # Broker operation for today
         moneyInvested, moneySold = self.__investAndSellToday()
@@ -40,7 +40,7 @@ class Investor(ABC):
         # Update porfolio record
         aux = pd.DataFrame({"moneyInvested": self.investedMoney, "moneyNotInvested": self.nonInvestedMoney,
                             "moneyInvestedToday": moneyInvested, "moneySoldToday": moneySold,
-                            "totalValue": (self.investedMoney + self.nonInvestedMoney), "openValue": data.actualStockValue}, index=[data.date])
+                            "totalValue": (self.investedMoney + self.nonInvestedMoney), "openValue": data["actualStockValue"]}, index=[data["date"]])
         self.record = pd.concat([self.record, aux])
 
         # print(f'Date: {data.date}, moneyInvested {self.investedMoney}, moneyNonInvested {self.nonInvestedMoney}, actualInvestmentValue {self.record["totalValue"].iloc[-1]}')
@@ -49,7 +49,7 @@ class Investor(ABC):
         self.possiblySellTomorrow(data)
         self.possiblyInvestTomorrow(data)
 
-        # print(f'\nToday-> invest {out1}, sell {out2}')
+        # print(f'\nToday-> invest {todayBuy}, sell {todaySell}')
         # print(f'Tomorrow-> invest {self.perToInvest}, sell {self.perToSell}')
 
         return self.returnBrokerUpdate(todayBuy, todaySell, data)
@@ -113,7 +113,7 @@ class Investor(ABC):
         pass
 
     @abstractmethod
-    def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+    def plotEvolution(self, stockMarketData, recordPredictedValue=None):
         """
         Function prototype that plots the actual status of the investor investment as well as the decisions that
         have been made

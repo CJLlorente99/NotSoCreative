@@ -148,9 +148,10 @@ class NNInvestorParams(InvestorParams):
         return f'NN, File\nNN,{self.file}'
 
 class DTInvestorParams(InvestorParams):
-    def __init__(self, filename):
+    def __init__(self, filename, orderedListArguments):
         super().__init__()
         self.filename = filename
+        self.orderedListArguments = orderedListArguments
 
     def __str__(self):
         return f'DT, filename\nNN,{self.filename}'

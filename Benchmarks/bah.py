@@ -14,7 +14,7 @@ class InvestorBaH(Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data: DataManager):
 		return pd.DataFrame(
-			{'nextStockValue': [data.nextStockValue], 'actualStockValue': [data.actualStockValue],
+			{'actualStockValue': [data["actualStockValue"]],
 			 'moneyToInvestBaH': [moneyInvestedToday], 'moneyToSellBaH': [moneySoldToday],
 			 'investedMoneyBaH': [self.investedMoney], 'nonInvestedMoneyBaH': [self.nonInvestedMoney]})
 
@@ -39,7 +39,7 @@ class InvestorBaH(Investor):
 	def sellPredictionBaH(self):
 		return 0
 
-	def plotEvolution(self, indicatorData, stockMarketData, recordPredictedValue=None):
+	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
 		Function that plots the actual status of the investor investment as well as the decisions that have been made
 		:param stockMarketData: df with the stock market data
