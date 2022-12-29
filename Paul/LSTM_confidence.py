@@ -50,13 +50,12 @@ def Bi_LSTM(n_inputs, n_features):
     # history = model.fit
     return model
 
-
-def prepare_data(data_set_scaled, backcandles, list, splitlimit):
+def prepare_data(data_set_scaled, backcandles, liste, splitlimit):
     X = []
-    for j in range(len(list)):  # data_set_scaled[0].size):#2 columns are target not X
+    for j in range(len(liste)):  # data_set_scaled[0].size):#2 columns are target not X
         X.append([])
         for i in range(backcandles, data_set_scaled.shape[0]):  # backcandles+2
-            X[j].append(data_set_scaled[i - backcandles:i, list[j]])
+            X[j].append(data_set_scaled[i - backcandles:i, liste[j]])
 
     # move axis from 0 to position 2
     X = np.moveaxis(X, [0], [2])
