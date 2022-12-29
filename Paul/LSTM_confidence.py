@@ -190,7 +190,7 @@ def main():
     print('test', y_test.shape)
 
     # train and predict
-    n_members = 100
+    n_members = 20
     epochs = 50
     batch_size = 10
     ensemble, y_pred_scale = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
