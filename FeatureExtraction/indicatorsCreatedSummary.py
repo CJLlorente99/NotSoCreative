@@ -3,7 +3,7 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
-file = "data.json"
+file = "dataLog.json"
 
 with open(file) as f:
 	jsonData = json.load(f)
