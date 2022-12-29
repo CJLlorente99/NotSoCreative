@@ -62,7 +62,7 @@ print("Schluss ADI")
 
 print("Anfang ADX")
 
-windows = np.unique(random.randint(1, 51, 30))
+windows = np.unique(random.randint(1, 51, 5))
 
 i = 0
 for window in windows:
@@ -95,7 +95,7 @@ print("Schluss ADX")
 
 print("Anfang Aroon")
 
-windows = np.unique(random.randint(1, 51, 30))
+windows = np.unique(random.randint(1, 51, 5))
 
 i = 0
 for window in windows:
@@ -131,7 +131,7 @@ print("Schluss Aroon")
 
 print("Anfang ATR")
 
-windows = np.unique(random.randint(1, 51, 30))
+windows = np.unique(random.randint(1, 51, 5))
 
 i = 0
 for window in windows:
@@ -159,7 +159,7 @@ print("Schluss ATR")
 
 print("Anfang BB")
 
-n = 50
+n = 10
 windows = random.randint(1, 51, n)
 stdDevs = random.uniform(0.5, 4, n)
 X = [windows, stdDevs]
@@ -206,7 +206,7 @@ print("Schluss BB")
 
 print("Anfang MACD")
 
-n = 100
+n = 20
 fastWindows = random.randint(1, 20, n)
 slowWindows = random.randint(5, 51, n)
 signals = random.randint(1, 51, n)
@@ -251,7 +251,7 @@ print("Schluss MACD")
 
 print("Anfang EMA")
 
-windows = np.unique(random.randint(1, 101, 50))
+windows = np.unique(random.randint(1, 101, 10))
 
 i = 0
 for window in windows:
@@ -295,7 +295,7 @@ print("Schluss OBV")
 
 print("Anfang RSI")
 
-windows = np.unique(random.randint(1, 51, 30))
+windows = np.unique(random.randint(1, 51, 5))
 
 i = 0
 for window in windows:
@@ -323,7 +323,7 @@ print("Schluss RSI")
 
 print("Anfang SRSI")
 
-n = 100
+n = 20
 windows = random.randint(1, 51, n)
 smooth1s = random.randint(1, 51, n)
 smooth2s = random.randint(1, 51, n)
