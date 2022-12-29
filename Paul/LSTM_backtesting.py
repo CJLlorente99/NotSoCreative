@@ -241,7 +241,6 @@ def main():
             real_signal[i] = 0
 
     # compare decisions
-    print('decision', decision, real_signal)
     print('Accuracy:', accuracy_score(real_signal, decision))
 
     backtest_func(data[-len(y_test):], decision)
