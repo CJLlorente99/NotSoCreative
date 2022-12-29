@@ -170,13 +170,9 @@ def main():
     print(data)
 
     # scale data
-    scaling = 1
-    if scaling == 1:
-        scaler = StandardScaler()
-        data_set_scaled = scaler.fit_transform(data)
-        data_set_scaled.shape[0]
-    else:
-        data_set_scaled = np.asarray(data)
+    scaler = StandardScaler()
+    data_set_scaled = scaler.fit_transform(data)
+
 
     # choose how many look back days
     backcandles = 30
@@ -217,11 +213,10 @@ def main():
     plt.show()
 
     # inverse scaling
-    if scaling == 1:
-        y_pred = inverse_scaling(data, y_pred_scale, scaler)
-        y_test = np.tile(y_test.reshape(-1, 1), (1, data.shape[1]))
-        y_test = scaler.inverse_transform(y_test)
-        y_test = y_test[:, -1]
+    y_pred = inverse_scaling(data, y_pred_scale, scaler)
+    y_test = np.tile(y_test.reshape(-1, 1), (1, data.shape[1]))
+    y_test = scaler.inverse_transform(y_test)
+    y_test = y_test[:, -1]
 
     # bounds unscaled
     lower, y_mean, upper = calculate_bounds(y_pred)
