@@ -210,6 +210,7 @@ def main():
     plt.plot(y_mean_scale, color='green', label='y_mean_scale')
     plt.axhline(y=0, color='r', linestyle='-', label="Zero")
     plt.legend()
+    plt.title('Scaled Returns')
     plt.show()
 
     # inverse scaling
@@ -220,6 +221,18 @@ def main():
 
     # bounds unscaled
     lower, y_mean, upper = calculate_bounds(y_pred)
+    
+    
+    plt.figure(figsize=(16, 8))
+    plt.plot(y_test, color='black', label='Test')
+    plt.plot(lower, color='green', label='lower')
+    plt.plot(upper, color='green', label='upper')
+    plt.plot(y_mean, color='green', label='y_mean')
+    plt.axhline(y=0, color='r', linestyle='-', label="Zero")
+    plt.legend()
+    plt.title('Returns')
+    plt.show()
+    
     # errors
     print('MSE:', mean_squared_error(y_test, y_mean))
     print('MAPE:', mean_absolute_error(y_test, y_mean))
@@ -247,7 +260,6 @@ def main():
             real_signal[i] = 0
 
     # compare decisions
-    print('decision', decision, real_signal)
     print('Accuracy:', accuracy_score(real_signal, decision))
 
     backtest_func(data[-len(y_test):], decision)
@@ -256,14 +268,6 @@ def main():
     backtest_func(data[-len(y_test):], real_signal)
     print('this was for the real value')
 
-    plt.figure(figsize=(16, 8))
-    plt.plot(y_test, color='black', label='Test')
-    plt.plot(lower, color='green', label='lower')
-    plt.plot(upper, color='green', label='upper')
-    plt.plot(y_mean, color='green', label='y_mean')
-    plt.axhline(y=0, color='r', linestyle='-', label="Zero")
-    plt.legend()
-    plt.show()
 
 
 if __name__ == '__main__':
