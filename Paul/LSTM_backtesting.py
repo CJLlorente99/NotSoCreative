@@ -204,6 +204,15 @@ def main():
     y_pred= np.tile(y_pred.reshape(-1, 1), (1, data.shape[1]))
     y_pred = scaler.inverse_transform(y_pred)
     y_pred = y_pred[:, -1]
+    
+    
+    plt.figure(figsize=(16, 8))
+    plt.plot(y_test, color='black', label='Test')
+    plt.plot(y_pred, color='green', label='pred')
+    plt.axhline(y=0, color='r', linestyle='-', label="Zero")
+    plt.legend()
+    plt.show()
+
 
     print('MSE:', mean_squared_error(y_test, y_pred))
     print('MAPE:', mean_absolute_error(y_test, y_pred))
@@ -240,13 +249,6 @@ def main():
 
     backtest_func(data[-len(y_test):], real_signal)
     print('this was for the real value')
-
-    plt.figure(figsize=(16, 8))
-    plt.plot(y_test, color='black', label='Test')
-    plt.plot(y_pred, color='green', label='pred')
-    plt.axhline(y=0, color='r', linestyle='-', label="Zero")
-    plt.legend()
-    plt.show()
 
 if __name__ == '__main__':
     main()
