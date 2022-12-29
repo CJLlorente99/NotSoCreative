@@ -82,8 +82,7 @@ def buy_stock(
 
 
     for i in range(real_movement.shape[0]):  #- int(0.025 * len(real_movement))#len(df)
-        #state = signal.iloc[i]
-        state = signal[i]
+        state = signal.iloc[i]
         if state == 1:
             initial_money, total_inv, current_inventory = buy(i, initial_money, total_inv, current_inventory)
             states_buy.append(i)
