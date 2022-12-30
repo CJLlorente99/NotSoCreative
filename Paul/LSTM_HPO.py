@@ -20,6 +20,7 @@ from keras.callbacks import History
 from keras.models import Model
 from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
 import numpy as np
+from scipy.stats import uniform, randint
 import shap
 from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
@@ -53,8 +54,8 @@ def build_model(n_inputs, n_features):
 def Bi_LSTM(n_inputs, n_features):
     optim = Adam(learning_rate=0.01)
     model = Sequential()
-    model.add(Bidirectional(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features))))
-    model.add(Dropout(0.1))
+    model.add(Bidirectional(LSTM(units=400, return_sequences=True, input_shape=(n_inputs, n_features))))
+    # model.add(Dropout(0.1))
     # model.add(Bidirectional(LSTM(units=200)))
     # model.add(Dropout(0.1))
     # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
@@ -93,15 +94,7 @@ def main():
 
     # multiple feature from data provided to the model
     X = []
-    # print(data_set_scaled[0].size)
-    # data_set_scaled=data_set.values
     backcandles = 30
-    print(data_set_scaled.shape[0])
-    # Indpendent variables
-    # deleted range(8)
-    # Columns as an input = list
-    # 4,5,6,7,
-
     list = [4, 5, 6, 7, 9]
     for j in range(len(list)):  # data_set_scaled[0].size):#2 columns are target not X
         X.append([])
@@ -110,44 +103,53 @@ def main():
 
     # move axis from 0 to position 2
     X = np.moveaxis(X, [0], [2])
-
-    # Erase first elements of y because of backcandles to match X length
-    # del(yi[0:backcandles])
-    # X, yi = np.array(X), np.array(yi)
-    # Choose -1 for last column, classification else -2...
     X, yi = np.array(X), np.array(data_set_scaled[backcandles:, -2])
-    # yi = yi * 1.5
+
     y = np.reshape(yi, (len(yi), 1))
 
-    # split data into train test sets
     splitlimit = (len(X) - 60)
-    # splitlimit = int(len(X)*0.9)
+
     print(splitlimit)
     X_train, X_test = X[:splitlimit], X[splitlimit:]
     y_train, y_test = y[:splitlimit], y[splitlimit:]
+
     n_inputs = X_train.shape[1]
     n_features = X_train.shape[2]
 
+    param_nn_rand = {
+        'unit1': randint(125, 250),
+        'unit2': randint(125, 250),
+        # 'activation': ['relu', 'sigmoid', 'tanh', 'elu'],
+        'learning_rate': loguniform(0.001, 0.1),
+        'layers1': [0, 1],
+        'layers2': [0, 1],
+        # 'dropout': uniform(0, 1),
+        # 'dropout_rate': uniform(0, 0.3),
+        'nb_epoch': randint(50, 150),
+        'batch_size': randint(2, 70),
+        # 'normalization': uniform(0, 1),
+        'optimizerL': ['Adam', 'Adagrad', 'Adamax', 'RMSprop', 'Adadelta']}
+
     param_nn_bs = {
-        'unit1': Integer(50, 200),
-        'unit2': Integer(50, 200),
-        'activation': Categorical(['relu', 'sigmoid', 'tanh', 'elu']),
+        'unit1': Integer(125, 250),
+        'unit2': Integer(125, 250),
         'learning_rate': Real(0.001, 0.1),
         'layers1': Integer(0, 1),
         'layers2': Integer(0, 1),
-        'dropout': Real(0, 1),
-        'dropout_rate': Real(0, 0.3),
-        'nb_epoch': Integer(50, 100),
-        'batch_size': Integer(10, 100),
-        # 'normalization': Real(0, 1),
-        'optimizerL': ['Adam', 'RMSprop', 'Adagrad', 'Adamax', 'Adadelta']}
+        'nb_epoch': Integer(50, 150),
+        'batch_size': Integer(2, 70),
+        'optimizerL': ['Adam', 'Adagrad', 'Adamax', 'Adadelta']}
     # 'layers1': Integer(0, 1),
+    # 'activation': Categorical(['relu', 'sigmoid', 'tanh', 'elu']),
+    #        'dropout': Real(0, 1),
+    # 'dropout_rate': Real(0, 0.3),
 
     print('build model')
 
     def build_LSTM(learning_rate=0.01, unit1=100, unit2=100, activation='relu', layers1=1, layers2=1, dropout=0.3,
                    dropout_rate=0.23,
                    nb_epoch=20, batch_size=20, optimizerL='Adam'):
+
         optimizerD = {'Adam': Adam(learning_rate=learning_rate), 'SGD': SGD(learning_rate=learning_rate),
                       'Adadelta': Adadelta(learning_rate=learning_rate),
                       'Adagrad': Adagrad(learning_rate=learning_rate), 'Adamax': Adamax(learning_rate=learning_rate),
@@ -157,40 +159,46 @@ def main():
         opt = optimizerD[optimizerL]
         nn = Sequential()
         nn.add(Bidirectional(LSTM(units=unit1, return_sequences=True, input_shape=(n_inputs, n_features))))
-        if dropout > 0.5:
-            nn.add(Dropout(dropout_rate))
-        '''for i in range(layers1):
-            nn.add(Bidirectional(LSTM(units=unit2, return_sequences=True)))
-            if dropout > 0.5:
-                nn.add(Dropout(dropout_rate))'''
+        nn.add(Dropout(0.1))
         for i in range(layers1):
-            nn.add(Bidirectional(LSTM(units=unit2)))
-            if dropout > 0.5:
-                nn.add(Dropout(dropout_rate))
+            nn.add(Bidirectional(LSTM(units=unit2, return_sequences=True)))
+            nn.add(Dropout(0.1))
+        nn.add(Bidirectional(LSTM(units=unit2)))
+        nn.add(Dropout(0.1))
         for i in range(layers2):
-            nn.add(Dense(32, activation=activation))
+            nn.add(Dense(32, activation='relu'))
         nn.add(Dense(1, activation='linear'))
-        nn.compile(loss='mse', optimizer=opt, metrics=['mse', 'mae'])
-        early_stopping = EarlyStopping(monitor="loss", patience=6, mode='auto', min_delta=0)
+        nn.compile(loss='mse', optimizer=opt, metrics=['mse'])
+        early_stopping = EarlyStopping(monitor='val_loss', patience=6, mode='auto', min_delta=0)
         history = nn.fit(X_train, y_train, batch_size=batch_size,
-                         epochs=nb_epoch, callbacks=[early_stopping])
-
+                         epochs=nb_epoch, callbacks=[early_stopping], validation_split=0.2)
         return nn
 
     nn_reg = KerasRegressor(build_fn=build_LSTM, verbose=0)
 
-    n_iter_search = 20
+    n_iter_search = 100
 
     # optimize
     print('opt')
+    # search_reg = RandomizedSearchCV(nn_reg, param_nn_rand, n_iter=n_iter_search, scoring='neg_mean_squared_error')
     search_reg = BayesSearchCV(nn_reg, param_nn_bs, n_iter=n_iter_search, scoring='neg_mean_squared_error', cv=5)
     search_reg.fit(X_train, y_train)
     print(search_reg.best_params_)
-    print(f'max error: {search_reg.best_score_}')
+    print(f'best score: {search_reg.best_score_}')
 
     # test prediction
     y_pred = search_reg.predict(X_test)
 
+    y_pred = np.tile(y_pred.reshape(-1, 1), (1, data.shape[1]))
+    y_test = np.tile(y_test.reshape(-1, 1), (1, data.shape[1]))
+    # y_train = np.tile(y_train.reshape(-1, 1), (1, data.shape[1]))
+
+    y_pred = sc.inverse_transform(y_pred)
+    y_test = sc.inverse_transform(y_test)
+    y_pred = y_pred[:, 0]
+    y_test = y_test[:, 0]
+    # y_train = sc.inverse_transform(y_train)
+    print('y_pred; y_test', y_pred, y_test)
     decision = [0] * len(y_pred)
     for i, yp in enumerate(y_pred):
         # if i == 0:
