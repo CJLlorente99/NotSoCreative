@@ -10,13 +10,13 @@ df.dropna(inplace=True)
 
 print(f"Original shape {df.shape}")
 df = df.iloc[-500:]
-print(df)
+print(df.columns)
 print(f"Studied shape {df.shape}")
 
-X_supervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_supervised = df[df.columns.drop(["Return", "Adj Close", "Class", "LogReturn"])][:-1]
 y_supervised = df["Class"][1:]
 
-X_unsupervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_unsupervised = df[df.columns.drop(["Return", "Adj Close", "Class", "LogReturn"])][:-1]
 y_unsupervised = df["Return"][1:]
 
 # Straight correlation study (Return)

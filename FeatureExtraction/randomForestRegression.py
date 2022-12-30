@@ -13,15 +13,18 @@ df = df.iloc[-500:]
 print(df)
 print(f"Studied shape {df.shape}")
 
-X_supervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_supervised = df[df.columns.drop(["Return", "Adj Close", "Class"])][:-1]
 y_supervised = df["Class"][1:]
 
-X_unsupervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_unsupervised = df[df.columns.drop(["Return", "Adj Close", "Class"])][:-1]
 y_unsupervised = df["Return"][1:]
 
 # Feature based on random forest (Return)
 
-X_train, X_test, y_train, y_test = train_test_split(X_unsupervised, y_unsupervised, test_size=0.25, random_state=0)
+X_train = X_unsupervised[:400]
+X_test = X_unsupervised[400:]
+y_train = y_unsupervised[:400]
+y_test = y_unsupervised[400:]
 rf = RandomForestRegressor(n_estimators=100)
 rf.fit(X_train, y_train)
 
@@ -52,7 +55,10 @@ shap.summary_plot(shap_values, X_test)
 
 # Feature based on random forest (Class)
 
-X_train, X_test, y_train, y_test = train_test_split(X_supervised, y_supervised, test_size=0.25, random_state=0)
+X_train = X_supervised[:400]
+X_test = X_supervised[400:]
+y_train = y_supervised[:400]
+y_test = y_supervised[400:]
 rf = RandomForestClassifier(n_estimators=100)
 rf.fit(X_train, y_train)
 

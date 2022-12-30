@@ -10,10 +10,10 @@ df = df.iloc[-500:]
 print(df)
 print(f"Studied shape {df.shape}")
 
-X_supervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_supervised = df[df.columns.drop(["Return", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
 y_supervised = df["Class"][1:]
 
-X_unsupervised = df[df.columns.drop(["Return", "ReturnBefore", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
+X_unsupervised = df[df.columns.drop(["Return", "Adj Close", "log(Open)", "Class", "LogReturn"])][:-1]
 y_unsupervised = df["Return"][1:]
 
 # Feature based on random forest (unsupervised == Return)
