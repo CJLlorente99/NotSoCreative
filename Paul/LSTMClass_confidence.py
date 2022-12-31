@@ -110,7 +110,7 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
 
 
 
-def calculate_bounds(yhat):
+def majority_vote(yhat):
     y_mean = []
     for i in range(yhat.shape[1]):
         y_10 = yhat[:, i]
@@ -198,7 +198,7 @@ def main():
     ensemble, y_pred, accuracy = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
 
     # majority vote
-    y_major= calculate_bounds(y_pred)
+    y_major= majority_vote(y_pred)
 
     # just to make a decision signal for the backtest.py -> there is -1 for sell and +1 for buy, so I have to switch the 0 to a -1
     y_test[np.where(y_test == 0)] = -1
