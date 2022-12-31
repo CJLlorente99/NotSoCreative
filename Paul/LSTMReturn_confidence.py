@@ -11,14 +11,16 @@ from keras.layers import LSTM, Bidirectional
 import tensorflow as tf
 import keras
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
-from keras.optimizers import Adam, Adamax
+from tensorflow.keras.optimizers import Adam, Adamax
 from keras.callbacks import History
 from keras.models import Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
 import numpy as np
 from sklearn.metrics import accuracy_score
-import shap
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.offline import plot
 
 # tf.random.set_seed(20)
 np.random.seed(10)
@@ -26,16 +28,26 @@ np.random.seed(10)
 
 def build_model(n_inputs, n_features):
     model = Sequential()
-    model.add(LSTM(units=150, return_sequences=True, input_shape=(n_inputs, n_features)))
-    model.add(Dropout(0.1))
-    model.add(LSTM(units=150))
-    model.add(Dropout(0.1))
+    model.add(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.01))
+    model.add(LSTM(units=200))
+    model.add(Dropout(0.01))
     # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
     model.add(Dense(units=1, activation='linear'))
     model.compile(optimizer='adam', loss='mean_squared_error')
     # history = model.fit
     return model
 
+
+def class_LSTM(n_inputs, n_features):
+    model = Sequential()
+    model.add(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.01))
+    model.add(LSTM(100))
+    model.add(Dropout(0.1))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
 
 def Bi_LSTM(n_inputs, n_features):
     optim = Adam(learning_rate=0.01)
@@ -50,7 +62,7 @@ def Bi_LSTM(n_inputs, n_features):
     # history = model.fit
     return model
 
-def prepare_data(data_set_scaled, backcandles, liste, splitlimit):
+def prepare_data(data_set_scaled, backcandles, liste, pred_days):
     X = []
     for j in range(len(liste)):  # data_set_scaled[0].size):#2 columns are target not X
         X.append([])
@@ -62,18 +74,23 @@ def prepare_data(data_set_scaled, backcandles, liste, splitlimit):
 
     X, yi = np.array(X), np.array(data_set_scaled[backcandles:, -1])
     y = np.reshape(yi, (len(yi), 1))
+    splitlimit = X.shape[0] - pred_days
 
     X_train, X_test = X[:splitlimit], X[splitlimit:]
     y_train, y_test = y[:splitlimit], y[splitlimit:]
+    print('shape', X_train)
+    print('shapes', y_train.shape, y_test.shape)
 
     return X_train, X_test, y_train, y_test
+
+
 
 
 def fit_model(X_train, y_train, epochs, batch_size):
     # define neural network model
     n_inputs = X_train.shape[1]
     n_features = X_train.shape[2]
-    # model = build_model(n_inputs, n_features)
+    #model = build_model(n_inputs, n_features)
     lstm_input = Input(shape=(n_inputs, n_features), name='lstm_input')
     inputs = LSTM(150, name='first_layer')(lstm_input)
     inputs = Dense(1, name='dense_layer')(inputs)
@@ -81,7 +98,7 @@ def fit_model(X_train, y_train, epochs, batch_size):
     model = Model(inputs=lstm_input, outputs=output)
     adam = Adam()
     model.compile(optimizer=adam, loss='mse')
-    # model.fit(X_train, y_train, batch_size=10, epochs=93)
+    #model.fit(X_train, y_train, batch_size=10, epochs=93)
     # fit the model on the training dataset
     early_stopping = EarlyStopping(monitor="loss", patience=10, mode='auto', min_delta=0)
     model.fit(X_train, y_train, verbose=2, epochs=epochs, batch_size=batch_size, callbacks=[early_stopping])
@@ -163,15 +180,20 @@ def main():
     data.reset_index(inplace=True)
     data.drop(['Close', 'Date'], axis=1, inplace=True)
     data.head(20)'''
-    data = pd.read_csv('featureSelectionDataset_Paul.csv', sep=',', header=0, index_col=0, parse_dates=True,
-                       decimal=".")
+    data = pd.read_csv('featureSelectionDataset_Paul.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
+    data = data.iloc[-600:,:]
     data.dropna(inplace=True)
     print(data)
 
     # scale data
-    scaler = StandardScaler()
-    data_set_scaled = scaler.fit_transform(data)
-
+    scaling = 1
+    if scaling == 1:
+        scaler = StandardScaler()
+        data_set_scaled = scaler.fit_transform(data)
+        data_set_scaled.shape[0]
+    else:
+        data_set_scaled = np.asarray(data)
+        
 
     # choose how many look back days
     backcandles = 30
@@ -182,21 +204,22 @@ def main():
     print(data.iloc[:, liste])
 
     # split data into train test sets
-    splitlimit = (len(data) - 60)
+    pred_days = 10
 
     # prepare data for lstm
-    X_train, X_test, y_train, y_test = prepare_data(data_set_scaled, backcandles, liste, splitlimit)
+    X_train, X_test, y_train, y_test = prepare_data(data_set_scaled, backcandles, liste, pred_days)
     print('test', y_test.shape)
 
+
     # train and predict
-    n_members = 20
-    epochs = 50
+    n_members = 10
+    epochs = 30
     batch_size = 10
     ensemble, y_pred_scale = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
-
+    
     # bounds scaled
     lower_scale, y_mean_scale, upper_scale = calculate_bounds(y_pred_scale)
-
+    
     # errors
     print('MSE scaled:', mean_squared_error(y_test, y_mean_scale))
     print('MAPE scaled:', mean_absolute_error(y_test, y_mean_scale))
@@ -211,16 +234,16 @@ def main():
     plt.legend()
     plt.title('Scaled Returns')
     plt.show()
-
+    
     # inverse scaling
-    y_pred = inverse_scaling(data, y_pred_scale, scaler)
-    y_test = np.tile(y_test.reshape(-1, 1), (1, data.shape[1]))
-    y_test = scaler.inverse_transform(y_test)
-    y_test = y_test[:, -1]
+    if scaling == 1:
+        y_pred = inverse_scaling(data, y_pred_scale, scaler)
+        y_test = np.tile(y_test.reshape(-1, 1), (1, data.shape[1]))
+        y_test = scaler.inverse_transform(y_test)
+        y_test = y_test[:, -1]
 
     # bounds unscaled
     lower, y_mean, upper = calculate_bounds(y_pred)
-    
     
     plt.figure(figsize=(16, 8))
     plt.plot(y_test, color='black', label='Test')
@@ -232,11 +255,35 @@ def main():
     plt.title('Returns')
     plt.show()
     
+    plt.figure(figsize=(16, 8))
+    for i in range((y_pred.shape[0])):
+        plt.plot(y_pred[i, :])
+    plt.axhline(y=0, color='r', linestyle='-', label="Zero")
+    plt.plot(y_test, color='black', linewidth=4, label='Test')
+    plt.title('all Returns')
+    plt.legend()
+    plt.show()
+    
+    fig = go.Figure()
+    for i in range((y_pred.shape[0])):
+        fig.add_trace(go.Scatter(y_pred[i, :], name=f'y_pred_{i}'))
+    fig.add_hline(y=0)
+    fig.add_trace(go.Scatter(y_test, name='y_test'))
+    fig.update_layout(
+        title=f'Return',
+        xaxis_title=f'Time',
+        yaxis_title=f'Return',
+        font=dict(family="Tahoma", size=18, color="Black"))
+    fig.show()
+        
+        
+    
     # errors
     print('MSE:', mean_squared_error(y_test, y_mean))
     print('MAPE:', mean_absolute_error(y_test, y_mean))
     print('MAE:', mean_absolute_percentage_error(y_test, y_mean))
 
+    
     # create decision signal
     decision = [0] * len(y_mean)
     for i, yp in enumerate(y_mean):
@@ -257,8 +304,8 @@ def main():
             real_signal[i] = 1
         else:
             real_signal[i] = 0
-
-    # compare decisions
+            
+  # compare decisions
     print('Accuracy:', accuracy_score(real_signal, decision))
 
     backtest_func(data[-len(y_test):], decision)
@@ -266,7 +313,7 @@ def main():
 
     backtest_func(data[-len(y_test):], real_signal)
     print('this was for the real value')
-
+    
 
 
 if __name__ == '__main__':

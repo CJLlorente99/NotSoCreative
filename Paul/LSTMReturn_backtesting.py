@@ -14,12 +14,11 @@ from keras.layers import Dense
 from keras.layers import TimeDistributed
 import tensorflow as tf
 import keras
-from keras.optimizers import Adam, Adamax
+from tensorflow.keras.optimizers import Adam, Adamax
 from keras.callbacks import History
 from keras.models import Model
 from keras.layers import Dense, Dropout, LSTM, Input, Activation, concatenate
 import numpy as np
-
 from sklearn.metrics import accuracy_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 
 #tf.random.set_seed(20)
@@ -28,10 +27,10 @@ np.random.seed(10)
 
 def build_model(n_inputs, n_features):
     model = Sequential()
-    model.add(LSTM(units=150, return_sequences=True, input_shape=(n_inputs, n_features)))
+    model.add(LSTM(units=400, return_sequences=True, input_shape=(n_inputs, n_features)))
     model.add(Dropout(0.1))
-    model.add(LSTM(units=150))
-    model.add(Dropout(0.2))
+    model.add(LSTM(units=400))
+    model.add(Dropout(0.1))
     #model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
     model.add(Dense(units=1, activation='linear'))
     model.compile(optimizer='adam', loss='mean_squared_error')
@@ -41,10 +40,10 @@ def build_model(n_inputs, n_features):
 def Bi_LSTM(n_inputs, n_features):
     optim = Adam(learning_rate=0.01)
     model = Sequential()
-    model.add(Bidirectional(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features))))
+    model.add(Bidirectional(LSTM(units=800, return_sequences=True, input_shape=(n_inputs, n_features))))
     model.add(Dropout(0.1))
-    #model.add(Bidirectional(LSTM(units=200)))
-    #model.add(Dropout(0.1))
+    model.add(Bidirectional(LSTM(units=800)))
+    model.add(Dropout(0.1))
     #model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
     model.add(Dense(units=1, activation='linear'))
     model.compile(optimizer=optim, loss='mean_squared_error')
@@ -94,7 +93,7 @@ def LSTM_HPO(n_inputs, n_features):
     nn.compile(loss='mse', optimizer=opt, metrics=['mse', 'mae'])
     return nn
 
-def prepare_data(data_set_scaled, backcandles, liste, splitlimit):
+def prepare_data(data_set_scaled, backcandles, liste, pred_days):
     X = []
     for j in range(len(liste)):  # data_set_scaled[0].size):#2 columns are target not X
         X.append([])
@@ -106,11 +105,15 @@ def prepare_data(data_set_scaled, backcandles, liste, splitlimit):
 
     X, yi = np.array(X), np.array(data_set_scaled[backcandles:, -1])
     y = np.reshape(yi, (len(yi), 1))
+    splitlimit = X.shape[0] - pred_days
 
     X_train, X_test = X[:splitlimit], X[splitlimit:]
     y_train, y_test = y[:splitlimit], y[splitlimit:]
+    print('shape', X_train)
+    print('shapes', y_train.shape, y_test.shape)
 
     return X_train, X_test, y_train, y_test
+
 
 
 def main():
@@ -147,39 +150,41 @@ def main():
     data_set_scaled.shape[0]
 
     # choose how many look back days
-    backcandles = 30
+    backcandles = 50
 
-    # choose columns: all
-    liste = list(range(0, data.shape[1] - 1))
-    print(liste)
+    # choose columns: all but open price and target
+    liste = list(range(0, data.shape[1] - 2))
     print(data.iloc[:, liste])
 
-    # split data into train test sets
-    splitlimit = (len(data) - 60)
+   # split data into train test sets
+    pred_days = 10
 
     # prepare data for lstm
-    X_train, X_test, y_train, y_test = prepare_data(data_set_scaled, backcandles, liste, splitlimit)
+    X_train, X_test, y_train, y_test = prepare_data(data_set_scaled, backcandles, liste, pred_days)
     print('test', y_test.shape)
 
+
     # build model
-    '''n_inputs = X_train.shape[1]
-    n_features = X_train.shape[2]
-    nb_epoch = 93
+ 
+    nb_epoch = 50
     batch_size = 10
-    #model = build_model(n_inputs, n_features)
+    n_inputs = X_train.shape[1]
+    n_features = X_train.shape[2]
+    
     model = build_model(n_inputs, n_features)
+    #model = Bi_LSTM(n_inputs, n_features)
     early_stopping = EarlyStopping(monitor="loss", patience=10, mode='auto', min_delta=0)
     history = model.fit(X_train, y_train, batch_size=batch_size,
-                        epochs=nb_epoch, callbacks=[early_stopping])'''
+                        epochs=nb_epoch, callbacks=[early_stopping])
 
-    lstm_input = Input(shape=(backcandles, len(list)), name='lstm_input')
+    '''lstm_input = Input(shape=(n_inputs, n_features), name='lstm_input')
     inputs = LSTM(150, name='first_layer')(lstm_input)
     inputs = Dense(1, name='dense_layer')(inputs)
     output = Activation('linear', name='output')(inputs)
     model = Model(inputs=lstm_input, outputs=output)
     adam = Adam()
     model.compile(optimizer=adam, loss='mse')
-    model.fit(X_train, y_train, batch_size=10, epochs=93)
+    model.fit(X_train, y_train, batch_size=10, epochs=93)'''
 
     # predict
     y_pred = model.predict(X_test)
@@ -205,14 +210,14 @@ def main():
     y_pred = scaler.inverse_transform(y_pred)
     y_pred = y_pred[:, -1]
     
-    
+
     plt.figure(figsize=(16, 8))
     plt.plot(y_test, color='black', label='Test')
     plt.plot(y_pred, color='green', label='pred')
     plt.axhline(y=0, color='r', linestyle='-', label="Zero")
     plt.legend()
+    plt.title('Returns')
     plt.show()
-
 
     print('MSE:', mean_squared_error(y_test, y_pred))
     print('MAPE:', mean_absolute_error(y_test, y_pred))
