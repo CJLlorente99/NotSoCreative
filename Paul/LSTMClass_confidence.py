@@ -26,18 +26,6 @@ from plotly.offline import plot
 np.random.seed(10)
 
 
-def build_model(n_inputs, n_features):
-    model = Sequential()
-    model.add(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features)))
-    model.add(Dropout(0.01))
-    model.add(LSTM(units=200))
-    model.add(Dropout(0.01))
-    # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
-    model.add(Dense(units=1, activation='linear'))
-    model.compile(optimizer='adam', loss='mean_squared_error')
-    # history = model.fit
-    return model
-
 
 def class_LSTM(n_inputs, n_features):
     model = Sequential()
