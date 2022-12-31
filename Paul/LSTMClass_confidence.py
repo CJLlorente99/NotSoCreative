@@ -161,8 +161,8 @@ def main():
                        decimal=".")
     data = data.iloc[-600:, :]
     data.dropna(inplace=True)
-    #y_open = np.asarray([1 if data.Return_open[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
-    #y_close = np.asarray([1 if data.Return_close[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
+    y_open = np.asarray([1 if data.Return_open[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
+    y_close = np.asarray([1 if data.Return_close[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
     y_target = np.asarray([1 if data.Target[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
     data = data.drop(['Target'], axis=1)
     print(data)
@@ -170,8 +170,8 @@ def main():
     # scale data
     scaler = StandardScaler()
     data_set_scaled = scaler.fit_transform(data)
-    #data_set_scaled = np.concatenate((data_set_scaled, y_open), axis=1)
-    #data_set_scaled = np.concatenate((data_set_scaled, y_close), axis=1)
+    data_set_scaled = np.concatenate((data_set_scaled, y_open), axis=1)
+    data_set_scaled = np.concatenate((data_set_scaled, y_close), axis=1)
     data_set_scaled = np.concatenate((data_set_scaled, y_target), axis=1)
     print('data_scaled', data_set_scaled.shape)
 
