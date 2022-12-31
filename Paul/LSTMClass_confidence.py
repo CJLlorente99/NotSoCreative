@@ -161,6 +161,7 @@ def main():
     # import data
     data = pd.read_csv('featureSelectionDataset_Paul.csv', sep=',', header=0, index_col=0, parse_dates=True,
                        decimal=".")
+    # iloc[-600, :] just to use less data 
     data = data.iloc[-600:, :]
     data.dropna(inplace=True)
     y_open = np.asarray([1 if data.Return_open[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
@@ -169,7 +170,7 @@ def main():
     data = data.drop(['Target'], axis=1)
     print(data)
 
-    # scale data
+    # scale data, and then add the class as feature input
     scaler = StandardScaler()
     data_set_scaled = scaler.fit_transform(data)
     data_set_scaled = np.concatenate((data_set_scaled, y_open), axis=1)
