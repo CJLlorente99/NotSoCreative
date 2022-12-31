@@ -197,17 +197,17 @@ def main():
     batch_size = 10
     ensemble, y_pred, accuracy = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
 
-    # bounds scaled
-    y_mean= calculate_bounds(y_pred)
+    # majority vote
+    y_major= calculate_bounds(y_pred)
 
     # just to make a decision signal for the backtest.py -> there is -1 for sell and +1 for buy, so I have to switch the 0 to a -1
     y_test[np.where(y_test == 0)] = -1
     
     # compare decisions
-    print(f'Accuracy:{accuracy_score(y_test, y_mean)*100}%')
+    print(f'Accuracy:{accuracy_score(y_test, y_major)*100}%')
     print('Accuracies from all ensembles', accuracy)
 
-    backtest_func(data[-len(y_test):], y_mean)
+    backtest_func(data[-len(y_test):], y_major)
     print('this was for our prediction')
 
     backtest_func(data[-len(y_test):], y_test)
