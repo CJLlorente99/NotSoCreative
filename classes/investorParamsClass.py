@@ -7,7 +7,7 @@ class InvestorParams:
 
 
 class BBInvestorParams(InvestorParams):
-    def __init__(self, window, stdDev, lowerBound, upperBound, a=1, b=3):
+    def __init__(self, window, stdDev, lowerBound=0, upperBound=0, a=1, b=3):
         super().__init__()
         self.window = window
         self.stdDev = stdDev

@@ -134,8 +134,7 @@ class InvestorLSTMProb(Investor):
 		:return:
 		"""
 		if data > 0:
-			print(data*probBuy)
-			return data * probBuy
+			return probBuy
 		return 0
 
 	def sellPrediction(self, data, probSell):
@@ -145,8 +144,7 @@ class InvestorLSTMProb(Investor):
 		:return:
 		"""
 		if data < 0:
-			print(-data*probSell)
-			return -data * probSell
+			return probSell
 		return 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):

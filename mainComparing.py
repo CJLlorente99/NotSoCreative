@@ -109,64 +109,6 @@ def main():
         experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)])
         print("investorBB created")
 
-        # Create investor BBNN
-        bbWindow = 10
-        bbStdDev = 1.5
-        lowerBound = 1.9
-        upperBound = 0.8
-        a = 2.4
-        b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        file = "data/modelnn2BB2022_12_20_11_27_08.h5"
-        nnParams = NNInvestorParams(file)
-        investorBBNN = InvestorBBNN(10000, nnParams)
-        experimentManager.addStrategy(investorBBNN, "bbnn", [experimentManager.createTIInput("bb", bbParams, "pband", 2)])
-        print("investorBBNN created")
-
-        # Create investor BB+RSI NN Class
-        bbWindow = 10
-        bbStdDev = 1.5
-        lowerBound = 1.9
-        upperBound = 0.8
-        a = 2.4
-        b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        RSIwindow = 3
-        upperBound = 61
-        lowerBound = 27.5
-        a = 1.1
-        b = 2.4
-        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
-        file = "data/modelnn2BB_2RSIClass2022_12_20_11_27_08.h5"
-        nnParams = NNInvestorParams(file)
-        investorBBRSINNClass = InvestorBBRSINNClass(10000, nnParams)
-        experimentManager.addStrategy(investorBBRSINNClass, "bbRsiNNClass",
-                                      [experimentManager.createTIInput("bb", bbParams, "pband", 2),
-                                       experimentManager.createTIInput("rsi", rsiParams, "rsi", 2)])
-        print("investorBBRSINNClass created")
-
-        # Create investor BB+RSI NN
-        bbWindow = 10
-        bbStdDev = 1.5
-        lowerBound = 1.9
-        upperBound = 0.8
-        a = 2.4
-        b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        RSIwindow = 3
-        upperBound = 61
-        lowerBound = 27.5
-        a = 1.1
-        b = 2.4
-        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
-        file = "data/modelnn2BB_2RSI2022_12_20_11_27_08.h5"
-        nnParams = NNInvestorParams(file)
-        investorBBRSINN = InvestorBBRSINN(10000, nnParams)
-        experimentManager.addStrategy(investorBBRSINN, "bbRsiNN",
-                                      [experimentManager.createTIInput("bb", bbParams, "pband", 2),
-                                       experimentManager.createTIInput("rsi", rsiParams, "rsi", 2)])
-        print("investorBBRSINN created")
-
         # Create investor based on DT
         bbWindow = 10
         bbStdDev = 1.5
