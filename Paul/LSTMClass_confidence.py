@@ -191,6 +191,7 @@ def main():
     print('test', y_test.shape)
 
     # train and predict
+    # n_members -> how many predictors we wanted to use
     n_members = 10
     epochs = 45
     batch_size = 10
@@ -199,7 +200,7 @@ def main():
     # bounds scaled
     y_mean= calculate_bounds(y_pred)
 
-
+    # just to make a decision signal for the backtest.py -> there is -1 for sell and +1 for buy, so I have to switch the 0 to a -1
     y_test[np.where(y_test == 0)] = -1
     
     # compare decisions
