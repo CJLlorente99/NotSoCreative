@@ -96,14 +96,15 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
         yhat = model.predict(X_test, verbose=2)
         print('yhat', yhat.shape)
         
+        # turn probability into class
         yhat[yhat > 0.5] = 1
         yhat[yhat <= 0.5] = 0
         
-        
+        # accuracy
         acc = accuracy_score(y_test, yhat)
         print('>%d, acc: %.3f' % (i + 1, acc))
         accuracy.append(acc)
-        # store the model and prediction
+        # store the model and prediction and accuracy
         ensemble.append(model)
         y_pred[i, :] = yhat.flatten()
     return ensemble, y_pred, accuracy
@@ -111,6 +112,7 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
 
 
 def majority_vote(yhat):
+    # if majority is 1 -> signal = 1 -> buy
     y_mean = []
     for i in range(yhat.shape[1]):
         y_10 = yhat[:, i]
@@ -178,7 +180,7 @@ def main():
     # choose how many look back days
     backcandles = 30
 
-    # choose columns: all but open price and target
+    # choose columns: all but target variable (its last column)
     liste = list(range(0, data.shape[1] - 1))
 
     # print(data.iloc[:, liste])
@@ -206,7 +208,8 @@ def main():
     # compare decisions
     print(f'Accuracy:{accuracy_score(y_test, y_major)*100}%')
     print('Accuracies from all ensembles', accuracy)
-
+    
+    # backtest for our prediction and the real class
     backtest_func(data[-len(y_test):], y_major)
     print('this was for our prediction')
 
