@@ -87,7 +87,7 @@ class ExperimentManager:
 			investor = strategy["investor"]
 			aux = pd.concat([aux, pd.DataFrame(self.criteriaCalculator.calculateCriteria(name, investor.record), index=[numExp])])
 
-		title = "Test criteria (" + initDate.strftime("%Y/%m/%d")[0] + "-" + lastDate.strftime("%Y/%m/%d")[0] + ")"
+		title = "TestCriteria(" + initDate.strftime("%Y_%m_%d")[0] + "-" + lastDate.strftime("%Y_%m_%d")[0] + ")"
 		self.criteriaCalculator.plotCriteria(aux, title)
 
 		return aux
@@ -99,7 +99,7 @@ class ExperimentManager:
 
 	def summaryCriteriaCalculatorAndPlotting(self, dfTestCriteria):
 		result = self.criteriaCalculator.calculateCriteriaVariousExperiments(dfTestCriteria)
-		self.criteriaCalculator.plotCriteriaVariousExperiments(result, "Summary of the test criteria")
+		self.criteriaCalculator.plotCriteriaVariousExperiments(result, "SummaryTestCriteria")
 		return result
 
 	@staticmethod

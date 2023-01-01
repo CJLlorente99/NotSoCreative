@@ -1,3 +1,5 @@
+import os.path
+
 import pandas as pd
 from classes.dataClass import DataGetter
 from TAIndicators.rsi import InvestorRSI
@@ -5,7 +7,7 @@ from TAIndicators.ma import InvestorMACD
 from TAIndicators.bb import InvestorBB
 from DecisionFunction.investorDecisionTree import InvestorDecisionTree
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
-from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass
+from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClassProb, InvestorLSTMConfidenceClass
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -20,10 +22,16 @@ from experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter()
+    name = "Charli"
+    # name = "Paul"
+    # name = "Tobias"
+    # name = "Sanchita"
+    # name = "Rishabh"
+    # name = "Kim"
+    dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 2
+    numExperiments = 5
     nDays = 10
     advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
@@ -46,7 +54,7 @@ def main():
         b = 2.4
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
         investorRSI = InvestorRSI(10000, rsiParams)
-        experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)])
+        experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)], True)
         print("investorRSI created")
 
         # Create investor MACD grad
@@ -62,7 +70,7 @@ def main():
         investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
         experimentManager.addStrategy(investorMACDGrad, "macdGrad",
                                       [experimentManager.createTIInput("macd", macdParamsGrad, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)])
+                                       experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)], True)
         print("investorMACDGrad created")
 
         # Create investor MACD zero
@@ -78,7 +86,7 @@ def main():
         investorMACDZero = InvestorMACD(10000, macdParamsZero)
         experimentManager.addStrategy(investorMACDZero, "macdGradZero",
                                       [experimentManager.createTIInput("macd", macdParamsZero, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)])
+                                       experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)], True)
         print("investorMACDZero created")
 
         # Create investor MACD signal
@@ -94,7 +102,7 @@ def main():
         investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
         experimentManager.addStrategy(investorMACDSignal, "macdGradSignal",
                                       [experimentManager.createTIInput("macd", macdParamsSignal, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)])
+                                       experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)], True)
         print("investorMACDSignal created")
 
         # Create investor BB
@@ -106,7 +114,7 @@ def main():
         b = 0.5
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
         investorBB = InvestorBB(10000, bbParams)
-        experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)])
+        experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], True)
         print("investorBB created")
 
         # Create investor based on DT
@@ -139,55 +147,61 @@ def main():
                                        experimentManager.createTIInput("aroon", aroonParams, "aroon_indicator", 1),
                                        experimentManager.createTIInput("atr", atrParams, "average_true_range", 1),
                                        experimentManager.createTIInput("obv", None, "on_balance_volume", 1),
-                                       experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)])
+                                       experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
         print("investorDT created")
 
         # Create investor based on LSTM Threshold
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], False)
-        # print("investorLSTMThreshold created")
-        #
-        # # Create investor based on LSTM Prob
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
-        # print("investorLSTMProb created")
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMThreshold created")
 
-        # Create investor based on class voting
-        investorLSTMConfidence = InvestorLSTMConfidenceClass(10000, 5)
-        experimentManager.addStrategy(investorLSTMConfidence, "lstmConfidence", [experimentManager.createTIInput("lstmConfidence")], True)
+        # Create investor based on LSTM Prob
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMProb created")
+
+        # Create investor based on class voting (possible intermediate values)
+        investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
+        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidence",
+                                      [experimentManager.createTIInput("lstmConfidence")], True)
+
+        # Create investor based on class voting (only sell and buy everything)
+        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 5)
+        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidence",
+                                      [experimentManager.createTIInput("lstmConfidence")], True)
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
-        experimentManager.addStrategy(investorRandom, "random")
+        experimentManager.addStrategy(investorRandom, "random", plotEvolution=True)
         print("investorRandom created")
 
         # Create investor BIA
         investorBIA = InvestorBIA(10000)
-        experimentManager.addStrategy(investorBIA, "bia")
+        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=True)
         print("investorBIA created")
 
         # Create investor WIA
         investorWIA = InvestorWIA(10000)
-        experimentManager.addStrategy(investorWIA, "wia")
+        experimentManager.addStrategy(investorWIA, "wia", plotEvolution=True)
         print("investorWIA created")
 
         # Create investor CA
         investorCA = InvestorCA(10000, 0.1)
-        experimentManager.addStrategy(investorCA, "ca")
+        experimentManager.addStrategy(investorCA, "ca", plotEvolution=True)
         print("investorCA created")
 
         # Create investor BaH
         investorBaH = InvestorBaH(10000)
-        experimentManager.addStrategy(investorBaH, "bah")
+        experimentManager.addStrategy(investorBaH, "bah", plotEvolution=True)
         print("investorBaH created")
 
         # Create investor Idle
         investorIdle = InvestorIdle(10000)
-        experimentManager.addStrategy(investorIdle, "idle")
+        experimentManager.addStrategy(investorIdle, "idle", plotEvolution=True)
         print("investorIdle created")
 
         auxLoop = pd.DataFrame()
@@ -226,6 +240,11 @@ def main():
     # Plot summary of test criteria
     experimentManager.summaryCriteriaCalculatorAndPlotting(dfTestCriteria)
 
+    # Save advanced data
+    advancedData.to_csv("images/advancedData.csv", index_label="nExperiment")
+
 
 if __name__ == '__main__':
+    if not os.path.exists("images"):
+        os.mkdir("images")
     main()

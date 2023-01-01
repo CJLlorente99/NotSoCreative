@@ -8,14 +8,25 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 class DataGetter:
     dataLen = 400
 
-    def __init__(self):
+    def __init__(self, name="Charli"):
         """
         Initialization function for the DataGetter. This class is supposed to be used as intermediary to get new data
         """
         self.ticker = "^GSPC"
         # define US business days
         us_bus = CDay(calendar=USFederalHolidayCalendar())
-        self.today = pd.bdate_range('2018-01-01', '2018-01-31', freq=us_bus)[0]
+        if name == "Charli":
+            self.today = pd.bdate_range('2022-08-01', '2022-08-31', freq=us_bus)[0]
+        elif name == "Paul":
+            self.today = pd.bdate_range('2021-04-01', '2021-04-30', freq=us_bus)[0]
+        elif name == "Tobias":
+            self.today = pd.bdate_range('2021-08-01', '2021-08-31', freq=us_bus)[0]
+        elif name == "Sanchita":
+            self.today = pd.bdate_range('2022-01-01', '2022-01-31', freq=us_bus)[0]
+        elif name == "Rishabh":
+            self.today = pd.bdate_range('2022-04-01', '2022-04-30', freq=us_bus)[0]
+        elif name == "Kim":
+            self.today = pd.bdate_range('2022-08-01', '2022-08-31', freq=us_bus)[0]
         self.start = self.today - CDay(self.dataLen)
 
     def getPastData(self) -> pd.DataFrame:
