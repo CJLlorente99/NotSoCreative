@@ -63,6 +63,9 @@ class ExperimentManager:
 					returnPred = investor.model.trainAndPredict(df)
 					returnClass = investor.model.trainAndPredictClassification(df)
 					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
+				elif inpName == "lstmConfidence":
+					returnPred = investor.trainAndPredict(df)
+					dataManager[tag] = returnPred
 
 			aux = investor.broker(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
