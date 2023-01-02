@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import math
 import yfinance as yf
@@ -73,6 +73,7 @@ def main():
     print(data)
     y = [1 if yx.iloc[i] > 0 else 0 for i in range(len(data))]
     
+    
     #y_open = np.asarray([1 if data.Return_open[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
     #y_close = np.asarray([1 if data.Return_close[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
     #y_target = np.asarray([1 if data.Target[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
@@ -105,7 +106,8 @@ def main():
     X_train, X_test = X[:splitlimit], X[splitlimit:]
     y_train, y_test = y[:splitlimit], y[splitlimit:]
     
-    model = RandomForestRegressor(n_estimators=100, verbose=2)
+    model = RandomForestClassifier(n_estimators=100, verbose=2)
+    #model = RandomForestRegressor(n_estimators=100, verbose=2)
     model.fit(np.asarray(X_train), y_train)  # , validation_split=0.3)
     y_pred = model.predict(X_test)
     
