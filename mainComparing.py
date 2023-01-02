@@ -149,19 +149,19 @@ def main():
                                        experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
         print("investorDT created")
 
-        # # Create investor based on LSTM Threshold
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
-        # print("investorLSTMThreshold created")
-        #
-        # # Create investor based on LSTM Prob
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
-        # print("investorLSTMProb created")
+        # Create investor based on LSTM Threshold
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMThreshold created")
+
+        # Create investor based on LSTM Prob
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMProb created")
         #
         # Create investor based on class voting (possible intermediate values)
         investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
