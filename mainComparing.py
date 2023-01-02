@@ -31,9 +31,8 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 3
     nDays = 10
-    advancedData = pd.DataFrame()
     dfTestCriteria = pd.DataFrame()
 
     for j in range(numExperiments):
@@ -166,12 +165,12 @@ def main():
 
         # Create investor based on class voting (possible intermediate values)
         investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
-        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidence",
+        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceInter",
                                       [experimentManager.createTIInput("lstmConfidence")], True)
 
         # Create investor based on class voting (only sell and buy everything)
         investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 5)
-        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidence",
+        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceEvery",
                                       [experimentManager.createTIInput("lstmConfidence")], True)
 
         # Create investor Random
@@ -226,7 +225,7 @@ def main():
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, experimentManager.returnExpData()], axis=1)
-        advancedData = pd.concat([advancedData, aux])
+        aux.to_csv("images/advancedData.csv", index_label="nExperiment", mode="a")
 
         # Calculate summary results
         firstDate = investorRSI.record.index.values[0]
@@ -239,9 +238,6 @@ def main():
 
     # Plot summary of test criteria
     experimentManager.summaryCriteriaCalculatorAndPlotting(dfTestCriteria)
-
-    # Save advanced data
-    advancedData.to_csv("images/advancedData.csv", index_label="nExperiment")
 
 
 if __name__ == '__main__':
