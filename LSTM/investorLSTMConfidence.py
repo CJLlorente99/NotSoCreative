@@ -12,7 +12,10 @@ from TAIndicators.atr import averageTrueRange
 from TAIndicators.stochasticRsi import stochasticRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence
 from TAIndicators.adx import averageDirectionalMovementIndex
-from classes.investorParamsClass import ATRInvestorParams, ADXInvestorParams, StochasticRSIInvestorParams, MACDInvestorParams
+from TAIndicators.rsi import relativeStrengthIndex
+from TAIndicators.bb import bollingerBands
+from TAIndicators.aroon import aroon
+from classes.investorParamsClass import ATRInvestorParams, ADXInvestorParams, StochasticRSIInvestorParams, MACDInvestorParams, RSIInvestorParams, BBInvestorParams, AroonInvestorParams
 from keras.backend import clear_session
 
 class InvestorLSTMConfidenceClass(Investor):
@@ -84,83 +87,99 @@ class InvestorLSTMConfidenceClass(Investor):
 		# fig.show()
 
 	def trainAndPredict(self, dataUntilToday: pd.DataFrame):
-		data = dataUntilToday.copy()
+		data = pd.DataFrame()
 
 		# Add indicators
-		# average_true_range_w1
-		params = ATRInvestorParams(1)
-		data["average_true_range_w1"] = averageTrueRange(data["High"], data["Low"], data["Close"], params)["average_true_range"]
-		# stochRsi_d_w50_s13_s211
-		params = StochasticRSIInvestorParams(50, 3, 11)
-		data["stochRsi_d_w50_s13_s211"] = stochasticRSI(data["Close"], params)["d"]
-		# macd_difffW1_sW22_signal6
-		params = MACDInvestorParams(None, None, 1, 22, 6)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW1_sW22_signal6"] = macd["macd"] - macd["signal"]
-		# macd_difffW4_sW24_signal7
-		params = MACDInvestorParams(None, None, 4, 24, 7)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW4_sW24_signal7"] = macd["macd"] - macd["signal"]
-		# macd_fW1_sW5_signal12
-		params = MACDInvestorParams(None, None, 1, 5, 12)
-		data["macd_fW1_sW5_signal12"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# adx_neg_w2
-		params = ADXInvestorParams(2)
-		data["adx_neg_w2"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx_neg"]
-		# adx_w2
-		params = ADXInvestorParams(2)
-		data["adx_w2"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx"]
-		# macd_difffW1_sW5_signal12
-		params = MACDInvestorParams(None, None, 1, 5, 12)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW1_sW5_signal12"] = macd["macd"] - macd["signal"]
-		# adx_w28
-		params = ADXInvestorParams(28)
-		data["adx_w28"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx"]
-		# macd_fW1_sW38_signal32
-		params = MACDInvestorParams(None, None, 1, 38, 32)
-		data["macd_fW1_sW38_signal32"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# macd_fW1_sW16_signal49
-		params = MACDInvestorParams(None, None, 1, 16, 49)
-		data["macd_fW1_sW16_signal49"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# macd_difffW16_sW44_signal47
-		params = MACDInvestorParams(None, None, 16, 44, 47)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW16_sW44_signal47"] = macd["macd"] - macd["signal"]
-		# macd_difffW8_sW5_signal2
-		params = MACDInvestorParams(None, None, 8, 5, 2)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW8_sW5_signal2"] = macd["macd"] - macd["signal"]
-		# average_true_range_w21
-		params = ATRInvestorParams(21)
-		data["average_true_range_w21"] = averageTrueRange(data["High"], data["Low"], data["Close"], params)[
-			"average_true_range"]
-		# macd_fW1_sW50_signal9
-		params = MACDInvestorParams(None, None, 1, 50, 9)
-		data["macd_fW1_sW50_signal9"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# Diff_close
-		data['Diff_close'] = data['Close'] - data['Close'].shift()
-		# Diff_open
-		data['Diff_open'] = data["Open"] - data["Open"].shift()
-
-		# Returns and objective classes
-		data["log_Open"] = np.log(data["Open"])
-		data['log_Close'] = np.log(data['Close'])
-		data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
+		# Return_close
+		data['log_Close'] = np.log(dataUntilToday['Close'])
 		data["Return_close"] = data["log_Close"] - data["log_Close"].shift(+1)
-		data["Return_target"] = data["log_Open"].shift(-1) - data["log_Open"]
 
-		y_open = np.asarray([1 if data.Return_open[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
+		# Diff_close
+		data['Diff_close'] = dataUntilToday['Close'] - dataUntilToday['Close'].shift()
+
+		# stochRsi_stochrsi_w2_s126_s24
+		params = StochasticRSIInvestorParams(2, 26, 4)
+		data['stochRsi_stochrsi_w2_s126_s24'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s137_s234
+		params = StochasticRSIInvestorParams(2, 37, 34)
+		data['stochRsi_stochrsi_w2_s137_s234'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# rsi_w1
+		params = RSIInvestorParams(1)
+		data['rsi_w1'] = relativeStrengthIndex(dataUntilToday['Close'], params)
+
+		# stochRsi_stochrsi_w2_s114_s236
+		params = StochasticRSIInvestorParams(2, 14, 36)
+		data['stochRsi_stochrsi_w2_s114_s236'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s12_s222
+		params = StochasticRSIInvestorParams(3, 2, 22)
+		data['stochRsi_stochrsi_w3_s12_s222'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s13_s218
+		params = StochasticRSIInvestorParams(2, 3, 18)
+		data['stochRsi_stochrsi_w2_s13_s218'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s115_s236
+		params = StochasticRSIInvestorParams(2, 15, 36)
+		data['stochRsi_stochrsi_w2_s115_s236'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s149_s21
+		params = StochasticRSIInvestorParams(3, 49, 1)
+		data['stochRsi_stochrsi_w3_s149_s21'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s129_s238
+		params = StochasticRSIInvestorParams(3, 29, 38)
+		data['stochRsi_stochrsi_w3_s129_s238'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# rsi_w2
+		params = RSIInvestorParams(2)
+		data['rsi_w2'] = relativeStrengthIndex(dataUntilToday['Close'], params)
+
+		# bb_pband_w4_stdDev3.3223760630638397
+		params = BBInvestorParams(4, 3.32)
+		data['bb_pband_w4_stdDev3.3223760630638397'] = bollingerBands(dataUntilToday['Close'], params)
+
+		# stochRsi_stochrsi_w4_s123_s245
+		params = StochasticRSIInvestorParams(4, 23, 45)
+		data['stochRsi_stochrsi_w4_s123_s245'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# macd_difffW1_sW5_signal12
+		params = MACDInvestorParams(1, 5, 12)
+		data['macd_difffW1_sW5_signal12'] = movingAverageConvergenceDivergence(dataUntilToday['Close'], params)
+
+		# bb_pband_w4_stdDev0.7177075201973817
+		params = BBInvestorParams(4, 0.72)
+		data['bb_pband_w4_stdDev0.7177075201973817'] = bollingerBands(dataUntilToday['Close'], params)
+
+		# Diff_open
+		data['Diff_open'] = dataUntilToday["Open"] - dataUntilToday["Open"].shift()
+
+		# Return_open
+		data['log_Open'] = np.log(dataUntilToday['Open'])
+		data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
+
+		# aroon_up_w4
+		params = AroonInvestorParams(4)
+		data['aroon_up_w4'] = aroon(dataUntilToday['Close'], params)
+
+		# Class_close
 		y_close = np.asarray([1 if data.Return_close[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
+
+		# target
+		data["Return_target"] = data["log_Open"].shift(-1) - data["log_Open"]
 		y_target = np.asarray([1 if data.Return_target[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
 
-		data = data.drop(['Return_target', 'High', 'Low', 'Adj Close'], axis=1)
+		# Drop based on correlation matrix
+		data = data.drop(['log_Open', 'log_Close', 'Return_target', 'stochRsi_stochrsi_w2_s114_s236', 'stochRsi_stochrsi_w2_s126_s24',
+                      'stochRsi_stochrsi_w2_s137_s234', 'stochRsi_stochrsi_w3_s149_s21', 'stochRsi_stochrsi_w3_s12_s222',
+                     'stochRsi_stochrsi_w2_s115_s236'], axis=1)
 		data.dropna(inplace=True)
 
 		# scale data, and then add the class as feature input
 		scaler = StandardScaler()
 		data_set_scaled = scaler.fit_transform(data)
-		data_set_scaled = np.concatenate((data_set_scaled, y_open[1:]), axis=1)
 		data_set_scaled = np.concatenate((data_set_scaled, y_close[1:]), axis=1)
 		data_set_scaled = np.concatenate((data_set_scaled, y_target[1:]), axis=1)
 
@@ -253,83 +272,101 @@ class InvestorLSTMConfidenceClassProb(Investor):
 		# fig.show()
 
 	def trainAndPredict(self, dataUntilToday: pd.DataFrame):
-		data = dataUntilToday.copy()
+		data = pd.DataFrame()
 
 		# Add indicators
-		# average_true_range_w1
-		params = ATRInvestorParams(1)
-		data["average_true_range_w1"] = averageTrueRange(data["High"], data["Low"], data["Close"], params)["average_true_range"]
-		# stochRsi_d_w50_s13_s211
-		params = StochasticRSIInvestorParams(50, 3, 11)
-		data["stochRsi_d_w50_s13_s211"] = stochasticRSI(data["Close"], params)["d"]
-		# macd_difffW1_sW22_signal6
-		params = MACDInvestorParams(None, None, 1, 22, 6)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW1_sW22_signal6"] = macd["macd"] - macd["signal"]
-		# macd_difffW4_sW24_signal7
-		params = MACDInvestorParams(None, None, 4, 24, 7)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW4_sW24_signal7"] = macd["macd"] - macd["signal"]
-		# macd_fW1_sW5_signal12
-		params = MACDInvestorParams(None, None, 1, 5, 12)
-		data["macd_fW1_sW5_signal12"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# adx_neg_w2
-		params = ADXInvestorParams(2)
-		data["adx_neg_w2"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx_neg"]
-		# adx_w2
-		params = ADXInvestorParams(2)
-		data["adx_w2"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx"]
-		# macd_difffW1_sW5_signal12
-		params = MACDInvestorParams(None, None, 1, 5, 12)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW1_sW5_signal12"] = macd["macd"] - macd["signal"]
-		# adx_w28
-		params = ADXInvestorParams(28)
-		data["adx_w28"] = averageDirectionalMovementIndex(data["High"], data["Low"], data["Close"], params)["adx"]
-		# macd_fW1_sW38_signal32
-		params = MACDInvestorParams(None, None, 1, 38, 32)
-		data["macd_fW1_sW38_signal32"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# macd_fW1_sW16_signal49
-		params = MACDInvestorParams(None, None, 1, 16, 49)
-		data["macd_fW1_sW16_signal49"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# macd_difffW16_sW44_signal47
-		params = MACDInvestorParams(None, None, 16, 44, 47)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW16_sW44_signal47"] = macd["macd"] - macd["signal"]
-		# macd_difffW8_sW5_signal2
-		params = MACDInvestorParams(None, None, 8, 5, 2)
-		macd = movingAverageConvergenceDivergence(data["Close"], params)
-		data["macd_difffW8_sW5_signal2"] = macd["macd"] - macd["signal"]
-		# average_true_range_w21
-		params = ATRInvestorParams(21)
-		data["average_true_range_w21"] = averageTrueRange(data["High"], data["Low"], data["Close"], params)[
-			"average_true_range"]
-		# macd_fW1_sW50_signal9
-		params = MACDInvestorParams(None, None, 1, 50, 9)
-		data["macd_fW1_sW50_signal9"] = movingAverageConvergenceDivergence(data["Close"], params)["macd"]
-		# Diff_close
-		data['Diff_close'] = data['Close'] - data['Close'].shift()
-		# Diff_open
-		data['Diff_open'] = data["Open"] - data["Open"].shift()
-
-		# Returns and objective classes
-		data["log_Open"] = np.log(data["Open"])
-		data['log_Close'] = np.log(data['Close'])
-		data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
+		# Return_close
+		data['log_Close'] = np.log(dataUntilToday['Close'])
 		data["Return_close"] = data["log_Close"] - data["log_Close"].shift(+1)
-		data["Return_target"] = data["log_Open"].shift(-1) - data["log_Open"]
 
-		y_open = np.asarray([1 if data.Return_open[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
+		# Diff_close
+		data['Diff_close'] = dataUntilToday['Close'] - dataUntilToday['Close'].shift()
+
+		# stochRsi_stochrsi_w2_s126_s24
+		params = StochasticRSIInvestorParams(2, 26, 4)
+		data['stochRsi_stochrsi_w2_s126_s24'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s137_s234
+		params = StochasticRSIInvestorParams(2, 37, 34)
+		data['stochRsi_stochrsi_w2_s137_s234'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# rsi_w1
+		params = RSIInvestorParams(1)
+		data['rsi_w1'] = relativeStrengthIndex(dataUntilToday['Close'], params)
+
+		# stochRsi_stochrsi_w2_s114_s236
+		params = StochasticRSIInvestorParams(2, 14, 36)
+		data['stochRsi_stochrsi_w2_s114_s236'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s12_s222
+		params = StochasticRSIInvestorParams(3, 2, 22)
+		data['stochRsi_stochrsi_w3_s12_s222'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s13_s218
+		params = StochasticRSIInvestorParams(2, 3, 18)
+		data['stochRsi_stochrsi_w2_s13_s218'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w2_s115_s236
+		params = StochasticRSIInvestorParams(2, 15, 36)
+		data['stochRsi_stochrsi_w2_s115_s236'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s149_s21
+		params = StochasticRSIInvestorParams(3, 49, 1)
+		data['stochRsi_stochrsi_w3_s149_s21'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# stochRsi_stochrsi_w3_s129_s238
+		params = StochasticRSIInvestorParams(3, 29, 38)
+		data['stochRsi_stochrsi_w3_s129_s238'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# rsi_w2
+		params = RSIInvestorParams(2)
+		data['rsi_w2'] = relativeStrengthIndex(dataUntilToday['Close'], params)
+
+		# bb_pband_w4_stdDev3.3223760630638397
+		params = BBInvestorParams(4, 3.32)
+		data['bb_pband_w4_stdDev3.3223760630638397'] = bollingerBands(dataUntilToday['Close'], params)
+
+		# stochRsi_stochrsi_w4_s123_s245
+		params = StochasticRSIInvestorParams(4, 23, 45)
+		data['stochRsi_stochrsi_w4_s123_s245'] = stochasticRSI(dataUntilToday['Close'], params)['stochrsi']
+
+		# macd_difffW1_sW5_signal12
+		params = MACDInvestorParams(1, 5, 12)
+		data['macd_difffW1_sW5_signal12'] = movingAverageConvergenceDivergence(dataUntilToday['Close'], params)
+
+		# bb_pband_w4_stdDev0.7177075201973817
+		params = BBInvestorParams(4, 0.72)
+		data['bb_pband_w4_stdDev0.7177075201973817'] = bollingerBands(dataUntilToday['Close'], params)
+
+		# Diff_open
+		data['Diff_open'] = dataUntilToday["Open"] - dataUntilToday["Open"].shift()
+
+		# Return_open
+		data['log_Open'] = np.log(dataUntilToday['Open'])
+		data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
+
+		# aroon_up_w4
+		params = AroonInvestorParams(4)
+		data['aroon_up_w4'] = aroon(dataUntilToday['Close'], params)
+
+		# Class_close
 		y_close = np.asarray([1 if data.Return_close[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
+
+		# target
+		data["Return_target"] = data["log_Open"].shift(-1) - data["log_Open"]
 		y_target = np.asarray([1 if data.Return_target[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
 
-		data = data.drop(['Return_target', 'High', 'Low', 'Adj Close'], axis=1)
+		# Drop based on correlation matrix
+		data = data.drop(['log_Open', 'log_Close', 'Return_target', 'stochRsi_stochrsi_w2_s114_s236',
+						  'stochRsi_stochrsi_w2_s126_s24',
+						  'stochRsi_stochrsi_w2_s137_s234', 'stochRsi_stochrsi_w3_s149_s21',
+						  'stochRsi_stochrsi_w3_s12_s222',
+						  'stochRsi_stochrsi_w2_s115_s236'], axis=1)
 		data.dropna(inplace=True)
 
 		# scale data, and then add the class as feature input
 		scaler = StandardScaler()
 		data_set_scaled = scaler.fit_transform(data)
-		data_set_scaled = np.concatenate((data_set_scaled, y_open[1:]), axis=1)
 		data_set_scaled = np.concatenate((data_set_scaled, y_close[1:]), axis=1)
 		data_set_scaled = np.concatenate((data_set_scaled, y_target[1:]), axis=1)
 
@@ -390,7 +427,7 @@ def fit_model(X_train, y_train, epochs, batch_size):
 	model = class_LSTM(n_inputs, n_features)
 	# model.fit(X_train, y_train, batch_size=10, epochs=93)
 	# fit the model on the training dataset
-	early_stopping = EarlyStopping(monitor="loss", patience=10, mode='auto', min_delta=0)
+	early_stopping = EarlyStopping(monitor="accuracy", patience=10, mode='auto', min_delta=0)
 	model.fit(X_train, y_train, verbose=2, epochs=epochs, batch_size=batch_size, callbacks=[early_stopping])
 	return model
 
