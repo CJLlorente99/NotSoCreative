@@ -1,4 +1,5 @@
 from keras.layers import Dropout, LSTM, Dense
+from keras.optimizers import Adamax
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from classes.investorClass import Investor
@@ -184,7 +185,7 @@ class InvestorLSTMConfidenceClass(Investor):
 		data_set_scaled = np.concatenate((data_set_scaled, y_target[1:]), axis=1)
 
 		# choose how many look back days
-		backcandles = 30
+		backcandles = 60
 
 		# choose columns: all but target variable (its last column)
 		liste = list(range(0, data.shape[1] - 1))
@@ -371,7 +372,7 @@ class InvestorLSTMConfidenceClassProb(Investor):
 		data_set_scaled = np.concatenate((data_set_scaled, y_target[1:]), axis=1)
 
 		# choose how many look back days
-		backcandles = 30
+		backcandles = 60
 
 		# choose columns: all but target variable (its last column)
 		liste = list(range(0, data.shape[1] - 1))
@@ -391,13 +392,14 @@ class InvestorLSTMConfidenceClassProb(Investor):
 		return y_pred
 
 def class_LSTM(n_inputs, n_features):
+	opt = Adamax(learning_rate=0.009)
 	model = Sequential()
-	model.add(LSTM(units=200, return_sequences=True, input_shape=(n_inputs, n_features)))
-	model.add(Dropout(0.01))
-	model.add(LSTM(100))
+	model.add(LSTM(units=175, return_sequences=True, input_shape=(n_inputs, n_features)))
+	model.add(Dropout(0.1))
+	model.add(LSTM(125))
 	model.add(Dropout(0.1))
 	model.add(Dense(1, activation='sigmoid'))
-	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+	model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 	return model
 
 def prepare_data(data_set_scaled, backcandles, liste, pred_days):
