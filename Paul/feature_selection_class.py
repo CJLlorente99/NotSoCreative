@@ -6,8 +6,8 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import math
 import yfinance as yf
-import pandas_ta as ta
-from Backtest import backtest_func
+# import pandas_ta as ta
+# from Backtest import backtest_func
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import LSTM, Bidirectional
@@ -49,7 +49,7 @@ def backtest(data, y, model, start=200, step=40):
     return predictions, accuracy
 
 def main():
-    data = pd.read_csv('featureSelectionDataset1000.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
+    data = pd.read_csv('featureSelectionDatasetMixed600.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
     # ["Return"]
     # for dataset Log300 use this:
     #data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class', 'LogReturnBefore'], axis=1)
@@ -59,17 +59,20 @@ def main():
     data["log_Open"] = np.log(data["Open"])
     data["Return_close"] = data["log_Close"] - data["log_Close"].shift(+1)
     data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
+    data["Return_intraday"] = data["log_Close"] - data["log_Open"]
     data['Diff_open'] = data["Open"] - data["Open"].shift()
     data['Diff_close'] = data['Close'] - data['Close'].shift()
+    data['Diff_intraday'] = data['Close'] - data['Open']
     data['Class_open'] = [1 if data.Return_open[i] > 0 else 0 for i in range(len(data))]
     data['Class_close'] = [1 if data.Return_close[i]>0 else 0 for i in range(len(data))]
-    yx = data["log_Open"].shift(-1) - data["log_Open"]
+    data['Class_intraday'] = [1 if data.Return_intraday[i]>0 else 0 for i in range(len(data))]
+    yx = data["log_Open"].shift(-2) - data["log_Open"].shift(-1)
     yx.dropna(inplace=True)
     yx = yx[1:]
     print(yx)
     
     data.dropna(inplace=True)
-    data = data[:-1]
+    data = data[:-2]
     print(data)
     y = [1 if yx.iloc[i] > 0 else 0 for i in range(len(data))]
     
@@ -78,7 +81,16 @@ def main():
     #y_close = np.asarray([1 if data.Return_close[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
     #y_target = np.asarray([1 if data.Target[i]>0 else 0 for i in range(len(data))]).reshape(-1, 1)
 
-    
+    # Create correlation matrix
+    corr_matrix = data.corr()
+    upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape),k=1).astype(np.bool))
+    to_drop = []
+    for column in upper_tri.columns:
+        if any(upper_tri[column] > 0.95):
+            to_drop.append(column)
+    data = data.drop(to_drop, axis=1)
+    print(data)
+
     '''data = yf.download(tickers='^GSPC', start='2018-01-01', end='2022-12-28')
     data.head(10)
     # Adding indicators
@@ -133,9 +145,9 @@ def main():
     plt.xticks(fontsize=10)
     plt.yticks(fontsize=10)
     plt.show()
-    X_sort['Open'] = data['Open']
-    X_sort['Target'] = data["log_Open"].shift(-1) - data["log_Open"]
-    X_sort.to_csv("featureSelectionDataset_Paul_Class.csv")
+    # X_sort['Open'] = data['Open']
+    # X_sort['Target'] = data["log_Open"].shift(-1) - data["log_Open"]
+    # X_sort.to_csv("featureSelectionDataset_Paul_Class.csv")
     print(X_sort)
 
 
