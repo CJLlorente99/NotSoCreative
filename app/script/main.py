@@ -10,6 +10,9 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 import time
 from logManager import LogManager
 import stat
+from inversionStrategyJSONAPI import *
+from taAPI import *
+import numpy as np
 """
 The .bat (Windows) or .sh (Mac/Linux) should install all needed packages
 The script should do the following.
@@ -18,8 +21,8 @@ The script should do the following.
 3) check new data can be retrieved from S&P 500 (check S&P 500 opens today)
 4) open csv file and read inversor status
 5) calculate needed data
-6) run algorithm
-7) write csv file with dataframe
+6) run algorithm (generate part of the csv related to the strategies)
+7) write csv file with dataframe (also append date and indicator data)
 """
 
 # Constants
@@ -29,6 +32,8 @@ logManager = LogManager(logFile)
 csvDataFileHidden = 'ACHTUNGScriptData/myData.csv'
 
 csvDataFile = 'scriptData/myData.csv'
+
+jsonFile = 'ACHTUNGScriptData/strategies.json'
 
 def main():
 	# 1) safety procedures (operations can be done/necessary files are there)
@@ -54,6 +59,23 @@ def main():
 		# Launch message to user
 
 	# 5) calculate needed data
+	jsonManager = JsonStrategyManager(jsonFile)
+	inputs = jsonManager.listInputs()
+
+	out = calculateInputs(data, inputs)
+	inputsDf = out['Data']
+	if not out['status']:
+		pass
+		# Launch message to user
+
+	# 6) run algorithm (generate part of the csv related to the strategies)
+	# investorStrategy | MoneyInvested | MoneyNotInvested | MoneyBoughtToday | MoneySoldToday | PerBoughtTomorrow |
+	# PerSoldTomorrow | TotalPortfolioValue
+	out = runStrategies(inversorInfo, inputsDf, jsonManager.listStrategies())
+
+	# 7) write csv file with dataframe (also append date and indicator data)
+
+
 
 def runSafetyProcedures():
 	status = False
@@ -120,6 +142,10 @@ def retrieveStockData(todayDate: datetime.date) -> pd.DataFrame():
 		status = True
 		errMsg = "retrieveStockData OK"
 		logManager.writeLog('INFO', errMsg)
+
+		# The only certain value we have from today is the open value. High, Low, Volume and Close are not teh definitive from today.
+		data['Open'] = data['Open'].shift(-1)
+		data = data[:-1]
 	else:
 		status = False
 		errMsg = 'retrieveStockData ERROR'
@@ -132,6 +158,7 @@ def retrieveStockData(todayDate: datetime.date) -> pd.DataFrame():
 def retrieveCSVData():
 	status = False
 	errMsg = ''
+	data = pd.DataFrame()
 
 	try:
 		data = pd.read_csv(csvDataFileHidden)
@@ -145,6 +172,134 @@ def retrieveCSVData():
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
+def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput]):
+	status = False
+	errMsg = ''
+
+	data = pd.DataFrame()
+
+	try:
+		for inp in inputs:
+			name = inp['Name']
+			dfName = inp['DfName']
+			key = inp['Key']
+			description = inp['Description']
+			parameters = inp['Parameters']
+
+			if name == 'High':
+				data[dfName] = df['High']
+			elif name == 'Low':
+				data[dfName] = df['Low']
+			elif name == 'Volume':
+				data[dfName] = df['Volume']
+			elif name == 'Close':
+				if key == 'Natural':
+					data[dfName] = df['Close']
+				elif key == 'Log':
+					data[dfName] = np.log(df['Close'])
+			elif name == 'Open':
+				if key == 'Natural':
+					data[dfName] = df['Open']
+				elif key == 'Log':
+					data[dfName] = np.log(df['Open'])
+			elif name == 'adi':
+				data[dfName] = accDistIndexIndicator(df['High'], df['Low'], df['Close'], df['Volume'])[key]
+			elif name == 'adx':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+
+				data[dfName] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], window)[key]
+			elif name == 'aroon':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+
+				data[dfName] = aroon(df['Close'], window)[key]
+			elif name == 'atr':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+
+				data[dfName] = averageTrueRange(df['High'], df['Low'], df['Close'], window)[key]
+			elif name == 'bb':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+					elif param['Name'] == 'StdDev':
+						stdDev = param['Value']
+
+				data[dfName] = bollingerBands(df['Close'], window, stdDev)[key]
+			elif name == 'ema':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+
+				data[dfName] = exponentialMovingAverage(df['Close'], window)[key]
+			elif name == 'macd':
+				for param in parameters:
+					if param['Name'] == 'FastWindow':
+						fastWindow = param['Value']
+					elif param['Name'] == 'slowWindow':
+						slowWindow = param['Value']
+					elif param['Name'] == 'signal':
+						signal = param['Value']
+
+				data[dfName] = movingAverageConvergenceDivergence(df['Close'], fastWindow, slowWindow, signal)[key]
+			elif name == 'obv':
+				data[dfName] = on_balance_volume(df['Close'], df['Volume'])[key]
+			elif name == 'rsi':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+
+				data[dfName] = relativeStrengthIndex(df['Close'], window)[key]
+			elif name == 'stochasticRsi':
+				for param in parameters:
+					if param['Name'] == 'Window':
+						window = param['Value']
+					elif param['Name'] == 'Smooth1':
+						smooth1 = param['Value']
+					elif param['Name'] == 'Smooth2':
+						smooth2 = param['Value']
+
+				data[dfName] = stochasticRSI(df['Close'], window, smooth1, smooth2)[key]
+
+		status = True
+		errMsg = 'calculateInputs OK'
+		logManager.writeLog('INFO', errMsg)
+	except:
+		status = False
+		errMsg = 'calculateInputs ERROR'
+		logManager.writeLog('ERROR', errMsg)
+
+	return {'status': status, 'errorMsg': errMsg, 'data': data}
+
+def runStrategies(inversorInfo: pd.DataFrame, inputsDf: pd.DataFrame, listStrategies: [Strategy]):
+	status = False
+	errMsg = ''
+
+	for strategy in listStrategies:
+		name = strategy['Name']
+
+		strategyInfo = inversorInfo[inversorInfo['investorStrategy'] == name]
+		inputsData = inputsDf[strategy.getListDfNameInputs()]
+
+		if name == 'bia':
+			pass
+		elif name == 'wia':
+			pass
+		elif name == 'bah':
+			pass
+		elif name == 'ca':
+			pass
+		elif name == 'random':
+			pass
+		elif name == 'idle':
+			pass
+
+
+	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
 if __name__ == "__main__":
 	main()
