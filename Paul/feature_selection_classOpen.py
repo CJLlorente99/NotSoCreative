@@ -50,7 +50,7 @@ def backtest(data, y, model, start=200, step=40):
     return predictions, accuracy
 
 def main():
-    data = pd.read_csv('featureSelectionDataset600MixedShifted.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
+    data = pd.read_csv('featureSelectionDataset.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
     # ["Return"]
     # for dataset Log300 use this:
     #data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class', 'LogReturnBefore'], axis=1)
@@ -78,7 +78,7 @@ def main():
     data['Class_interday'] = [1 if data.Return_interday[i] > 0 else 0 for i in range(len(data))]
     yx = data["log_Open"].shift(-1) - data["log_Open"]
     yx.dropna(inplace=True)
-    yx = yx[1:]
+    # yx = yx[2:]
     print(yx)
     
     data.dropna(inplace=True)

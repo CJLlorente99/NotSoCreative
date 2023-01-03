@@ -69,7 +69,7 @@ print("Schluss ADI")
 
 print("Anfang ADX")
 
-windows = np.unique(random.randint(1, 51, 5))
+windows = np.unique(random.randint(1, 51, 10))
 
 i = 0
 for window in windows:
@@ -102,7 +102,7 @@ print("Schluss ADX")
 
 print("Anfang Aroon")
 
-windows = np.unique(random.randint(1, 51, 5))
+windows = np.unique(random.randint(1, 51, 10))
 
 i = 0
 for window in windows:
@@ -129,43 +129,43 @@ for window in windows:
 		 pd.DataFrame(ar["aroon_up"].values, columns=["aroon_up_" + tag], index=ar["aroon_up"].index)], axis=1)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_indicator_" + tag, "key": "aroon_indicator",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_down_" + tag, "key": "aroon_down",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_up_" + tag, "key": "aroon_up",
-				   "parameters": {"window": int(window)}}
-
-	params = AroonInvestorParams(window)
-	ar = aroon(df["LogReturnBefore"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(ar["aroon_indicator"].values, columns=["aroonReturnLogOpen_indicator_" + tag],
-					  index=ar["aroon_indicator"].index),
-		 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogOpen_down_" + tag], index=ar["aroon_down"].index),
-		 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogOpen_up_" + tag], index=ar["aroon_up"].index)], axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_indicator_" + tag, "key": "aroon_indicator",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_down_" + tag, "key": "aroon_down",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_up_" + tag, "key": "aroon_up",
-				   "parameters": {"window": int(window)}}
-
-	params = AroonInvestorParams(window)
-	ar = aroon(df["LogReturnBeforeClose"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(ar["aroon_indicator"].values, columns=["aroonReturnLogClose_indicator_" + tag],
-					  index=ar["aroon_indicator"].index),
-		 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogClose_down_" + tag], index=ar["aroon_down"].index),
-		 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogClose_up_" + tag], index=ar["aroon_up"].index)], axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_indicator_" + tag, "key": "aroon_indicator",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_down_" + tag, "key": "aroon_down",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_up_" + tag, "key": "aroon_up",
+	# 			   "parameters": {"window": int(window)}}
+	#
+	# params = AroonInvestorParams(window)
+	# ar = aroon(df["LogReturnBefore"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(ar["aroon_indicator"].values, columns=["aroonReturnLogOpen_indicator_" + tag],
+	# 				  index=ar["aroon_indicator"].index),
+	# 	 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogOpen_down_" + tag], index=ar["aroon_down"].index),
+	# 	 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogOpen_up_" + tag], index=ar["aroon_up"].index)], axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_indicator_" + tag, "key": "aroon_indicator",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_down_" + tag, "key": "aroon_down",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_up_" + tag, "key": "aroon_up",
+	# 			   "parameters": {"window": int(window)}}
+	#
+	# params = AroonInvestorParams(window)
+	# ar = aroon(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(ar["aroon_indicator"].values, columns=["aroonReturnLogClose_indicator_" + tag],
+	# 				  index=ar["aroon_indicator"].index),
+	# 	 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogClose_down_" + tag], index=ar["aroon_down"].index),
+	# 	 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogClose_up_" + tag], index=ar["aroon_up"].index)], axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -176,7 +176,7 @@ print("Schluss Aroon")
 
 print("Anfang ATR")
 
-windows = np.unique(random.randint(1, 51, 5))
+windows = np.unique(random.randint(1, 51, 10))
 
 i = 0
 for window in windows:
@@ -204,7 +204,7 @@ print("Schluss ATR")
 
 print("Anfang BB")
 
-n = 10
+n = 20
 windows = random.randint(1, 51, n)
 stdDevs = random.uniform(0.5, 4, n)
 X = [windows, stdDevs]
@@ -242,51 +242,51 @@ for j in range(n):
 		 pd.DataFrame(bb["lband"].values, columns=["bb_lband_" + tag], index=bb["lband"].index)], axis=1)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_pband_" + tag, "key": "pband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_mavg_" + tag, "key": "mavg",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_hband_" + tag, "key": "hband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_lband_" + tag, "key": "lband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-
-	params = BBInvestorParams(window, stdDev, 0, 0)
-	bb = bollingerBands(df["LogReturnBefore"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(bb["pband"].values, columns=["bbReturnLogOpen_pband_" + tag], index=bb["pband"].index),
-		 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogOpen_mavg_" + tag], index=bb["mavg"].index),
-		 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogOpen_hband_" + tag], index=bb["hband"].index),
-		 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogOpen_lband_" + tag], index=bb["lband"].index)], axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_pband_" + tag, "key": "pband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_mavg_" + tag, "key": "mavg",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_hband_" + tag, "key": "hband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_lband_" + tag, "key": "lband",
-				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
-	jsonString.append(json.dumps(description))
-
-	params = BBInvestorParams(window, stdDev, 0, 0)
-	bb = bollingerBands(df["LogReturnBeforeClose"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(bb["pband"].values, columns=["bbReturnLogClose_pband_" + tag], index=bb["pband"].index),
-		 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogClose_mavg_" + tag], index=bb["mavg"].index),
-		 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogClose_hband_" + tag], index=bb["hband"].index),
-		 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogClose_lband_" + tag], index=bb["lband"].index)], axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_pband_" + tag, "key": "pband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_mavg_" + tag, "key": "mavg",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_hband_" + tag, "key": "hband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_lband_" + tag, "key": "lband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = BBInvestorParams(window, stdDev, 0, 0)
+	# bb = bollingerBands(df["LogReturnBefore"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(bb["pband"].values, columns=["bbReturnLogOpen_pband_" + tag], index=bb["pband"].index),
+	# 	 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogOpen_mavg_" + tag], index=bb["mavg"].index),
+	# 	 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogOpen_hband_" + tag], index=bb["hband"].index),
+	# 	 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogOpen_lband_" + tag], index=bb["lband"].index)], axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_pband_" + tag, "key": "pband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_mavg_" + tag, "key": "mavg",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_hband_" + tag, "key": "hband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_lband_" + tag, "key": "lband",
+	# 			   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = BBInvestorParams(window, stdDev, 0, 0)
+	# bb = bollingerBands(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(bb["pband"].values, columns=["bbReturnLogClose_pband_" + tag], index=bb["pband"].index),
+	# 	 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogClose_mavg_" + tag], index=bb["mavg"].index),
+	# 	 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogClose_hband_" + tag], index=bb["hband"].index),
+	# 	 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogClose_lband_" + tag], index=bb["lband"].index)], axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -297,7 +297,7 @@ print("Schluss BB")
 
 print("Anfang MACD")
 
-n = 20
+n = 40
 fastWindows = random.randint(1, 20, n)
 slowWindows = random.randint(5, 51, n)
 signals = random.randint(1, 51, n)
@@ -333,46 +333,46 @@ for j in range(n):
 		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macd_diff" + tag], index=macd["macd"].index)], axis=1)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_" + tag, "key": "macd",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_signal_" + tag, "key": "signal",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_diff" + tag, "key": "macd-signal",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-
-	params = MACDInvestorParams(None, None, fastWindow, slowWindow, signal)
-	macd = movingAverageConvergenceDivergence(df["LogReturnBefore"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(macd["macd"].values, columns=["macdReturnLogOpen_" + tag], index=macd["macd"].index),
-		 pd.DataFrame(macd["signal"].values, columns=["macdReturnLogOpen_signal_" + tag], index=macd["signal"].index),
-		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogOpen_diff" + tag], index=macd["macd"].index)],
-		axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_" + tag, "key": "macd",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_signal_" + tag, "key": "signal",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_diff" + tag, "key": "macd-signal",
-				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
-	jsonString.append(json.dumps(description))
-
-	params = MACDInvestorParams(None, None, fastWindow, slowWindow, signal)
-	macd = movingAverageConvergenceDivergence(df["LogReturnBeforeClose"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(macd["macd"].values, columns=["macdReturnLogClose_" + tag], index=macd["macd"].index),
-		 pd.DataFrame(macd["signal"].values, columns=["macdReturnLogClose_signal_" + tag], index=macd["signal"].index),
-		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogClose_diff" + tag],
-					  index=macd["macd"].index)],
-		axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_" + tag, "key": "macd",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_signal_" + tag, "key": "signal",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_diff" + tag, "key": "macd-signal",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = MACDInvestorParams(None, None, fastWindow, slowWindow, signal)
+	# macd = movingAverageConvergenceDivergence(df["LogReturnBefore"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(macd["macd"].values, columns=["macdReturnLogOpen_" + tag], index=macd["macd"].index),
+	# 	 pd.DataFrame(macd["signal"].values, columns=["macdReturnLogOpen_signal_" + tag], index=macd["signal"].index),
+	# 	 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogOpen_diff" + tag], index=macd["macd"].index)],
+	# 	axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_" + tag, "key": "macd",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_signal_" + tag, "key": "signal",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_diff" + tag, "key": "macd-signal",
+	# 			   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = MACDInvestorParams(None, None, fastWindow, slowWindow, signal)
+	# macd = movingAverageConvergenceDivergence(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(macd["macd"].values, columns=["macdReturnLogClose_" + tag], index=macd["macd"].index),
+	# 	 pd.DataFrame(macd["signal"].values, columns=["macdReturnLogClose_signal_" + tag], index=macd["signal"].index),
+	# 	 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogClose_diff" + tag],
+	# 				  index=macd["macd"].index)],
+	# 	axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -383,7 +383,7 @@ print("Schluss MACD")
 
 print("Anfang EMA")
 
-windows = np.unique(random.randint(1, 101, 10))
+windows = np.unique(random.randint(1, 101, 20))
 
 i = 0
 for window in windows:
@@ -402,25 +402,25 @@ for window in windows:
 	aux = pd.DataFrame(ema["ema"].values, columns=["ema_" + tag], index=ema["ema"].index)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "emaReturnLogOpen", "dfName": "emaReturnLogOpen_" + tag, "key": "ema",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-
-	params = MAInvestorParams(None, None, window)
-	ema = exponentialMovingAverage(df["LogReturnBefore"], params)
-
-	aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogOpen_" + tag], index=ema["ema"].index)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "emaReturnLogClose", "dfName": "emaReturnLogClose_" + tag, "key": "ema",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-
-	params = MAInvestorParams(None, None, window)
-	ema = exponentialMovingAverage(df["LogReturnBeforeClose"], params)
-
-	aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogClose_" + tag], index=ema["ema"].index)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "emaReturnLogOpen", "dfName": "emaReturnLogOpen_" + tag, "key": "ema",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = MAInvestorParams(None, None, window)
+	# ema = exponentialMovingAverage(df["LogReturnBefore"], params)
+	#
+	# aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogOpen_" + tag], index=ema["ema"].index)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "emaReturnLogClose", "dfName": "emaReturnLogClose_" + tag, "key": "ema",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = MAInvestorParams(None, None, window)
+	# ema = exponentialMovingAverage(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogClose_" + tag], index=ema["ema"].index)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -447,7 +447,7 @@ print("Schluss OBV")
 
 print("Anfang RSI")
 
-windows = np.unique(random.randint(1, 51, 5))
+windows = np.unique(random.randint(1, 51, 10))
 
 i = 0
 for window in windows:
@@ -466,25 +466,25 @@ for window in windows:
 	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsi_" + tag], index=rsi["rsi"].index)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "rsiReturnLogOpen", "dfName": "rsiReturnLogOpen_" + tag, "key": "rsi",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-
-	params = RSIInvestorParams(0, 0, window)
-	rsi = relativeStrengthIndex(df["LogReturnBefore"], params)
-
-	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogOpen_" + tag], index=rsi["rsi"].index)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "rsiReturnLogClose", "dfName": "rsiReturnLogClose_" + tag, "key": "rsi",
-				   "parameters": {"window": int(window)}}
-	jsonString.append(json.dumps(description))
-
-	params = RSIInvestorParams(0, 0, window)
-	rsi = relativeStrengthIndex(df["LogReturnBeforeClose"], params)
-
-	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogClose_" + tag], index=rsi["rsi"].index)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "rsiReturnLogOpen", "dfName": "rsiReturnLogOpen_" + tag, "key": "rsi",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = RSIInvestorParams(0, 0, window)
+	# rsi = relativeStrengthIndex(df["LogReturnBefore"], params)
+	#
+	# aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogOpen_" + tag], index=rsi["rsi"].index)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "rsiReturnLogClose", "dfName": "rsiReturnLogClose_" + tag, "key": "rsi",
+	# 			   "parameters": {"window": int(window)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = RSIInvestorParams(0, 0, window)
+	# rsi = relativeStrengthIndex(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogClose_" + tag], index=rsi["rsi"].index)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -495,7 +495,7 @@ print("Schluss RSI")
 
 print("Anfang SRSI")
 
-n = 20
+n = 40
 windows = random.randint(1, 51, n)
 smooth1s = random.randint(1, 51, n)
 smooth2s = random.randint(1, 51, n)
@@ -531,47 +531,47 @@ for j in range(n):
 		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsi_d_" + tag], index=stochRsi["d"].index)], axis=1)
 	df = pd.concat([df, aux.shift()], axis=1)
 
-	description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_stochrsi_" + tag, "key": "stochrsi",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_k_" + tag, "key": "k",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_d_" + tag, "key": "d",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-
-	params = StochasticRSIInvestorParams(window, smooth1, smooth2)
-	stochRsi = stochasticRSI(df["LogReturnBefore"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(stochRsi["stochrsi"].values, columns=["stochRsiReturnLogOpen_stochrsi_" + tag],
-					  index=stochRsi["stochrsi"].index),
-		 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogOpen_k_" + tag], index=stochRsi["k"].index),
-		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogOpen_d_" + tag], index=stochRsi["d"].index)], axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
-
-	description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_stochrsi_" + tag,
-				   "key": "stochrsi",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_k_" + tag, "key": "k",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-	description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_d_" + tag, "key": "d",
-				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
-	jsonString.append(json.dumps(description))
-
-	params = StochasticRSIInvestorParams(window, smooth1, smooth2)
-	stochRsi = stochasticRSI(df["LogReturnBeforeClose"], params)
-
-	aux = pd.concat(
-		[pd.DataFrame(stochRsi["stochrsi"].values, columns=["stochRsiReturnLogClose_stochrsi_" + tag],
-					  index=stochRsi["stochrsi"].index),
-		 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogClose_k_" + tag], index=stochRsi["k"].index),
-		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogClose_d_" + tag], index=stochRsi["d"].index)],
-		axis=1)
-	df = pd.concat([df, aux.shift()], axis=1)
+	# description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_stochrsi_" + tag, "key": "stochrsi",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_k_" + tag, "key": "k",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_d_" + tag, "key": "d",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = StochasticRSIInvestorParams(window, smooth1, smooth2)
+	# stochRsi = stochasticRSI(df["LogReturnBefore"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(stochRsi["stochrsi"].values, columns=["stochRsiReturnLogOpen_stochrsi_" + tag],
+	# 				  index=stochRsi["stochrsi"].index),
+	# 	 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogOpen_k_" + tag], index=stochRsi["k"].index),
+	# 	 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogOpen_d_" + tag], index=stochRsi["d"].index)], axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
+	#
+	# description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_stochrsi_" + tag,
+	# 			   "key": "stochrsi",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_k_" + tag, "key": "k",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	# description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_d_" + tag, "key": "d",
+	# 			   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
+	# jsonString.append(json.dumps(description))
+	#
+	# params = StochasticRSIInvestorParams(window, smooth1, smooth2)
+	# stochRsi = stochasticRSI(df["LogReturnBeforeClose"], params)
+	#
+	# aux = pd.concat(
+	# 	[pd.DataFrame(stochRsi["stochrsi"].values, columns=["stochRsiReturnLogClose_stochrsi_" + tag],
+	# 				  index=stochRsi["stochrsi"].index),
+	# 	 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogClose_k_" + tag], index=stochRsi["k"].index),
+	# 	 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogClose_d_" + tag], index=stochRsi["d"].index)],
+	# 	axis=1)
+	# df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
