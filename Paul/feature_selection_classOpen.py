@@ -20,6 +20,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 import numpy as np
 from sklearn.metrics import accuracy_score
 import seaborn as sns
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 
 # not important
 def backtest(data, y, model, start=200, step=40):
@@ -126,7 +127,8 @@ def main():
     X_train, X_test = X[:splitlimit], X[splitlimit:]
     y_train, y_test = y[:splitlimit], y[splitlimit:]
     
-    model = RandomForestClassifier(n_estimators=100, verbose=2)
+    #model = RandomForestClassifier(n_estimators=100, verbose=2)
+    model = DecisionTreeClassifier()
     #model = RandomForestRegressor(n_estimators=100, verbose=2)
     model.fit(np.asarray(X_train), y_train)  # , validation_split=0.3)
     y_pred = model.predict(X_test)
