@@ -58,7 +58,7 @@ description = {"indicatorName": "adi", "dfName": "adi", "key": "acc_dist_index",
 jsonString.append(json.dumps(description))
 
 aux = pd.DataFrame(accDistIndexIndicator(df["High"], df["Low"], df["Close"], df["Volume"])["acc_dist_index"], columns=["adi"])
-df = pd.concat([df, aux], axis=1)
+df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -91,7 +91,7 @@ for window in windows:
 	aux = pd.concat([pd.DataFrame(adx["adx"].values, columns=["adx_" + tag], index=adx["adx"].index),
 					 pd.DataFrame(adx["adx_neg"].values, columns=["adx_neg_" + tag], index=adx["adx_neg"].index),
 					 pd.DataFrame(adx["adx_pos"].values, columns=["adx_pos_" + tag], index=adx["adx_pos"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -127,7 +127,7 @@ for window in windows:
 		[pd.DataFrame(ar["aroon_indicator"].values, columns=["aroon_indicator_" + tag], index=ar["aroon_indicator"].index),
 		 pd.DataFrame(ar["aroon_down"].values, columns=["aroon_down_" + tag], index=ar["aroon_down"].index),
 		 pd.DataFrame(ar["aroon_up"].values, columns=["aroon_up_" + tag], index=ar["aroon_up"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "aroonReturnLogOpen", "dfName": "aroonReturnLogOpen_indicator_" + tag, "key": "aroon_indicator",
 				   "parameters": {"window": int(window)}}
@@ -146,7 +146,7 @@ for window in windows:
 					  index=ar["aroon_indicator"].index),
 		 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogOpen_down_" + tag], index=ar["aroon_down"].index),
 		 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogOpen_up_" + tag], index=ar["aroon_up"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "aroonReturnLogClose", "dfName": "aroonReturnLogClose_indicator_" + tag, "key": "aroon_indicator",
 				   "parameters": {"window": int(window)}}
@@ -165,7 +165,7 @@ for window in windows:
 					  index=ar["aroon_indicator"].index),
 		 pd.DataFrame(ar["aroon_down"].values, columns=["aroonReturnLogClose_down_" + tag], index=ar["aroon_down"].index),
 		 pd.DataFrame(ar["aroon_up"].values, columns=["aroonReturnLogClose_up_" + tag], index=ar["aroon_up"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -193,7 +193,7 @@ for window in windows:
 	atr = averageTrueRange(df["High"], df["Low"], df["Close"], params)
 
 	aux = pd.DataFrame(atr["average_true_range"].values, columns=["average_true_range_" + tag], index=atr["average_true_range"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -240,7 +240,7 @@ for j in range(n):
 		 pd.DataFrame(bb["mavg"].values, columns=["bb_mavg_" + tag], index=bb["mavg"].index),
 		 pd.DataFrame(bb["hband"].values, columns=["bb_hband_" + tag], index=bb["hband"].index),
 		 pd.DataFrame(bb["lband"].values, columns=["bb_lband_" + tag], index=bb["lband"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "bbReturnLogOpen", "dfName": "bbReturnLogOpen_pband_" + tag, "key": "pband",
 				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
@@ -263,7 +263,7 @@ for j in range(n):
 		 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogOpen_mavg_" + tag], index=bb["mavg"].index),
 		 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogOpen_hband_" + tag], index=bb["hband"].index),
 		 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogOpen_lband_" + tag], index=bb["lband"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "bbReturnLogClose", "dfName": "bbReturnLogClose_pband_" + tag, "key": "pband",
 				   "parameters": {"window": int(window), "stdDev": float(stdDev)}}
@@ -286,7 +286,7 @@ for j in range(n):
 		 pd.DataFrame(bb["mavg"].values, columns=["bbReturnLogClose_mavg_" + tag], index=bb["mavg"].index),
 		 pd.DataFrame(bb["hband"].values, columns=["bbReturnLogClose_hband_" + tag], index=bb["hband"].index),
 		 pd.DataFrame(bb["lband"].values, columns=["bbReturnLogClose_lband_" + tag], index=bb["lband"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -331,7 +331,7 @@ for j in range(n):
 		[pd.DataFrame(macd["macd"].values, columns=["macd_" + tag], index=macd["macd"].index),
 		 pd.DataFrame(macd["signal"].values, columns=["macd_signal_" + tag], index=macd["signal"].index),
 		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macd_diff" + tag], index=macd["macd"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "macdReturnLogOpen", "dfName": "macdReturnLogOpen_" + tag, "key": "macd",
 				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
@@ -351,7 +351,7 @@ for j in range(n):
 		 pd.DataFrame(macd["signal"].values, columns=["macdReturnLogOpen_signal_" + tag], index=macd["signal"].index),
 		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogOpen_diff" + tag], index=macd["macd"].index)],
 		axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "macdReturnLogClose", "dfName": "macdReturnLogClose_" + tag, "key": "macd",
 				   "parameters": {"fastWindow": int(fastWindow), "slowWindow": int(slowWindow), "signal": int(signal)}}
@@ -372,7 +372,7 @@ for j in range(n):
 		 pd.DataFrame((macd["macd"] - macd["signal"]).values, columns=["macdReturnLogClose_diff" + tag],
 					  index=macd["macd"].index)],
 		axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -400,7 +400,7 @@ for window in windows:
 	ema = exponentialMovingAverage(df["Close"], params)
 
 	aux = pd.DataFrame(ema["ema"].values, columns=["ema_" + tag], index=ema["ema"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "emaReturnLogOpen", "dfName": "emaReturnLogOpen_" + tag, "key": "ema",
 				   "parameters": {"window": int(window)}}
@@ -410,7 +410,7 @@ for window in windows:
 	ema = exponentialMovingAverage(df["LogReturnBefore"], params)
 
 	aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogOpen_" + tag], index=ema["ema"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "emaReturnLogClose", "dfName": "emaReturnLogClose_" + tag, "key": "ema",
 				   "parameters": {"window": int(window)}}
@@ -420,7 +420,7 @@ for window in windows:
 	ema = exponentialMovingAverage(df["LogReturnBeforeClose"], params)
 
 	aux = pd.DataFrame(ema["ema"].values, columns=["emaReturnLogClose_" + tag], index=ema["ema"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -436,7 +436,7 @@ jsonString.append(json.dumps(description))
 
 obv = on_balance_volume(df["Close"], df["Volume"])
 aux = pd.DataFrame(obv["on_balance_volume"].values, columns=["obv"], index=obv["on_balance_volume"].index)
-df = pd.concat([df, aux], axis=1)
+df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -464,7 +464,7 @@ for window in windows:
 	rsi = relativeStrengthIndex(df["Close"], params)
 
 	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsi_" + tag], index=rsi["rsi"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "rsiReturnLogOpen", "dfName": "rsiReturnLogOpen_" + tag, "key": "rsi",
 				   "parameters": {"window": int(window)}}
@@ -474,7 +474,7 @@ for window in windows:
 	rsi = relativeStrengthIndex(df["LogReturnBefore"], params)
 
 	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogOpen_" + tag], index=rsi["rsi"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "rsiReturnLogClose", "dfName": "rsiReturnLogClose_" + tag, "key": "rsi",
 				   "parameters": {"window": int(window)}}
@@ -484,7 +484,7 @@ for window in windows:
 	rsi = relativeStrengthIndex(df["LogReturnBeforeClose"], params)
 
 	aux = pd.DataFrame(rsi["rsi"].values, columns=["rsiReturnLogClose_" + tag], index=rsi["rsi"].index)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 
@@ -529,7 +529,7 @@ for j in range(n):
 		[pd.DataFrame(stochRsi["stochrsi"].values, columns=["stochRsi_stochrsi_" + tag], index=stochRsi["stochrsi"].index),
 		 pd.DataFrame(stochRsi["k"].values, columns=["stochRsi_k_" + tag], index=stochRsi["k"].index),
 		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsi_d_" + tag], index=stochRsi["d"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "stochRsiReturnLogOpen", "dfName": "stochRsiReturnLogOpen_stochrsi_" + tag, "key": "stochrsi",
 				   "parameters": {"window": int(window), "smooth1": int(smooth1), "smooth2": int(smooth2)}}
@@ -549,7 +549,7 @@ for j in range(n):
 					  index=stochRsi["stochrsi"].index),
 		 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogOpen_k_" + tag], index=stochRsi["k"].index),
 		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogOpen_d_" + tag], index=stochRsi["d"].index)], axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 	description = {"indicatorName": "stochRsiReturnLogClose", "dfName": "stochRsiReturnLogClose_stochrsi_" + tag,
 				   "key": "stochrsi",
@@ -571,7 +571,7 @@ for j in range(n):
 		 pd.DataFrame(stochRsi["k"].values, columns=["stochRsiReturnLogClose_k_" + tag], index=stochRsi["k"].index),
 		 pd.DataFrame(stochRsi["d"].values, columns=["stochRsiReturnLogClose_d_" + tag], index=stochRsi["d"].index)],
 		axis=1)
-	df = pd.concat([df, aux], axis=1)
+	df = pd.concat([df, aux.shift()], axis=1)
 
 print(df)
 

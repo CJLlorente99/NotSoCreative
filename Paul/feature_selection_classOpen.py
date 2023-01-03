@@ -50,7 +50,7 @@ def backtest(data, y, model, start=200, step=40):
     return predictions, accuracy
 
 def main():
-    data = pd.read_csv('featureSelectionDatasetMixed600.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
+    data = pd.read_csv('featureSelectionDataset600MixedShifted.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
     # ["Return"]
     # for dataset Log300 use this:
     #data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class', 'LogReturnBefore'], axis=1)
@@ -60,6 +60,7 @@ def main():
     # Each row of the data frame has (for day t)
     # Close(t-1) | Open(t) | Return_close/Diff_close{Close(t-1) - Close(t-2)} | Return_open/Diff_open{Open(t) - Open(t-1)} | Return_intraday/Diff_intraday{Close(t-1) - Open(t-1)} |
     # Return_interday/Diff_interday{Open(t) - Close(t-1)}
+    # ALL INDICATORS HAVE ALREADY BEEN SHIFTED AS NONE DEPENDS ON THE OPEN VALUE
     data['Close'] = data['Close'].shift(+1)
     data['log_Close'] = np.log(data['Close'])
     data["log_Open"] = np.log(data["Open"])
@@ -81,7 +82,7 @@ def main():
     print(yx)
     
     data.dropna(inplace=True)
-    data = data[:-2]
+    data = data[:-1]
     print(data)
     y = [1 if yx.iloc[i] > 0 else 0 for i in range(len(data))]
     
