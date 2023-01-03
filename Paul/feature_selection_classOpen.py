@@ -54,19 +54,27 @@ def main():
     # for dataset Log300 use this:
     #data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class', 'LogReturnBefore'], axis=1)
     # for other use this
-    data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class'], axis=1)
+    data = data.drop(['LogReturn', 'Return', 'ReturnBefore', 'log(Open)', 'Class', 'LogReturnBefore', 'LogReturnBeforeClose'], axis=1)
+
+    # Each row of the data frame has (for day t)
+    # Close(t-1) | Open(t) | Return_close/Diff_close{Close(t-1) - Close(t-2)} | Return_open/Diff_open{Open(t) - Open(t-1)} | Return_intraday/Diff_intraday{Close(t-1) - Open(t-1)} |
+    # Return_interday/Diff_interday{Open(t) - Close(t-1)}
+    data['Close'] = data['Close'].shift(+1)
     data['log_Close'] = np.log(data['Close'])
     data["log_Open"] = np.log(data["Open"])
     data["Return_close"] = data["log_Close"] - data["log_Close"].shift(+1)
     data["Return_open"] = data["log_Open"] - data["log_Open"].shift(+1)
-    data["Return_intraday"] = data["log_Close"] - data["log_Open"]
+    data["Return_intraday"] = data["log_Close"] - data["log_Open"].shift(+1)
+    data['Return_interday'] = data["log_Open"] - data["log_Close"]
     data['Diff_open'] = data["Open"] - data["Open"].shift()
     data['Diff_close'] = data['Close'] - data['Close'].shift()
-    data['Diff_intraday'] = data['Close'] - data['Open']
+    data['Diff_intraday'] = data['Close'] - data['Open'].shift(1)
+    data['Diff_interday'] = data['Open'] - data['Close']
     data['Class_open'] = [1 if data.Return_open[i] > 0 else 0 for i in range(len(data))]
     data['Class_close'] = [1 if data.Return_close[i]>0 else 0 for i in range(len(data))]
     data['Class_intraday'] = [1 if data.Return_intraday[i]>0 else 0 for i in range(len(data))]
-    yx = data["log_Open"].shift(-2) - data["log_Open"].shift(-1)
+    data['Class_interday'] = [1 if data.Return_interday[i] > 0 else 0 for i in range(len(data))]
+    yx = data["log_Open"].shift(-1) - data["log_Open"]
     yx.dropna(inplace=True)
     yx = yx[1:]
     print(yx)
@@ -147,7 +155,7 @@ def main():
     plt.show()
     # X_sort['Open'] = data['Open']
     # X_sort['Target'] = data["log_Open"].shift(-1) - data["log_Open"]
-    # X_sort.to_csv("featureSelectionDataset_Paul_Class.csv")
+    X_sort.to_csv("featureSelectionDataset_Paul_Class.csv")
     print(X_sort)
 
 
