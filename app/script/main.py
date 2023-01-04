@@ -53,10 +53,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	# dateToday = date.today()
-	# now = datetime.datetime.now()
-	dateToday = datetime.datetime(2022, 12, 27)
-	now = datetime.datetime(2022, 12, 27, closingHour, closingMinute+20, 0)
+	dateToday = datetime.datetime.now()
+	now = datetime.datetime.now()
+	# dateToday = datetime.datetime(2022, 12, 27)
+	# now = datetime.datetime(2022, 12, 27, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute+10, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute + 10, second=0)
