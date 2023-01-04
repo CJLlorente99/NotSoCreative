@@ -18,14 +18,13 @@ class DailyStrategy(ABC):
 		self.initialInvestment = strategyDefinition.initialMoney
 		self.description = strategyDefinition.description
 
+		self.perToInvest = 0
 		if len(record) == 0:
 			self.investedMoney = 0
 			self.nonInvestedMoney = self.initialInvestment
-			self.perToInvest = 0
 		else:
 			self.investedMoney = record['MoneyInvested'].values[-1]
 			self.nonInvestedMoney = record['MoneyNotInvested'].values[-1]
-			self.perToInvest = record['PerInvestTomorrow'].values[-1]
 
 
 	"""

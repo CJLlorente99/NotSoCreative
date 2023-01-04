@@ -54,10 +54,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = datetime.datetime.now()
-	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2022, 12, 27)
-	# now = datetime.datetime(2022, 12, 27, closingHour, closingMinute+20, 0)
+	# dateToday = datetime.datetime.now()
+	# now = datetime.datetime.now()
+	dateToday = datetime.datetime(2022, 12, 28)
+	now = datetime.datetime(2022, 12, 28, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute+10, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute + 10, second=0)
@@ -359,7 +359,7 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
-def runStrategies(dateToday, operation, investorinfo: pd.DataFrame, inputsDf: pd.DataFrame, listStrategies: [Strategy]):
+def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd.DataFrame, listStrategies: [Strategy]):
 	status = False
 	errMsg = ''
 	data = pd.DataFrame()
@@ -373,13 +373,16 @@ def runStrategies(dateToday, operation, investorinfo: pd.DataFrame, inputsDf: pd
 		logManager.writeLog('INFO', 'runStrategies run without any action')
 		return {'status': status, 'errorMsg': errMsg, 'data': data}
 	dateTag = dateToday.combine(dateToday, tm)
+	lastDateTag = None
+	if len(investorInfo) != 0:
+		lastDateTag = datetime.datetime.strptime(investorInfo.index[-1], '%Y-%m-%d %H:%M:%S')
 
 	entry = pd.DataFrame()
 	for strategy in listStrategies:
 		name = strategy.name
 
-		if len(investorinfo) != 0:
-			strategyInfo = investorinfo[investorinfo['investorStrategy'] == name]
+		if len(investorInfo) != 0:
+			strategyInfo = investorInfo[investorInfo['investorStrategy'] == name]
 		else:
 			strategyInfo = pd.DataFrame()
 		inputsData = inputsDf[['Open', 'Close'] + strategy.getListDfNameInputs()]
@@ -404,9 +407,15 @@ def runStrategies(dateToday, operation, investorinfo: pd.DataFrame, inputsDf: pd
 		elif name == 'lstmConfidenceOpenClose':
 			aux = LSTMConfidenceOpenClose(strategyInfo, strategy).broker(operation, inputsData)
 
-		aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
-		aux['Date'] = dateTag
-		aux.set_index('Date', inplace=True)
+		if name in ['wia', 'bia'] and lastDateTag:
+			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
+			aux['Date'] = lastDateTag
+			aux.set_index('Date', inplace=True)
+		else:
+			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
+			aux['Date'] = dateTag
+			aux.set_index('Date', inplace=True)
+
 		entry = pd.concat([entry, aux])
 
 	status = True

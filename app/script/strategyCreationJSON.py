@@ -9,6 +9,14 @@ jsonmanager = JsonStrategyManager(jsonFile)
 # Delete all
 jsonmanager.deleteFile()
 
+# BIA
+biaStrategy = Strategy('bia', 'Best Invesment Approach for benchmark purposes', [])
+jsonmanager.addStrategy(biaStrategy)
+
+# WIA
+wiaStrategy = Strategy('wia', 'Worst Invesment Approach for benchmark purposes', [])
+jsonmanager.addStrategy(wiaStrategy)
+
 # CA
 caStrategy = Strategy('ca', 'Continuous Average strategy for benchmark purposes', [])
 jsonmanager.addStrategy(caStrategy)
@@ -114,5 +122,5 @@ param2 = InputParameter('Smooth1', 8)
 param3 = InputParameter('Smooth2', 19)
 inputs.append(StrategyInput('stochasticRsi', '', 'stochRsi_k_w29_s18_s219', 'k', [param1, param2, param3]))
 
-lstmConfidence = Strategy('lstmConfidenceOpenClose', 'Strategy based on LSTM prediction of intraday return', inputs)
-jsonmanager.addStrategy(lstmConfidence)
+# lstmConfidence = Strategy('lstmConfidenceOpenClose', 'Strategy based on LSTM prediction of intraday return', inputs)
+# jsonmanager.addStrategy(lstmConfidence)
