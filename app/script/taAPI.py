@@ -70,7 +70,8 @@ def movingAverageConvergenceDivergence(close, fastWindow, slowWindow, signal):
 	:return: dict with the following keys ["macd", "signal"]
 	"""
 	macd = MACD(close, fastWindow, slowWindow, signal, True)
-	return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
+	diff = macd.macd() - macd.macd_signal()
+	return {"macd" : macd.macd(), "signal" : macd.macd_signal(), 'diff': diff}
 
 def exponentialMovingAverage(close, window):
 	"""

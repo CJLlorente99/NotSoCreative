@@ -82,23 +82,26 @@ inputs and their proper parameters. Example of JSON file describing one strategy
 All attributes named 'Name' are hard-coded and therefore can only take specific values.
 The following table shows the input names, parameters names and key names accepted.
 
-| Input Name    | Key Names                             | Parameter Names                |
-|---------------|---------------------------------------|--------------------------------|
-| High          | Natural                               |                                |
-| Low           | Natural                               |                                |
-| Volume        | Natural                               |                                |
-| Close         | Natural, Log                          |                                |
-| Open          | Natural, Log                          |                                |
-| adi           | acc_dist_index                        |                                |
-| adx           | adx, adx_neg, adx_pos                 | Window                         |
-| aroon         | aroon_indicator, aroon_down, aroon_up | Window                         |
-| atr           | average_true_range                    | Window                         |
-| bb            | pband, mavg, hband, lband             | Window, StdDev                 |
-| ema           | ema                                   | Window                         |
-| macd          | macd, signal, diff                    | FastWindow, SlowWindow, Signal |
-| obv           | on_balance_volume                     |                                |
-| rsi           | rsi                                   | Window                         |
-| stochasticRsi | stochrsi, k, d                        | Window, Smooth1, Smooth2       |
+| Input Name      | Key Names                             | Parameter Names                |
+|-----------------|---------------------------------------|--------------------------------|
+| High            | Natural                               |                                |
+| Low             | Natural                               |                                |
+| Volume          | Natural                               |                                |
+| Close           | Natural, Log                          |                                |
+| Open            | Natural, Log                          |                                |
+| Return_open     | Natural, Log                          |                                |
+| Return_intraday | Natural, Log                          |                                |
+| Return_interday | Natural, Log                          |                                |
+| adi             | acc_dist_index                        |                                |
+| adx             | adx, adx_neg, adx_pos                 | Window                         |
+| aroon           | aroon_indicator, aroon_down, aroon_up | Window                         |
+| atr             | average_true_range                    | Window                         |
+| bb              | pband, mavg, hband, lband             | Window, StdDev                 |
+| ema             | ema                                   | Window                         |
+| macd            | macd, signal, diff                    | FastWindow, SlowWindow, Signal |
+| obv             | on_balance_volume                     |                                |
+| rsi             | rsi                                   | Window                         |
+| stochasticRsi   | stochrsi, k, d                        | Window, Smooth1, Smooth2       |
 
 # How to run it automatically #
 ## Windows ##

@@ -15,6 +15,7 @@ from strategies.ca import CA
 from strategies.idle import Idle
 from strategies.rsi import RSI
 from strategies.bb import BB
+from strategies.lstmConfidenceOpenClose import LSTMConfidenceOpenClose
 from logManager import LogManager
 from inversionStrategyJSONAPI import *
 from taAPI import *
@@ -95,7 +96,7 @@ def main():
 	jsonManager = JsonStrategyManager(jsonFile)
 	inputs = jsonManager.listInputs()
 
-	out = calculateInputs(data, inputs)
+	out = calculateInputs(data, inputs, operation)
 	inputsDf = out['data']
 	if not out['status']:
 		pass
@@ -169,7 +170,7 @@ def retrieveStockData(todayDate: datetime.date, operation) -> pd.DataFrame():
 	status = False
 	errMsg = ''
 
-	window = 300
+	window = 600
 	startDate = todayDate - CDay(window, calendar=USFederalHolidayCalendar())
 
 	# First try to retrieve data
@@ -221,7 +222,7 @@ def retrieveCSVData():
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
-def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput]):
+def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 	status = False
 	errMsg = ''
 
@@ -236,20 +237,55 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput]):
 
 		if name == 'High':
 			data[dfName] = df['High']
+
 		elif name == 'Low':
 			data[dfName] = df['Low']
+
 		elif name == 'Volume':
 			data[dfName] = df['Volume']
+
 		elif name == 'Close':
 			if key == 'Natural':
 				data[dfName] = df['Close']
 			elif key == 'Log':
 				data[dfName] = np.log(df['Close'])
+
 		elif name == 'Open':
 			if key == 'Natural':
 				data[dfName] = df['Open']
 			elif key == 'Log':
 				data[dfName] = np.log(df['Open'])
+
+		elif name == 'Return_open':
+			if key == 'Natural':
+				data[dfName] = df['Open'] / df['Open'].shift()
+			elif key == 'Log':
+				data[dfName] = np.log(df['Open']) - np.log(df['Open'].shift())
+
+		elif name == 'Return_intraday':
+			if key == 'Natural':
+				if operation == 'Morning':
+					data[dfName] = df['Close'] / df['Open'].shift()
+				elif operation == 'Afternoon':
+					data[dfName] = df['Close'] / df['Open']
+			elif key == 'Log':
+				if operation == 'Morning':
+					data[dfName] = np.log(df['Close']) - np.log(df['Open'].shift())
+				elif operation == 'Afternoon':
+					data[dfName] = np.log(df['Close']) - np.log(df['Open'])
+
+		elif name == 'Return_interday':
+			if key == 'Natural':
+				if operation == 'Morning':
+					data[dfName] = df['Open'] / df['Close']
+				elif operation == 'Afternoon':
+					data[dfName] = df['Open'] / df['Close'].shift()
+			elif key == 'Log':
+				if operation == 'Morning':
+					data[dfName] = np.log(df['Open']) - np.log(df['Close'])
+				elif operation == 'Afternoon':
+					data[dfName] = np.log(df['Open']) - np.log(df['Close'].shift())
+
 		elif name == 'adi':
 			data[dfName] = accDistIndexIndicator(df['High'], df['Low'], df['Close'], df['Volume'])[key]
 		elif name == 'adx':
@@ -288,9 +324,9 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput]):
 			for param in parameters:
 				if param.name == 'FastWindow':
 					fastWindow = param.value
-				elif param.name == 'slowWindow':
+				elif param.name == 'SlowWindow':
 					slowWindow = param.value
-				elif param.name == 'signal':
+				elif param.name == 'Signal':
 					signal = param.value
 
 			data[dfName] = movingAverageConvergenceDivergence(df['Close'], fastWindow, slowWindow, signal)[key]
@@ -365,6 +401,8 @@ def runStrategies(dateToday, operation, investorinfo: pd.DataFrame, inputsDf: pd
 			aux = RSI(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'bb':
 			aux = BB(strategyInfo, strategy).broker(operation, inputsData)
+		elif name == 'lstmConfidenceOpenClose':
+			aux = LSTMConfidenceOpenClose(strategyInfo, strategy).broker(operation, inputsData)
 
 		aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
 		aux['Date'] = dateTag
