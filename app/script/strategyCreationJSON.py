@@ -121,6 +121,5 @@ param1 = InputParameter('Window', 29)
 param2 = InputParameter('Smooth1', 8)
 param3 = InputParameter('Smooth2', 19)
 inputs.append(StrategyInput('stochasticRsi', '', 'stochRsi_k_w29_s18_s219', 'k', [param1, param2, param3]))
-
-# lstmConfidence = Strategy('lstmConfidenceOpenClose', 'Strategy based on LSTM prediction of intraday return', inputs)
-# jsonmanager.addStrategy(lstmConfidence)
+lstmConfidence = Strategy('lstmConfidenceOpenClose', 'Strategy based on LSTM prediction of intraday return', inputs)
+jsonmanager.addStrategy(lstmConfidence)
