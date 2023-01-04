@@ -1,0 +1,1 @@
+python3 "C:\Users\carlo\OneDrive\Documentos\Universidad\MUIT\Segundo\Data Science II\NotSoCreative\app\script\main.py"

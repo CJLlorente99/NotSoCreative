@@ -2,9 +2,9 @@
 This file will be saved in **scriptData/myData.csv** and **can** be read by the frontend SW. The format
 of the CSV will be the one depicted in the table below.
 
-| Date       | investorStrategy | MoneyInvested | MoneyNotInvested | MoneyBoughtToday | MoneySoldToday | PerBoughtTomorrow | PerSoldTomorrow | TotalPortfolioValue | TodayOpen | YesterdayClose |
-|------------|------------------|---------------|------------------|------------------|----------------|-------------------|-----------------|---------------------|-----------|----------------|
-| YYYY-MM-DD |      String      |     Float     |       Float      |       Float      |      Float     | Float             | Float           |        Float        |   Float   |      Float     |
+| Date                | investorStrategt | MoneyInvested | MoneyNotInvested | MoneyInvestedToday | PerInvestToday | TotalPortfolioValue | Indicators & Data |
+|---------------------|------------------|---------------|------------------|--------------------|----------------|---------------------|-------------------|
+| YYYY-MM-DD HH:MM:SS | String           | Float         | Float            | Float              | Float          | Float               | Float             |
 
 This CSV will also store the information for the benchmarks and all other strategies that could be tried.
 Accepted values for investorStrategy are:
@@ -18,7 +18,8 @@ Accepted values for investorStrategy are:
 - ca
 
 *(OtherStrategies)*
-- 
+- rsi
+- bb
 
 # Format of JSON (strategies definition) #
 
@@ -99,3 +100,26 @@ The following table shows the input names, parameters names and key names accept
 | rsi           | rsi                                   | Window                         |
 | stochasticRsi | stochrsi, k, d                        | Window, Smooth1, Smooth2       |
 
+# How to run it automatically #
+## Windows ##
+1. Verify all needed libraries are installed. To do this, run "run_script.bat" from the terminal. This is done
+by just opening a PowerShell terminal and writing 
+``./run_script.bat``. Install the libraries with ``pip install *``
+2. Open the Windows "Task Scheduler".
+3. Create two basic tasks by clicking on "Create basic task". Give name and description as you want. Just select a daily
+periodicity at 16.00 (CET) for one task and 22.30 (CET) for the other.
+
+## Mac ##
+1. Move files "local.ds2Afternoon.plist" and "local.ds2Morning.plist" into "/Library/LaunchDaemons"
+2. Load the scripts by making use of "launchctl". In the terminal
+
+````
+launchctl load ~/Library/LaunchAgents/local.ds2Afternoon.plist 
+launchctl load ~/Library/LaunchAgents/local.ds2Morning.plist
+````
+
+Once this is done, it will be done forever until unloaded by writing the following in the terminal.
+````
+launchctl unload ~/Library/LaunchAgents/local.ds2Afternoon.plist
+launchctl unload ~/Library/LaunchAgents/local.ds2Morning.plist
+````

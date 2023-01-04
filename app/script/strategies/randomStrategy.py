@@ -1,6 +1,4 @@
-from app.script.dailyStrategy import DailyStrategy
-import pandas as pd
-from inversionStrategyJSONAPI import Strategy
+from dailyStrategy import DailyStrategy
 from numpy import random
 
 

@@ -1,4 +1,4 @@
-from app.script.dailyStrategy import DailyStrategy
+from dailyStrategy import DailyStrategy
 import pandas as pd
 from inversionStrategyJSONAPI import Strategy
 

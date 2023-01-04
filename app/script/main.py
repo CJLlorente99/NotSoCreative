@@ -53,10 +53,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = date.today()
-	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2022, 12, 27)
-	# now = datetime.datetime(2022, 12, 27, closingHour, closingMinute+20, 0)
+	# dateToday = date.today()
+	# now = datetime.datetime.now()
+	dateToday = datetime.datetime(2022, 12, 27)
+	now = datetime.datetime(2022, 12, 27, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute+10, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute + 10, second=0)
@@ -85,10 +85,11 @@ def main():
 		# Launch message to user
 
 	# Check we have not already performed this operation (same day and moment)
-	out = checkNoRepeat(investorinfo, operation, dateToday)
-	if not out['status']:
-		# We've already done this operation
-		return 
+	if len(investorinfo) != 0:
+		out = checkNoRepeat(investorinfo, operation, dateToday)
+		if not out['status']:
+			# We've already done this operation
+			return
 
 	# 5) calculate needed data
 	jsonManager = JsonStrategyManager(jsonFile)

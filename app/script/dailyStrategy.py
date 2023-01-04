@@ -46,7 +46,7 @@ class DailyStrategy(ABC):
 			moneyInvested = self.brokerAfternoon(inputs)
 
 		return pd.DataFrame({'investorStrategy': self.name, 'MoneyInvested': self.investedMoney, 'MoneyNotInvested': self.nonInvestedMoney,
-							 'MoneyInvestedToday': moneyInvested, 'PerInvestTomorrow': self.perToInvest,
+							 'MoneyInvestedToday': moneyInvested, 'PerInvestToday': self.perToInvest,
 							 'TotalPortfolioValue': self.investedMoney + self.nonInvestedMoney}, index=[0])
 
 	def brokerMorning(self, inputs: pd.DataFrame):
@@ -57,14 +57,14 @@ class DailyStrategy(ABC):
 		:param inputs:
 		:return:
 		"""
-		# Update investedMoney value
-		self.investedMoney *= inputs["Open"][-1] / inputs["Close"][-2]
-
-		# Broker operation for today
-		moneyInvested = self.__investAndSellToday()
+		# Update investedMoney value (both open and close are already shifted appropriately)
+		self.investedMoney *= inputs["Open"][-1] / inputs["Close"][-1]
 
 		# Broker operations for next day
 		self.possiblyOperationMorning(inputs)
+
+		# Broker operation for today
+		moneyInvested = self.__investAndSellToday()
 
 		return moneyInvested
 
@@ -77,13 +77,13 @@ class DailyStrategy(ABC):
 		:return:
 		"""
 		# Update investedMoney value
-		self.investedMoney *= inputs["Open"][-1] / inputs["Close"][-2]
+		self.investedMoney *= inputs["Close"][-1] / inputs["Open"][-1]
+
+		# Broker operations for today
+		self.possiblyOperationAfternoon(inputs)
 
 		# Broker operation for today
 		moneyInvested = self.__investAndSellToday()
-
-		# Broker operations for next day
-		self.possiblyOperationAfternoon(inputs)
 
 		return moneyInvested
 
