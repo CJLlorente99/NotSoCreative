@@ -124,9 +124,14 @@ class JsonStrategyManager:
 		with open(self.fileName) as f:
 			jsonData = json.load(f)
 
-		strategies = []
+		entries = []
 		for entry in jsonData:
-			strategies.append(json.loads(entry))
+			entries.append(json.loads(entry))
+
+		strategies = []
+		for entry in entries:
+			aux = Strategy(entry['Name'], entry['Description'], self.listInput(entry['Inputs']))
+			strategies.append(aux)
 
 		return strategies
 
@@ -141,6 +146,27 @@ class JsonStrategyManager:
 		inputs = []
 		for entry in entries:
 			for inp in entry['Inputs']:
-				inputs.append(inp)
+				aux = StrategyInput(inp['Name'], inp['Description'], inp['DfName'], inp['Key'], self.listParameters(inp['Parameters']))
+				inputs.append(aux)
 
 		return inputs
+
+
+	def listInput(self, listDictInputs):
+		inputs = []
+		for inp in listDictInputs:
+			aux = StrategyInput(inp['Name'], inp['Description'], inp['DfName'], inp['Key'], self.listParameters(inp['Parameters']))
+			inputs.append(aux)
+
+		return inputs
+
+	def listParameters(self, listDictParameters):
+		params = []
+		for param in listDictParameters:
+			aux = InputParameter(param['Name'], param['Value'])
+			params.append(aux)
+
+		return params
+
+	def deleteFile(self):
+		os.remove(self.fileName)
