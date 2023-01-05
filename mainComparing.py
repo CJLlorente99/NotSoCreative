@@ -1,6 +1,5 @@
 import datetime
 import os.path
-
 import pandas as pd
 from classes.dataClass import DataGetter
 from TAIndicators.rsi import InvestorRSI
@@ -8,7 +7,7 @@ from TAIndicators.ma import InvestorMACD
 from TAIndicators.bb import InvestorBB
 from DecisionFunction.investorDecisionTree import InvestorDecisionTree
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
-from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClassProb, InvestorLSTMConfidenceClass
+from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -32,7 +31,7 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 1
+    numExperiments = 3
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -54,7 +53,7 @@ def main():
         b = 2.4
         rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
         investorRSI = InvestorRSI(10000, rsiParams)
-        experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)], True)
+        experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)], False)
         print("investorRSI created")
 
         # Create investor MACD grad
@@ -70,7 +69,7 @@ def main():
         investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
         experimentManager.addStrategy(investorMACDGrad, "macdGrad",
                                       [experimentManager.createTIInput("macd", macdParamsGrad, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)], True)
+                                       experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)], False)
         print("investorMACDGrad created")
 
         # Create investor MACD zero
@@ -86,7 +85,7 @@ def main():
         investorMACDZero = InvestorMACD(10000, macdParamsZero)
         experimentManager.addStrategy(investorMACDZero, "macdGradZero",
                                       [experimentManager.createTIInput("macd", macdParamsZero, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)], True)
+                                       experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)], False)
         print("investorMACDZero created")
 
         # Create investor MACD signal
@@ -102,7 +101,7 @@ def main():
         investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
         experimentManager.addStrategy(investorMACDSignal, "macdGradSignal",
                                       [experimentManager.createTIInput("macd", macdParamsSignal, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)], True)
+                                       experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)], False)
         print("investorMACDSignal created")
 
         # Create investor BB
@@ -114,7 +113,7 @@ def main():
         b = 0.5
         bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
         investorBB = InvestorBB(10000, bbParams)
-        experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], True)
+        experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], False)
         print("investorBB created")
 
         # Create investor based on DT
@@ -163,16 +162,11 @@ def main():
         investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
         experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
         print("investorLSTMProb created")
-        # #
-        # # Create investor based on class voting (possible intermediate values)
-        # investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
-        # experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceInter",
-        #                               [experimentManager.createTIInput("lstmConfidence")], True)
-        #
-        # # Create investor based on class voting (only sell and buy everything)
-        # investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 5)
-        # experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceEvery",
-        #                               [experimentManager.createTIInput("lstmConfidence")], True)
+
+        # Create investor based on class voting (only sell and buy everything)
+        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 2)
+        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceEvery",
+                                      [experimentManager.createTIInput("df")], True)
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)

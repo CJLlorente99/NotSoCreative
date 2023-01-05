@@ -64,9 +64,8 @@ class ExperimentManager:
 					returnPred = investor.model.trainAndPredictMorning(df)
 					returnClass = investor.model.trainAndPredictClassificationMorning(df)
 					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
-				elif inpName == "lstmConfidence":
-					returnPred = investor.trainAndPredictMorning(df)
-					dataManager[tag] = returnPred
+				elif inpName == 'df':
+					dataManager['df'] = df
 
 			aux = investor.brokerMorning(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
@@ -110,13 +109,12 @@ class ExperimentManager:
 					dataManager[tag] = relativeStrengthIndex(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "stochrsi":
 					dataManager[tag] = stochasticRSI(df.Close, inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == 'df':
+					dataManager[tag] = df
 				elif inpName == "lstm":
 					returnPred = investor.model.trainAndPredictAfternoon(df)
 					returnClass = investor.model.trainAndPredictClassificationAfternoon(df)
 					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
-				elif inpName == "lstmConfidence":
-					returnPred = investor.trainAndPredictAfternoon(df)
-					dataManager[tag] = returnPred
 
 			aux = investor.brokerAfternoon(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)

@@ -32,14 +32,14 @@ The script should do the following.
 """
 
 # Constants
-logFile = 'ACHTUNGScriptData/log.txt'
+logFile = 'C:/Users/carlo/OneDrive/Documentos/Universidad/MUIT/Segundo/Data Science II/NotSoCreative/app/script/ACHTUNGScriptData/log.txt'
 logManager = LogManager(logFile)
 
-csvDataFileHidden = 'ACHTUNGScriptData/myData.csv'
+csvDataFileHidden = 'C:/Users/carlo/OneDrive/Documentos/Universidad/MUIT/Segundo/Data Science II/NotSoCreative/app/script/ACHTUNGScriptData/myData.csv'
 
-csvDataFile = 'scriptData/myData.csv'
+csvDataFile = 'C:/Users/carlo/OneDrive/Documentos/Universidad/MUIT/Segundo/Data Science II/NotSoCreative/app/script/scriptData/myData.csv'
 
-jsonFile = 'ACHTUNGScriptData/strategies.json'
+jsonFile = 'C:/Users/carlo/OneDrive/Documentos/Universidad/MUIT/Segundo/Data Science II/NotSoCreative/app/script/ACHTUNGScriptData\strategies.json'
 
 openingHour = 15
 openingMinute = 30
@@ -58,8 +58,8 @@ def main():
 	# dateToday = datetime.datetime(2022, 12, 28)
 	# now = datetime.datetime(2022, 12, 28, closingHour, closingMinute+20, 0)
 
-	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute+10, second=0)
-	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute + 10, second=0)
+	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
+	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
 
 	operation = 'None'
 	if openingTimeSP500 < now < closingTimeSP500:

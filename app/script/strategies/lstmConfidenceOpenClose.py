@@ -44,7 +44,7 @@ def getPredictionLSTM(data):
 	ensemble, y_pred, prob = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
 
 	# majority vote, probs for amount
-	return majority_vote(y_pred)
+	return majority_vote(y_pred)[0]
 
 def class_LSTM(n_inputs, n_features):
 	model = Sequential()
@@ -113,7 +113,7 @@ def majority_vote(yhat):
 		y_10 = yhat[:, i]
 		probs.append(np.sum(y_10))
 		n_one = np.count_nonzero(y_10 == 1)
-		length =  round(y_10.shape[0] * 0.5)
+		length = round(y_10.shape[0] * 0.5)
 		if n_one > length:
 			y_mean.append(1)
 		else:

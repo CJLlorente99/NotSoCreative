@@ -1,7 +1,7 @@
 from inversionStrategyJSONAPI import *
 
 
-jsonFile = 'ACHTUNGScriptData/strategies.json'
+jsonFile = '../ACHTUNGScriptData/strategies.json'
 
 # json manager
 jsonmanager = JsonStrategyManager(jsonFile)

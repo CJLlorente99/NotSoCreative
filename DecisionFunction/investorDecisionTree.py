@@ -64,10 +64,10 @@ class InvestorDecisionTree(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		# fig.write_image("images/EvolutionPorfolioDT(" + self.record.index[0].strftime(
-		# 		"%d_%m_%Y") + "-" +
-		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		fig.show()
+		fig.write_image("images/EvolutionPorfolioDT(" + self.record.index[0].strftime(
+				"%d_%m_%Y") + "-" +
+				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		# fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -86,6 +86,6 @@ class InvestorDecisionTree(Investor):
 		fig.update_layout(
 			title="Decision making under DT (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		# fig.write_image("images/DecisionMakingDT(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		fig.show()
+		fig.write_image("images/DecisionMakingDT(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		# fig.show()

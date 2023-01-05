@@ -132,10 +132,10 @@ class InvestorMACD(Investor):
                 "%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
             yaxis_title="Value [$]", hovermode='x unified')
-        # fig.write_image("images/EvolutionPorfolioMACD" + self.macdParams.type + "(" + self.record.index[0].strftime(
-        #         "%d_%m_%Y") + "-" +
-        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        fig.show()
+        fig.write_image("images/EvolutionPorfolioMACD" + self.macdParams.type + "(" + self.record.index[0].strftime(
+                "%d_%m_%Y") + "-" +
+                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        # fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -160,9 +160,9 @@ class InvestorMACD(Investor):
         fig.update_layout(
             title="Decision making under MACD " + self.macdParams.type + " (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-        # fig.write_image("images/DecisionmakingMACD" + self.macdParams.type + "(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        fig.show()
+        fig.write_image("images/DecisionmakingMACD" + self.macdParams.type + "(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        # fig.show()
 
 
 def movingAverageConvergenceDivergence(close, params: MACDInvestorParams):
@@ -173,7 +173,8 @@ def movingAverageConvergenceDivergence(close, params: MACDInvestorParams):
     :return: dict with the following keys ["macd", "signal"]
     """
     macd = MACD(close, params.fastWindow, params.slowWindow, params.signal, True)
-    return {"macd" : macd.macd(), "signal" : macd.macd_signal()}
+    diff = macd.macd() - macd.macd_signal()
+    return {"macd" : macd.macd(), "signal" : macd.macd_signal(), 'diff': diff}
 
 def exponentialMovingAverage(close, params: MAInvestorParams):
     ema = EMAIndicator(close, params.window, True)
