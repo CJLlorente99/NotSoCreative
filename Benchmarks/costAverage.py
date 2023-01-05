@@ -7,37 +7,34 @@ from plotly.subplots import make_subplots
 This strategy consists on buying a fixed quantity periodically
 """
 class InvestorCA(Investor):
-	def __init__(self, initialInvestment=10000, dailyWindow=0.1):
+	def __init__(self, initialInvestment=10000, dailyWindow=0.05):
 		super().__init__(initialInvestment)
 		self.dailyWindow = dailyWindow
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
 			{'actualStockValue': [data["actualStockValue"]],
-			 'moneyToInvestCA': [moneyInvestedToday], 'moneyToSellCA': [moneySoldToday],
+			 'moneyToInvestCA': [moneyInvestedToday],
 			 'investedMoneyCA': [self.investedMoney], 'nonInvestedMoneyCA': [self.nonInvestedMoney]})
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPredictionCA(data)
+		self.perToInvest = 0
+		if 1 - data["nDay"] * self.dailyWindow > 0:
+			self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
 
-	def possiblySellTomorrow(self, data):
+
+	def possiblyInvestAfternoon(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPredictionCA()
-
-	def buyPredictionCA(self, data):
+		self.perToInvest = 0
 		if 1 - data["nDay"] * self.dailyWindow > 0:
-			return self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
-		return 0
-
-	def sellPredictionCA(self):
-		return 0
+			self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -45,7 +42,6 @@ class InvestorCA(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(
@@ -58,10 +54,10 @@ class InvestorCA(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioCA(" + self.record.index[0].strftime(
-				"%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/EvolutionPorfolioCA(" + self.record.index[0].strftime(
+		# 		"%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -74,16 +70,14 @@ class InvestorCA(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"],
-							 marker_color="green"), row=2, col=1)
-		fig.add_trace(
-			go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"),
-			row=2, col=1)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]
+							 ), row=2, col=1)
+
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
 			title="Decision making under CA (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingCA(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/DecisionMakingCA(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()

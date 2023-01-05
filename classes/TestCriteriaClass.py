@@ -73,8 +73,7 @@ class TestCriteriaClass:
 		results["AbsGain"] = AbsGain
 
 		# Calculation of the nOperation
-		nOperation = record["moneyInvestedToday"][record["moneyInvestedToday"] != 0].count() + \
-					 record["moneySoldToday"][record["moneySoldToday"] != 0].count()
+		nOperation = record["moneyInvestedToday"][record["moneyInvestedToday"] != 0].count()
 		nOperation = nOperation if nOperation != 0 else 0
 		results["nOperation"] = nOperation
 
@@ -94,12 +93,12 @@ class TestCriteriaClass:
 		results["meanInvested"] = meanInvested
 
 		# Calculation of the meanBuying
-		meanBuying = record["moneyInvestedToday"][record["moneyInvestedToday"] != 0].mean()
+		meanBuying = record["moneyInvestedToday"][record["moneyInvestedToday"] > 0].mean()
 		meanBuying = meanBuying if meanBuying != 0 else 0
 		results["meanBuying"] = meanBuying
 
 		# Calculation of the meanSelling
-		meanSelling = record["moneySoldToday"][record["moneySoldToday"] != 0].mean()
+		meanSelling = record["moneyInvestedToday"][record["moneyInvestedToday"] < 0].mean()
 		meanSelling = meanSelling if meanSelling != 0 else 0
 		results["meanSelling"] = meanSelling
 
@@ -112,18 +111,18 @@ class TestCriteriaClass:
 		results["maxLossOneDay"] = maxLossOneDay
 
 		# Calculation of TreynorMeasure
-		beta = np.cov(record["totalValue"].diff()[1:].values, record["openValue"].diff()[1:].values)[0][1] / np.var(
-			record["openValue"].diff()[1:].values)
+		beta = np.cov(record["totalValue"].diff()[1:].values, record["actualStockValue"].diff()[1:].values)[0][1] / np.var(
+			record["actualStockValue"].diff()[1:].values)
 		TreynorMeasure = (PerGain - self.rfr) / beta
 		results["TreynorMeasure"] = TreynorMeasure
 
 		# Calculation of SharpeRatio
-		SP500std = record["openValue"].std()
+		SP500std = record["actualStockValue"].std()
 		SharpeRatio = (PerGain - self.rfr) / SP500std
 		results["SharpeRatio"] = SharpeRatio
 
 		# Calculation of JensenMeasure
-		marketReturn = record["openValue"].diff()[1:].sum() / 100
+		marketReturn = record["actualStockValue"].diff()[1:].sum() / 100
 		betaJensen = beta * (marketReturn - self.rfr)
 		capm = self.rfr + betaJensen
 		JensonMeasure = PerGain - capm
@@ -150,7 +149,7 @@ class TestCriteriaClass:
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
 
-		fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"],
+		fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"]-10000,
 								 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
 					  col=1)
 
@@ -174,8 +173,8 @@ class TestCriteriaClass:
 								 y=dfResult["JensenMeasure"]), row=2, col=3)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
-		fig.write_image("images/" + title + "(1_2).png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/" + title + "(1_2).png",scale=6, width=1080, height=1080)
+		fig.show()
 
 		# Create one figure showing the second set of test criteria
 		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
@@ -191,8 +190,8 @@ class TestCriteriaClass:
 								 y=dfResult["meanSelling"], marker_color="red"), row=2, col=1)
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="group")
-		fig.write_image("images/" + title + "(2_2).png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=1080, height=1080)
+		fig.show()
 
 	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
@@ -366,7 +365,7 @@ class TestCriteriaClass:
 							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
 								   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
 
-		fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"],
+		fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"]-10000,
 								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
 					  col=1)
 
@@ -397,8 +396,8 @@ class TestCriteriaClass:
 					  row=2, col=3)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
-		fig.write_image("images/" + title + "(1_2).png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/" + title + "(1_2).png",scale=6, width=1080, height=1080)
+		fig.show()
 
 		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
 							subplot_titles=["MMNotInvested/MMInvested", "MMBuying/MMSelling"])
@@ -417,5 +416,5 @@ class TestCriteriaClass:
 					  row=2, col=1)
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
-		fig.write_image("images/" + title + "(2_2).png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=1080, height=1080)
+		fig.show()

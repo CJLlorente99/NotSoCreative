@@ -13,66 +13,40 @@ class InvestorRSI(Investor):
         super().__init__(initialInvestment)
         self.rsiParams = rsiParams
 
-    def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+    def returnBrokerUpdate(self, moneyInvestedToday, data):
         return pd.DataFrame(
-                {'rsi': data["rsirsi"], 'moneyToInvestRSI': moneyInvestedToday, 'moneyToSellRSI': moneySoldToday,
+                {'rsi': data["rsirsi"], 'moneyToInvestRSI': moneyInvestedToday,
                  'investedMoneyRSI': self.investedMoney, 'nonInvestedMoneyRSI': self.nonInvestedMoney}, index=[0])
 
-    def possiblyInvestTomorrow(self, data):
+    def possiblyInvestMorning(self, data):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToInvest = self.buyPredictionRSI(data["rsirsi"])
+        rsi = data["rsirsi"]
 
-    def possiblySellTomorrow(self, data):
+        params = self.rsiParams
+
+        self.perToInvest = 0
+        if rsi < params.lowerBound:  # Buy linearly then with factor f
+            self.perToInvest = math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
+        elif rsi > params.upperBound:  # Buy linearly then with factor f
+            self.perToInvest = -math.tanh(params.a * (rsi - params.upperBound) ** params.b)
+
+    def possiblyInvestAfternoon(self, data):
         """
         Function that calls the sell function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        self.perToSell = self.sellPredictionRSI(data["rsirsi"])
+        rsi = data["rsirsi"]
 
-    def buyPredictionRSI(self, rsi):
-        """
-        Function that represents the buying behavior
-        :param rsi: RSI value for today
-        """
         params = self.rsiParams
 
+        self.perToInvest = 0
         if rsi < params.lowerBound:  # Buy linearly then with factor f
-            return math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
-        else:
-            return 0
-
-    def sellPredictionRSI(self, rsi):
-        """
-        Function that represents the selling behavior
-        """
-        params = self.rsiParams
-        if rsi > params.upperBound:  # Buy linearly then with factor f
-            return math.tanh(params.a * (rsi - params.upperBound) ** params.b)
-        else:
-            return 0
-
-    def plotDecisionRules(self):
-        """
-        Function that plots the decision rule with the given parameters
-        """
-        params = self.rsiParams
-
-        testRSI = np.arange(0, 100, 0.01)
-        buyPoints = []
-        sellPoints = []
-        for point in testRSI:
-            buyPoints = np.append(buyPoints, self.buyFunctionPredictionRSI(point))
-            sellPoints = np.append(sellPoints, self.sellFunctionPredictionRSI(point))
-
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(name="BuyPoints", x=testRSI, y=buyPoints, fill='tozeroy'))
-        fig.add_trace(go.Scatter(name="SellPoints", x=testRSI, y=-sellPoints, fill='tozeroy'))
-        fig.update_layout(title="Decision Rules for RSI indicator", xaxis={"title": "RSI Value"},
-                          yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
-        fig.show()
+            self.perToInvest = math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
+        elif rsi > params.upperBound:  # Buy linearly then with factor f
+            self.perToInvest = -math.tanh(params.a * (rsi - params.upperBound) ** params.b)
 
     def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
@@ -81,7 +55,6 @@ class InvestorRSI(Investor):
         :param stockMarketData: df with the stock market data
         :param recordPredictedValue: Predicted data dataframe
         """
-        self.record = self.record.iloc[1:]
         # Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
         fig = go.Figure()
         fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -92,10 +65,10 @@ class InvestorRSI(Investor):
                 "%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
             yaxis_title="Value [$]", hovermode='x unified')
-        fig.write_image("images/EvolutionPorfolioRSI(" + self.record.index[0].strftime(
-                "%d_%m_%Y") + "-" +
-                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        # fig.show()
+        # fig.write_image("images/EvolutionPorfolioRSI(" + self.record.index[0].strftime(
+        #         "%d_%m_%Y") + "-" +
+        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -110,16 +83,15 @@ class InvestorRSI(Investor):
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
         fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
                                  y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-        fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-        fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+        fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1)
         fig.update_xaxes(title_text="Date", row=1, col=1)
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(
             title="Decision making under RSI (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-        fig.write_image("images/DecisionMakingRSI(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        # fig.show()
+        # fig.write_image("images/DecisionMakingRSI(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        fig.show()
 
 
 def relativeStrengthIndex(close, params: RSIInvestorParams):

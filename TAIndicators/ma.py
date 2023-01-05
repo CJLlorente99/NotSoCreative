@@ -14,12 +14,11 @@ class InvestorMACD(Investor):
         super().__init__(initialInvestment)
         self.macdParams = macdParams
 
-    def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+    def returnBrokerUpdate(self, moneyInvestedToday, data):
         if self.macdParams.type == "grad":
             return pd.DataFrame(
                 {'macd' + self.macdParams.type + "macd": data["macdmacd"][-1],
                  'moneyToInvestMACD' + self.macdParams.type: moneyInvestedToday,
-                 'moneyToSellMACD' + self.macdParams.type: moneySoldToday,
                  'investedMoneyMACD' + self.macdParams.type: self.investedMoney,
                  'nonInvestedMoneyMACD' + self.macdParams.type: self.nonInvestedMoney}, index=[0])
         else:
@@ -27,30 +26,17 @@ class InvestorMACD(Investor):
                 {'macd' + self.macdParams.type + "macd": data["macdmacd"][-1],
                  'macd' + self.macdParams.type + "signal": data["macdsignal"][-1],
                  'moneyToInvestMACD' + self.macdParams.type: moneyInvestedToday,
-                 'moneyToSellMACD' + self.macdParams.type: moneySoldToday,
                  'investedMoneyMACD' + self.macdParams.type: self.investedMoney,
                  'nonInvestedMoneyMACD' + self.macdParams.type: self.nonInvestedMoney}, index=[0])
 
-    def possiblyInvestTomorrow(self, data):
+    def possiblyInvestMorning(self, data):
         """
         Function that calls the buy function and updates the investment values
         :param data: Decision data based on the type of indicator
         """
-        firstGradient, secondGradient, self.perToInvest = self.buyPredictionMACD(data["macdmacd"], data["macdsignal"])
+        macd = data["macdmacd"]
+        signal = data["macdsignal"]
 
-    def possiblySellTomorrow(self, data):
-        """
-        Function that calls the sell function and updates the investment values
-        :param data: Decision data based on the type of indicator
-        """
-        self.perToSell = self.sellPredictionMACD(data["macdmacd"], data["macdsignal"])
-
-    def buyPredictionMACD(self, macd, signal):
-        """
-        Function that is used to predict next day buying behavior
-        :param macdDict: Dict with the values of the MACD (signal and macd)
-        :param params: MACD params
-        """
         params = self.macdParams
         type = params.type
 
@@ -62,28 +48,38 @@ class InvestorMACD(Investor):
         firstGradientSignal = np.gradient(signal.values)
 
         # Depending on the strategy, act accordingly
+        self.perToInvest = 0
         if type == "grad":
             if params.buyGradients.lowerBoundGradient < firstGradient[
                 -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < \
                     secondGradient[-1]:
-                return firstGradient, secondGradient, math.tanh(
+                self.perToInvest = math.tanh(
                     params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
-            return firstGradient, secondGradient, 0
+            elif params.sellGradients.lowerBoundGradient < firstGradient[
+                -1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > \
+                    secondGradient[-1]:
+                self.perToInvest = -math.tanh(
+                    params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
         elif type == "grad_crossZero":
             if macd.values[-2] < 0 < macd.values[-1]:
-                return firstGradient, secondGradient, math.tanh(params.a * firstGradient[-1] ** params.b)
-            return firstGradient, secondGradient, 0
+                self.perToInvest = math.tanh(params.a * firstGradient[-1] ** params.b)
+            elif macd.values[-2] > 0 > macd.values[-1]:
+                self.perToInvest = -math.tanh(params.a * (-firstGradient[-1]) ** params.b)
         elif type == "grad_crossSignal":
             if (signal.values[-2] - macd.values[-2]) > 0 > (signal.values[-1] - macd.values[-1]):
-                return firstGradient, secondGradient, math.tanh(params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
-            return firstGradient, secondGradient, 0
+                self.perToInvest = math.tanh(
+                    params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
+            elif (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
+                self.perToInvest = -math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
 
-    def sellPredictionMACD(self, macd, signal):
+    def possiblyInvestAfternoon(self, data):
         """
-        Function that is used to predict next day selling behavior
-        :param macdDict: Dict with the values of the MACD (signal and macd)
-        :param params: MACD params
+        Function that calls the sell function and updates the investment values
+        :param data: Decision data based on the type of indicator
         """
+        macd = data["macdmacd"]
+        signal = data["macdsignal"]
+
         params = self.macdParams
         type = params.type
 
@@ -95,62 +91,29 @@ class InvestorMACD(Investor):
         firstGradientSignal = np.gradient(signal.values)
 
         # Depending on the strategy, act accordingly
+        self.perToInvest = 0
         if type == "grad":
-            if params.sellGradients.lowerBoundGradient < firstGradient[
+            if params.buyGradients.lowerBoundGradient < firstGradient[
+                -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < \
+                    secondGradient[-1]:
+                self.perToInvest = math.tanh(
+                    params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
+            elif params.sellGradients.lowerBoundGradient < firstGradient[
                 -1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > \
                     secondGradient[-1]:
-                return math.tanh(
+                self.perToInvest = -math.tanh(
                     params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
-            else:
-                return 0
         elif type == "grad_crossZero":
-            if macd.values[-2] > 0 > macd.values[-1]:
-                return math.tanh(params.a * (-firstGradient[-1]) ** params.b)
-            return 0
+            if macd.values[-2] < 0 < macd.values[-1]:
+                self.perToInvest = math.tanh(params.a * firstGradient[-1] ** params.b)
+            elif macd.values[-2] > 0 > macd.values[-1]:
+                self.perToInvest = -math.tanh(params.a * (-firstGradient[-1]) ** params.b)
         elif type == "grad_crossSignal":
-            if (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
-                return math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
-            return 0
-
-    def plotDecisionRules(self):
-        """
-        Function that plots the decision rule used
-        :param params: MACD params
-        """
-        params = self.macdParams
-        testMACDdata = pd.Series(np.random.normal(0, 1, 30))
-        buyPoints = []
-        sellPoints = []
-        for i in range(len(testMACDdata) - params.fastWindow):
-            testMACD = movingAverageConvergenceDivergence(testMACDdata[0:i + 2], params)
-            firstGradient, secondGradient, buyPoint = self.buyPredictionMACD(testMACD)
-            buyPoints = np.append(buyPoints, buyPoint)
-            sellPoints = np.append(sellPoints, self.sellPredictionMACD(testMACD))
-
-        x = np.arange(len(testMACDdata))
-
-        fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(name="Stock data", x=x, y=testMACDdata.values), row=1, col=1, secondary_y=False)
-        fig.add_trace(go.Scatter(name="MACDValues", x=x[3:], y=testMACD["macd"].values), row=1, col=1,
-                      secondary_y=False)
-        fig.add_trace(go.Scatter(name="BuyPoints", x=x[4:], y=buyPoints, fill='tozeroy'), row=1, col=1,
-                      secondary_y=True)
-        fig.add_trace(go.Scatter(name="SellPoints", x=x[4:], y=-sellPoints, fill='tozeroy'), row=1, col=1,
-                      secondary_y=True)
-        fig.add_trace(go.Scatter(name="FirstGradient", x=x[3:], y=firstGradient), row=2, col=1, secondary_y=False)
-        if params.type == "grad":
-            fig.add_trace(go.Scatter(name="SecondGradient", x=x[3:], y=secondGradient), row=2, col=1, secondary_y=True)
-            fig.update_layout(title="Decision Rules for MACD indicator (Grad)", xaxis={"title": "x"},
-                              yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
-        elif params.type == "grad_crossZero":
-            fig.update_layout(title="Decision Rules for MACD indicator (Grad+CrossZero)", xaxis={"title": "x"},
-                              yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
-        elif params.type == "grad_crossSignal":
-            fig.add_trace(go.Scatter(name="SignalValues", x=x[3:], y=testMACD["signal"].values), row=1, col=1,
-                          secondary_y=False)
-            fig.update_layout(title="Decision Rules for MACD indicator (Grad+CrossSignal)", xaxis={"title": "x"},
-                              yaxis={"title": "Sell/Buy/Hold [$]"}, hovermode='x unified')
-        fig.show()
+            if (signal.values[-2] - macd.values[-2]) > 0 > (signal.values[-1] - macd.values[-1]):
+                self.perToInvest = math.tanh(
+                    params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
+            elif (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
+                self.perToInvest = -math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
 
     def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """
@@ -159,7 +122,6 @@ class InvestorMACD(Investor):
         :param stockMarketData: df with the stock market data
         :param recordPredictedValue: Predicted data dataframe
         """
-        self.record = self.record.iloc[1:]
         # Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
         fig = go.Figure()
         fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -170,10 +132,10 @@ class InvestorMACD(Investor):
                 "%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
             yaxis_title="Value [$]", hovermode='x unified')
-        fig.write_image("images/EvolutionPorfolioMACD" + self.macdParams.type + "(" + self.record.index[0].strftime(
-                "%d_%m_%Y") + "-" +
-                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        # fig.show()
+        # fig.write_image("images/EvolutionPorfolioMACD" + self.macdParams.type + "(" + self.record.index[0].strftime(
+        #         "%d_%m_%Y") + "-" +
+        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        fig.show()
 
         # Plot indicating the value of the indicator, the value of the stock market and the decisions made
         fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -192,16 +154,15 @@ class InvestorMACD(Investor):
                                  y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
         fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
                                  y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-        fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-        fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+        fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1)
         fig.update_xaxes(title_text="Date", row=1, col=1)
         fig.update_xaxes(title_text="Date", row=2, col=1)
         fig.update_layout(
             title="Decision making under MACD " + self.macdParams.type + " (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
                   self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-        fig.write_image("images/DecisionmakingMACD" + self.macdParams.type + "(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-                  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-        # fig.show()
+        # fig.write_image("images/DecisionmakingMACD" + self.macdParams.type + "(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+        #           self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+        fig.show()
 
 
 def movingAverageConvergenceDivergence(close, params: MACDInvestorParams):

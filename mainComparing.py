@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 import pandas as pd
@@ -31,7 +32,7 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 3
+    numExperiments = 1
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -162,16 +163,16 @@ def main():
         investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
         experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
         print("investorLSTMProb created")
+        # #
+        # # Create investor based on class voting (possible intermediate values)
+        # investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
+        # experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceInter",
+        #                               [experimentManager.createTIInput("lstmConfidence")], True)
         #
-        # Create investor based on class voting (possible intermediate values)
-        investorLSTMConfidenceProb = InvestorLSTMConfidenceClassProb(10000, 5)
-        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceInter",
-                                      [experimentManager.createTIInput("lstmConfidence")], True)
-
-        # Create investor based on class voting (only sell and buy everything)
-        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 5)
-        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceEvery",
-                                      [experimentManager.createTIInput("lstmConfidence")], True)
+        # # Create investor based on class voting (only sell and buy everything)
+        # investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 5)
+        # experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceEvery",
+        #                               [experimentManager.createTIInput("lstmConfidence")], True)
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
@@ -189,7 +190,7 @@ def main():
         print("investorWIA created")
 
         # Create investor CA
-        investorCA = InvestorCA(10000, 0.1)
+        investorCA = InvestorCA(10000, 0.05)
         experimentManager.addStrategy(investorCA, "ca", plotEvolution=True)
         print("investorCA created")
 
@@ -205,18 +206,34 @@ def main():
 
         auxLoop = pd.DataFrame()
         # Run for loop as if days passed
-        pastStockValue = df.Open[-1]
+        pastStockValue = df.Close[0]
+        nDay = 1
         for i in range(nDays+1):
             todayData = dataGetter.getToday()
             df = dataGetter.getUntilToday()
 
-            experimentManager.runDay(todayData, df, dataGetter.getNextNextDay(), dataGetter.getNextDay(), pastStockValue, j, i)
+            # Run morning operation
+            experimentManager.runMorning(todayData, df, dataGetter.getNextNextDay(), dataGetter.getNextDay(), pastStockValue, j, nDay)
+            nDay += 1
             # Save data into df for record
-            aux = pd.DataFrame({'nExperiment': [j], 'date': [dataGetter.today], 'stockValueOpen': todayData.Open.values[0], 'stockValueClose': todayData.Close.values[0]})
+            dataTag = dataGetter.today.combine(dataGetter.today, datetime.time(9, 30))
+            aux = pd.DataFrame({'nExperiment': [j], 'date': [dataTag], 'stockValueOpen': todayData.Open.values[0], 'stockValueClose': todayData.Close.values[0]})
+            auxLoop = pd.concat([auxLoop, aux], ignore_index=True)
+
+
+            # Run afternoon operation
+            experimentManager.runAfternoon(todayData, df, dataGetter.getNextNextDay(), dataGetter.getNextDay(),
+                                         pastStockValue, j, nDay)
+            nDay += 1
+            # Save data into df for record
+            dataTag = dataGetter.today.combine(dataGetter.today, datetime.time(16, 00))
+            aux = pd.DataFrame(
+                {'nExperiment': [j], 'date': [dataTag], 'stockValueOpen': todayData.Open.values[0],
+                 'stockValueClose': todayData.Close.values[0]})
             auxLoop = pd.concat([auxLoop, aux], ignore_index=True)
 
             # Refresh for next day
-            pastStockValue = todayData.Open.values[0]
+            pastStockValue = todayData.Close.values[0]
             dataGetter.goNextDay()
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])

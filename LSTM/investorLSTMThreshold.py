@@ -13,45 +13,33 @@ class InvestorLSTMThreshold(Investor):
 		self.lstmParams = lstmParams
 		self.model = LSTMClass()
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
 			{"lstmReturn": data["lstm"]["return"], "lstmProb0": data["lstm"]["prob0"], "lstmProb1": data["lstm"]["prob1"],
-			 'moneyToInvestLSTM': moneyInvestedToday, 'moneyToSellLSTM': moneySoldToday,
+			 'moneyToInvestLSTM': moneyInvestedToday,
 			 'investedMoneyLSTM': self.investedMoney, 'nonInvestedMoneyLSTM': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPrediction(data["lstm"]["return"][0])
+		self.perToInvest = 0
+		if data["lstm"]["return"][0] > self.lstmParams.threshold:
+			self.perToInvest = 1
+		elif data["lstm"]["return"][0] < -self.lstmParams.threshold:
+			self.perToInvest = -1
 
-	def possiblySellTomorrow(self, data):
+	def possiblyInvestAfternoon(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPrediction(data["lstm"]["return"][0])
-
-	def buyPrediction(self, data):
-		"""
-		Function that returns the money to be invested
-		:param data: predicted return value by LSTM
-		:return:
-		"""
-		if data > self.lstmParams.threshold:
-			return 1
-		return 0
-
-	def sellPrediction(self, data):
-		"""
-		Function that returns the money to be sold
-		:param data: predicted return value by LSTM
-		:return:
-		"""
-		if data < -self.lstmParams.threshold:
-			return 1
-		return 0
+		self.perToInvest = 0
+		if data["lstm"]["return"][0] > self.lstmParams.threshold:
+			self.perToInvest = 1
+		elif data["lstm"]["return"][0] < -self.lstmParams.threshold:
+			self.perToInvest = -1
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -60,7 +48,6 @@ class InvestorLSTMThreshold(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -71,10 +58,10 @@ class InvestorLSTMThreshold(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMThreshold(" + self.record.index[0].strftime(
-				"%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/EvolutionPorfolioLSTMThreshold(" + self.record.index[0].strftime(
+		# 		"%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=2, specs=[[{"secondary_y": True, "colspan": 2}, None], [{"secondary_y": False}, {"secondary_y": False}]])
@@ -88,8 +75,7 @@ class InvestorLSTMThreshold(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index, visible='legendonly',
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1, secondary_y=False)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1, secondary_y=False)
 
 		fig.add_trace(go.Bar(name="Prob Sell", x=self.record.index, y=-expData["lstmProb0"][-len(self.record.index):],
 							 marker_color="red"), row=2, col=2)
@@ -101,9 +87,9 @@ class InvestorLSTMThreshold(Investor):
 		fig.update_layout(
 			title="Decision making under LSTM Threshold (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMThreshold(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/DecisionMakingLSTMThreshold(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()
 
 
 class InvestorLSTMProb(Investor):
@@ -112,45 +98,33 @@ class InvestorLSTMProb(Investor):
 		self.lstmParams = lstmParams
 		self.model = LSTMClass()
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
 			{"lstmReturn": data["lstm"]["return"], "lstmProb0": data["lstm"]["prob0"], "lstmProb1": data["lstm"]["prob1"],
-			 'moneyToInvestLSTM': moneyInvestedToday, 'moneyToSellLSTM': moneySoldToday,
+			 'moneyToInvestLSTM': moneyInvestedToday,
 			 'investedMoneyLSTM': self.investedMoney, 'nonInvestedMoneyLSTM': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPrediction(data["lstm"]["return"][0], data["lstm"]["prob1"][0])
+		self.perToInvest = 0
+		if data["lstm"]["return"][0] > 0:
+			self.perToInvest = data["lstm"]["prob1"][0]
+		elif data["lstm"]["return"][0] < 0:
+			self.perToInvest = data["lstm"]["prob0"][0]
 
-	def possiblySellTomorrow(self, data):
+	def possiblyInvestAfternoon(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPrediction(data["lstm"]["return"][0], data["lstm"]["prob0"][0])
-
-	def buyPrediction(self, data, probBuy):
-		"""
-		Function that returns the money to be invested
-		:param data: predicted return value by LSTM
-		:return:
-		"""
-		if data > 0:
-			return probBuy
-		return 0
-
-	def sellPrediction(self, data, probSell):
-		"""
-		Function that returns the money to be sold
-		:param data: predicted return value by LSTM
-		:return:
-		"""
-		if data < 0:
-			return probSell
-		return 0
+		self.perToInvest = 0
+		if data["lstm"]["return"][0] > 0:
+			self.perToInvest = data["lstm"]["prob1"][0]
+		elif data["lstm"]["return"][0] < 0:
+			self.perToInvest = data["lstm"]["prob0"][0]
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -159,7 +133,6 @@ class InvestorLSTMProb(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -170,10 +143,10 @@ class InvestorLSTMProb(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMProb(" + self.record.index[0].strftime(
-				"%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/EvolutionPorfolioLSTMProb(" + self.record.index[0].strftime(
+		# 		"%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=2, specs=[[{"secondary_y": True, "colspan": 2}, None], [{"secondary_y": False}, {"secondary_y": False}]])
@@ -187,8 +160,7 @@ class InvestorLSTMProb(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index, visible='legendonly',
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1, secondary_y=False)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1, secondary_y=False)
 
 		fig.add_trace(go.Bar(name="Prob Sell", x=self.record.index, y=-expData["lstmProb0"][-len(self.record.index):],
 							 marker_color="red"), row=2, col=2)
@@ -200,6 +172,6 @@ class InvestorLSTMProb(Investor):
 		fig.update_layout(
 			title="Decision making under LSTM Prob (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMProb(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
-				  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
-		# fig.show()
+		# fig.write_image("images/DecisionMakingLSTMProb(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		# 		  self.record.index[-1].strftime("%d_%m_%Y") + ").png",scale=6, width=1080, height=1080)
+		fig.show()

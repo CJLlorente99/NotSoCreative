@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from investorClass import Investor
 from TAIndicators.adi import accDistIndexIndicator
@@ -10,7 +11,7 @@ from TAIndicators.obv import on_balance_volume
 from TAIndicators.rsi import relativeStrengthIndex
 from TAIndicators.stochasticRsi import stochasticRSI
 from classes.TestCriteriaClass import  TestCriteriaClass
-
+import datetime
 class ExperimentManager:
 	def __init__(self):
 		self.strategies = []  # Entries have an Investor, a name and an ordered list of inputs.
@@ -22,14 +23,64 @@ class ExperimentManager:
 				 , "plotEvolution": plotEvolution}
 		self.strategies.append(entry)
 
-	def runDay(self, todayData, df, nextNextData, nextData, pastOpen, expNum, numDay):
+	def runMorning(self, todayData, df, nextNextData, nextData, pastOpen, expNum, numDay):
 		dataManager = {}
+
 		dataManager["nDay"] = numDay
 		dataManager["pastStockValue"] = pastOpen
-		dataManager["date"] = todayData.index[0]
+		dataManager["date"] = todayData.index[0].combine(todayData.index[0], datetime.time(9, 30))
 		dataManager["actualStockValue"] = todayData.Open.values[0]
-		dataManager["nextnextStockValueOpen"] = nextNextData.Open.values[0]
-		dataManager["nextStockValueOpen"] = nextData.Open.values[0]
+		dataManager["nextStockValue"] = todayData.Close.values[0]
+
+		for strategy in self.strategies:
+			investor = strategy["investor"]
+			name = strategy["name"]
+			listOrderedInputs = strategy["listOrderedInputs"]  # Containing dicts with (name, params, key, numValues)
+			for inp in listOrderedInputs:
+				inpName = inp["name"]
+				inpParams = inp["params"]
+				inpKey = inp["key"]
+				inpNumValues = inp["numValues"]
+				tag = inpName + (inpKey if inpKey else "")
+				if inpName == "adi":
+					dataManager[tag] = accDistIndexIndicator(df.High[:-1], df.Low[:-1], df.Close[:-1], df.Volume[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "adx":
+					dataManager[tag] = averageDirectionalMovementIndex(df.High[:-1], df.Low[:-1], df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "aroon":
+					dataManager[tag] = aroon(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "atr":
+					dataManager[tag] = averageTrueRange(df.High[:-1], df.Low[:-1], df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "bb":
+					dataManager[tag] = bollingerBands(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "macd":
+					dataManager[tag] = movingAverageConvergenceDivergence(df.Close[:-1], inpParams)[inpKey]
+				elif inpName == "obv":
+					dataManager[tag] = on_balance_volume(df.Close[:-1], df.Volume[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "rsi":
+					dataManager[tag] = relativeStrengthIndex(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "stochrsi":
+					dataManager[tag] = stochasticRSI(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+				elif inpName == "lstm":
+					returnPred = investor.model.trainAndPredictMorning(df)
+					returnClass = investor.model.trainAndPredictClassificationMorning(df)
+					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
+				elif inpName == "lstmConfidence":
+					returnPred = investor.trainAndPredictMorning(df)
+					dataManager[tag] = returnPred
+
+			aux = investor.brokerMorning(dataManager)
+			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
+
+			print(f"Experiment {expNum} Day {round(numDay/2)} Morning {name} Completed")
+
+	def runAfternoon(self, todayData, df, nextNextData, nextData, pastOpen, expNum, numDay):
+		dataManager = {}
+
+		dataManager["nDay"] = numDay
+		dataManager["pastStockValue"] = pastOpen
+		dataManager["date"] = todayData.index[0].combine(todayData.index[0], datetime.time(16, 00))
+		dataManager["actualStockValue"] = todayData.Close.values[0]
+		dataManager["nextStockValue"] = nextData.Open.values[0]
 
 		for strategy in self.strategies:
 			investor = strategy["investor"]
@@ -60,17 +111,17 @@ class ExperimentManager:
 				elif inpName == "stochrsi":
 					dataManager[tag] = stochasticRSI(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "lstm":
-					returnPred = investor.model.trainAndPredict(df)
-					returnClass = investor.model.trainAndPredictClassification(df)
+					returnPred = investor.model.trainAndPredictAfternoon(df)
+					returnClass = investor.model.trainAndPredictClassificationAfternoon(df)
 					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
 				elif inpName == "lstmConfidence":
-					returnPred = investor.trainAndPredict(df)
+					returnPred = investor.trainAndPredictAfternoon(df)
 					dataManager[tag] = returnPred
 
-			aux = investor.broker(dataManager)
+			aux = investor.brokerAfternoon(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
 
-			print(f"Experiment {expNum} Day {numDay} {name} Completed")
+			print(f"Experiment {expNum} Day {round(numDay/2)} Afternoon {name} Completed")
 
 	def returnExpData(self):
 		aux = pd.DataFrame()
@@ -93,9 +144,12 @@ class ExperimentManager:
 		return aux
 
 	def plotEvolution(self, df):
+		df_new = pd.DataFrame(np.repeat(df.values,2, axis=0), index=np.repeat(df.index.values, 2, axis=0), columns=df.columns)
+		df_new['Open'] = df_new['Open'].shift(-1)
+		df_new = df_new[:-1]
 		for strategy in self.strategies:
 			if strategy["plotEvolution"]:
-				strategy["investor"].plotEvolution(strategy["expData"], df)
+				strategy["investor"].plotEvolution(strategy["expData"], df_new)
 
 	def summaryCriteriaCalculatorAndPlotting(self, dfTestCriteria):
 		result = self.criteriaCalculator.calculateCriteriaVariousExperiments(dfTestCriteria)

@@ -14,50 +14,32 @@ class InvestorBBNN(Investor):
 		self.model = NNDecisionFunction()
 		self.model.load(nnParams.file)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
-			{'BBNN': data["bbpband"][-1], 'moneyToInvestBBNN': moneyInvestedToday, 'moneyToSellBBNN': moneySoldToday,
+			{'BBNN': data["bbpband"][-1], 'moneyToInvestBBNN': moneyInvestedToday,
 			 'investedMoneyBBNN':self.investedMoney, 'nonInvestedMoneyBBNN': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPredictionBB(data["bbpband"])
+		bb = data["bbpband"]
+		inputs = [bb[-1], bb[-2]]
+		inputs = np.asarray(inputs)
+		y = self.model.predict([inputs.tolist()])[0]
+		self.perToInvest = (y - 0.5) * 2
 
-	def possiblySellTomorrow(self, data):
+	def possiblyInvestAfternoon(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPredictionBB(data["bbpband"])
-
-	def buyPredictionBB(self, bb):
-		"""
-		Function that returns the money to be invested
-		:param bb: bollinger_pband() value
-		:return:
-		"""
+		bb = data["bbpband"]
 		inputs = [bb[-1], bb[-2]]
 		inputs = np.asarray(inputs)
 		y = self.model.predict([inputs.tolist()])[0]
-		if y > 0.5:
-			return (y - 0.5) *  2
-		return 0
-
-	def sellPredictionBB(self, bb):
-		"""
-		Function that returns the money to be sold
-		:param bb: bollinger_pband() value
-		:return:
-		"""
-		inputs = [bb[-1], bb[-2]]
-		inputs = np.asarray(inputs)
-		y = self.model.predict([inputs.tolist()])[0]
-		if y < 0.5:
-			return -(y - 0.5) *  2
-		return 0
+		self.perToInvest = (y - 0.5) * 2
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -66,7 +48,6 @@ class InvestorBBNN(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -94,8 +75,7 @@ class InvestorBBNN(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-		fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1)
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
@@ -110,50 +90,44 @@ class InvestorBBRSINNClass(Investor):
 		self.model = NNDecisionFunction()
 		self.model.load(nnParams.file)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
-			{'BBRSINNClassBB': data["bbpband"][-1], 'BBRSINNClassRSI': data["rsirsi"][-1], 'moneyToInvestBBRSINNClass': moneyInvestedToday, 'moneyToSellBBRSINNClass': moneySoldToday,
+			{'BBRSINNClassBB': data["bbpband"][-1], 'BBRSINNClassRSI': data["rsirsi"][-1], 'moneyToInvestBBRSINNClass': moneyInvestedToday,
 			 'investedMoneyBBRSINNClass': self.investedMoney, 'nonInvestedMoneyBBRSINNClass': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPrediction(data["bbpband"], data["rsirsi"])
-
-	def possiblySellTomorrow(self, data):
-		"""
-		Function that calls the sell function and updates the investment values
-		:param data: Decision data based on the type of indicator
-		"""
-		self.perToSell = self.sellPrediction(data["bbpband"], data["rsirsi"])
-
-	def buyPrediction(self, bb, rsi):
-		"""
-		Function that returns the money to be invested
-		:param bb: bollinger_pband() value
-		:return:
-		"""
+		bb = data["bbpband"]
+		rsi= data["rsirsi"]
+		self.perToInvest = 0
 		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
 		inputs = np.asarray(inputs)
 		y = self.model.predict([inputs.tolist()])
 		if y[:, 1] > y[:, 0]:
-			return (y[:, 1] - 0.5) * 2
-		return 0
+			self.perToInvest = (y[:, 1] - 0.5) * 2
+		if y[:, 1] < y[:, 0]:
+			self.perToInvest = -(y[:, 0] - 0.5) * 2
 
-	def sellPrediction(self, bb, rsi):
+
+	def possiblyInvestAfternoon(self, data):
 		"""
-		Function that returns the money to be sold
-		:param bb: bollinger_pband() value
-		:return:
+		Function that calls the sell function and updates the investment values
+		:param data: Decision data based on the type of indicator
 		"""
+		bb = data["bbpband"]
+		rsi = data["rsirsi"]
+		self.perToInvest = 0
 		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
 		inputs = np.asarray(inputs)
 		y = self.model.predict([inputs.tolist()])
+		if y[:, 1] > y[:, 0]:
+			self.perToInvest = (y[:, 1] - 0.5) * 2
 		if y[:, 1] < y[:, 0]:
-			return (y[:, 0] - 0.5) * 2
-		return 0
+			self.perToInvest = -(y[:, 0] - 0.5) * 2
+
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -162,7 +136,6 @@ class InvestorBBRSINNClass(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -192,8 +165,7 @@ class InvestorBBRSINNClass(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-		fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1)
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
@@ -208,50 +180,34 @@ class InvestorBBRSINN(Investor):
 		self.model = NNDecisionFunction()
 		self.model.load(nnParams.file)
 
-	def returnBrokerUpdate(self, moneyInvestedToday, moneySoldToday, data):
+	def returnBrokerUpdate(self, moneyInvestedToday, data):
 		return pd.DataFrame(
-			{'BBRSINNBB': data["bbpband"][-1], 'BBRSINNRSI': data["rsirsi"][-1], 'moneyToInvestBBRSINN': moneyInvestedToday, 'moneyToSellBBRSINN': moneySoldToday,
+			{'BBRSINNBB': data["bbpband"][-1], 'BBRSINNRSI': data["rsirsi"][-1], 'moneyToInvestBBRSINN': moneyInvestedToday,
 			 'investedMoneyBBRSINN': self.investedMoney, 'nonInvestedMoneyBBRSINN': self.nonInvestedMoney}, index=[0])
 
-	def possiblyInvestTomorrow(self, data):
+	def possiblyInvestMorning(self, data):
 		"""
 		Function that calls the buy function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = self.buyPrediction(data["bbpband"], data["rsirsi"])
+		bb = data["bbpband"]
+		rsi = data["rsirsi"]
+		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
+		inputs = np.asarray(inputs)
+		y = self.model.predict([inputs.tolist()])[0]
+		self.perToInvest = (y - 0.5) * 2
 
-	def possiblySellTomorrow(self, data):
+	def possiblyInvestAfternoon(self, data):
 		"""
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToSell = self.sellPrediction(data["bbpband"], data["rsirsi"])
-
-	def buyPrediction(self, bb, rsi):
-		"""
-		Function that returns the money to be invested
-		:param bb: bollinger_pband() value
-		:return:
-		"""
+		bb = data["bbpband"]
+		rsi = data["rsirsi"]
 		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
 		inputs = np.asarray(inputs)
 		y = self.model.predict([inputs.tolist()])[0]
-		if y > 0.5:
-			return (y - 0.5) * 2
-		return 0
-
-	def sellPrediction(self, bb, rsi):
-		"""
-		Function that returns the money to be sold
-		:param bb: bollinger_pband() value
-		:return:
-		"""
-		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
-		inputs = np.asarray(inputs)
-		y = self.model.predict([inputs.tolist()])[0]
-		if y < 0.5:
-			return (y - 0.5) * 2
-		return 0
+		self.perToInvest = (y - 0.5) * 2
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -260,7 +216,6 @@ class InvestorBBRSINN(Investor):
 		:param stockMarketData: df with the stock market data
 		:param recordPredictedValue: Predicted data dataframe
 		"""
-		self.record = self.record.iloc[1:]
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(name="Money Invested", x=self.record.index, y=self.record["moneyInvested"], stackgroup="one"))
@@ -290,8 +245,7 @@ class InvestorBBRSINN(Investor):
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
 								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"], marker_color="green"), row=2, col=1)
-		fig.add_trace(go.Bar(name="Money Sold Today", x=self.record.index, y=-self.record["moneySoldToday"], marker_color="red"), row=2, col=1)
+		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]), row=2, col=1)
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
