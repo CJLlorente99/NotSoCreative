@@ -1,6 +1,6 @@
 from dailyStrategy import DailyStrategy
 import pandas as pd
-from inversionStrategyJSONAPI import Strategy
+from jsonManagement.inversionStrategyJSONAPI import Strategy
 
 
 class BaH(DailyStrategy):

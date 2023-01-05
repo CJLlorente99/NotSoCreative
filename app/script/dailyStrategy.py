@@ -1,6 +1,6 @@
 import pandas as pd
 from abc import ABC, abstractmethod
-from inversionStrategyJSONAPI import Strategy
+from jsonManagement.inversionStrategyJSONAPI import Strategy
 
 
 class DailyStrategy(ABC):

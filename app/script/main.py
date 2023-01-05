@@ -1,7 +1,6 @@
 import datetime
 import os
 import urllib.request
-from datetime import date
 import yfinance as yf
 import pandas as pd
 from pandas.tseries.offsets import CDay
@@ -16,8 +15,8 @@ from strategies.idle import Idle
 from strategies.rsi import RSI
 from strategies.bb import BB
 from strategies.lstmConfidenceOpenClose import LSTMConfidenceOpenClose
-from logManager import LogManager
-from inversionStrategyJSONAPI import *
+from logManager.logManager import LogManager
+from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
 import numpy as np
 """
