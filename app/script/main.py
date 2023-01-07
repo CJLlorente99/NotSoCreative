@@ -53,10 +53,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	# dateToday = datetime.datetime.now()
-	# now = datetime.datetime.now()
-	dateToday = datetime.datetime(2022, 12, 28)
-	now = datetime.datetime(2022, 12, 28, openingHour, openingMinute+20, 0)
+	dateToday = datetime.datetime.now()
+	now = datetime.datetime.now()
+	# dateToday = datetime.datetime(2022, 12, 30)
+	# now = datetime.datetime(2022, 12, 30, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -354,6 +354,9 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 	# Close and Open should ALWAYS be in
 	data['Open'] = df['Open']
 	data['Close'] = df['Close']
+	data['High'] = df['High']
+	data['Low'] = df['Low']
+	data['Volume'] = df['Volume']
 
 	status = True
 	errMsg = 'calculateInputs OK'
@@ -387,7 +390,7 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			strategyInfo = investorInfo[investorInfo['investorStrategy'] == name]
 		else:
 			strategyInfo = pd.DataFrame()
-		inputsData = inputsDf[['Open', 'Close'] + strategy.getListDfNameInputs()]
+		inputsData = inputsDf[['Open', 'Close', 'High', 'Low'] + strategy.getListDfNameInputs()]
 
 		aux = pd.DataFrame()
 		if name == 'bia':
