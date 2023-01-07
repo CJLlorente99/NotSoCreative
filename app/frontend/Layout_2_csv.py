@@ -1,4 +1,5 @@
 import csv
+import customtkinter
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import ttk
@@ -13,8 +14,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import Entry
 from tkinter import END
 
-#Main Window
-root = tk.Tk()
+customtkinter.set_appearance_mode("System")
+customtkinter.set_default_color_theme("blue")
+
+# Main Window
+root = customtkinter.CTk()
 root.geometry('800x600')
 root.title("Stock Market Prediction Engine")
 
@@ -52,16 +56,16 @@ def getCurrentValue(df, strategy, kind):
 ############## START FRONTEND ###########
 
 #left side
-frame_l = tk.Frame(root)
+frame_l = customtkinter.CTkFrame(root)
 frame_l.grid(row=0, column=0)
 
-labelL1 = tk.Label(frame_l, text='Portfolio Value', font=18)
+labelL1 = customtkinter.CTkLabel(frame_l, text='Portfolio Value', font=customtkinter.CTkFont(size=20, weight="bold"))
 labelL1.pack()
-labelL2 = tk.Label(frame_l, text=str(round(getCurrentValue(df, investorStrategy, 'TotalPortfolioValue'),2)), font=18)
+labelL2 = customtkinter.CTkLabel(frame_l, text=str(round(getCurrentValue(df, investorStrategy, 'TotalPortfolioValue'),2)), font=customtkinter.CTkFont(size=20))
 labelL2.pack()
 
 #middle
-frame_m = tk.Frame(root)
+frame_m = customtkinter.CTkFrame(root)
 frame_m.grid(row=0, column=1)
 
 
@@ -80,18 +84,18 @@ ax.set_title('Open S&P 500')
 
 
 #right side
-frame_r = tk.Frame(root)
+frame_r = customtkinter.CTkFrame(root)
 frame_r.grid(row=0, column=2)
 
 
-labelR1 = tk.Label(frame_r, text='Money Invested', font=18)
+labelR1 = customtkinter.CTkLabel(frame_r, text='Money Invested', font=customtkinter.CTkFont(size=20, weight="bold"))
 labelR1.pack()
 
-labelR2 = tk.Label(frame_r, text=str(round(getCurrentValue(df, investorStrategy, 'MoneyInvested'),2)), font=18)
+labelR2 = customtkinter.CTkLabel(frame_r, text=str(round(getCurrentValue(df, investorStrategy, 'MoneyInvested'),2)), font=customtkinter.CTkFont(size=20))
 labelR2.pack()
 
 
-frame_b = tk.Frame(root)
+frame_b = customtkinter.CTkFrame(root)
 frame_b.grid(row=1, columnspan=2)
 
 # Bottom side
@@ -100,7 +104,7 @@ total_rows = 7
 total_columns = 3
 
 # Names of the columns
-list=["Metrics", "MPV", "STD", "Max/Min (Total Assets)", "% & absolute gain", "Max. gain per day", "Mix. gain per day"]
+list = ["Metrics", "MPV", "STD", "Max/Min (Total Assets)", "% & absolute gain", "Max. gain per day", "Mix. gain per day"]
 
 # take the data
 lst = [(list[0], 'Our Strategy', 'WIA' ),
