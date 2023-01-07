@@ -35,11 +35,12 @@ class InvestorBBNN(Investor):
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		bb = data["bbpband"]
-		inputs = [bb[-1], bb[-2]]
-		inputs = np.asarray(inputs)
-		y = self.model.predict([inputs.tolist()])[0]
-		self.perToInvest = (y - 0.5) * 2
+		# bb = data["bbpband"]
+		# inputs = [bb[-1], bb[-2]]
+		# inputs = np.asarray(inputs)
+		# y = self.model.predict([inputs.tolist()])[0]
+		# self.perToInvest = (y - 0.5) * 2
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -58,10 +59,9 @@ class InvestorBBNN(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.show()
+		# fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
-		fig = go.Figure()
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
 		if recordPredictedValue is not None:
 			fig.add_trace(go.Scatter(name="Predicted Stock Market Value Close", x=recordPredictedValue.index,
@@ -81,7 +81,7 @@ class InvestorBBNN(Investor):
 		fig.update_layout(
 			title="Decision making under BBNN (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.show()
+		# fig.show()
 
 class InvestorBBRSINNClass(Investor):
 	def __init__(self, initialInvestment=10000, nnParams: NNInvestorParams = None):
@@ -117,16 +117,17 @@ class InvestorBBRSINNClass(Investor):
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		bb = data["bbpband"]
-		rsi = data["rsirsi"]
+		# bb = data["bbpband"]
+		# rsi = data["rsirsi"]
+		# self.perToInvest = 0
+		# inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
+		# inputs = np.asarray(inputs)
+		# y = self.model.predict([inputs.tolist()])
+		# if y[:, 1] > y[:, 0]:
+		# 	self.perToInvest = (y[:, 1] - 0.5) * 2
+		# if y[:, 1] < y[:, 0]:
+		# 	self.perToInvest = -(y[:, 0] - 0.5) * 2
 		self.perToInvest = 0
-		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
-		inputs = np.asarray(inputs)
-		y = self.model.predict([inputs.tolist()])
-		if y[:, 1] > y[:, 0]:
-			self.perToInvest = (y[:, 1] - 0.5) * 2
-		if y[:, 1] < y[:, 0]:
-			self.perToInvest = -(y[:, 0] - 0.5) * 2
 
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
@@ -146,7 +147,7 @@ class InvestorBBRSINNClass(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.show()
+		# fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -171,7 +172,7 @@ class InvestorBBRSINNClass(Investor):
 		fig.update_layout(
 			title="Decision making under BBRSINNClass (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.show()
+		# fig.show()
 
 class InvestorBBRSINN(Investor):
 	def __init__(self, initialInvestment=10000, nnParams: NNInvestorParams = None):
@@ -202,12 +203,13 @@ class InvestorBBRSINN(Investor):
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		bb = data["bbpband"]
-		rsi = data["rsirsi"]
-		inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
-		inputs = np.asarray(inputs)
-		y = self.model.predict([inputs.tolist()])[0]
-		self.perToInvest = (y - 0.5) * 2
+		# bb = data["bbpband"]
+		# rsi = data["rsirsi"]
+		# inputs = [bb[-1], bb[-2], rsi[-1], rsi[-2]]
+		# inputs = np.asarray(inputs)
+		# y = self.model.predict([inputs.tolist()])[0]
+		# self.perToInvest = (y - 0.5) * 2
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -226,7 +228,7 @@ class InvestorBBRSINN(Investor):
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.show()
+		# fig.show()
 
 		# Plot indicating the value of the indicator, the value of the stock market and the decisions made
 		fig = make_subplots(rows=2, cols=1, specs=[[{"secondary_y": True}], [{"secondary_y": False}]])
@@ -251,4 +253,4 @@ class InvestorBBRSINN(Investor):
 		fig.update_layout(
 			title="Decision making under BBRSINN (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.show()
+		# fig.show()

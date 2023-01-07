@@ -33,8 +33,8 @@ class InvestorCA(Investor):
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = 0
-		if 1 - data["nDay"] * self.dailyWindow > 0:
-			self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
+		# if 1 - data["nDay"] * self.dailyWindow > 0:
+		# 	self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""

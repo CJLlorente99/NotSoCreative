@@ -26,7 +26,7 @@ class InvestorBaH(Investor):
 		Function that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = 1
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""

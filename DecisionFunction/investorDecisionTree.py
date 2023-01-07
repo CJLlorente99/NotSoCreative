@@ -45,6 +45,7 @@ class InvestorDecisionTree(Investor):
 		agg = np.asarray(agg).transpose()
 		y = self.model.predict(agg)
 		self.perToInvest = (y - 0.5) * 2
+		# self.perToInvest = 0
 
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):

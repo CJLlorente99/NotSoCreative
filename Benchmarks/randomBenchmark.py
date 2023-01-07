@@ -26,7 +26,8 @@ class InvestorRandom(Investor):
 		Function prototype that calls the sell function and updates the investment values
 		:param data: Decision data based on the type of indicator
 		"""
-		self.perToInvest = random.uniform(-1, 1)
+		# self.perToInvest = random.uniform(-1, 1)
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)

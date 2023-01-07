@@ -36,10 +36,10 @@ class InvestorLSTMThreshold(Investor):
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = 0
-		if data["lstm"]["return"][0] > self.lstmParams.threshold:
-			self.perToInvest = 1
-		elif data["lstm"]["return"][0] < -self.lstmParams.threshold:
-			self.perToInvest = -1
+		# if data["lstm"]["return"][0] > self.lstmParams.threshold:
+		# 	self.perToInvest = 1
+		# elif data["lstm"]["return"][0] < -self.lstmParams.threshold:
+		# 	self.perToInvest = -1
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -121,10 +121,10 @@ class InvestorLSTMProb(Investor):
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = 0
-		if data["lstm"]["return"][0] > 0:
-			self.perToInvest = data["lstm"]["prob1"][0]
-		elif data["lstm"]["return"][0] < 0:
-			self.perToInvest = data["lstm"]["prob0"][0]
+		# if data["lstm"]["return"][0] > 0:
+		# 	self.perToInvest = data["lstm"]["prob1"][0]
+		# elif data["lstm"]["return"][0] < 0:
+		# 	self.perToInvest = data["lstm"]["prob0"][0]
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
