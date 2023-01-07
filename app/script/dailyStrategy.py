@@ -1,6 +1,7 @@
 import pandas as pd
 from abc import ABC, abstractmethod
 from jsonManagement.inversionStrategyJSONAPI import Strategy
+import numpy as np
 
 
 class DailyStrategy(ABC):
@@ -17,6 +18,7 @@ class DailyStrategy(ABC):
 		self.name = strategyDefinition.name
 		self.initialInvestment = strategyDefinition.initialMoney
 		self.description = strategyDefinition.description
+		self.record = record
 
 		self.perToInvest = 0
 		if len(record) == 0:
@@ -44,9 +46,17 @@ class DailyStrategy(ABC):
 		elif operation == 'Afternoon':
 			moneyInvested = self.brokerAfternoon(inputs)
 
-		return pd.DataFrame({'investorStrategy': self.name, 'MoneyInvested': self.investedMoney, 'MoneyNotInvested': self.nonInvestedMoney,
+		# Calculate test criteria
+		testCriteriaEntry = self.calculateTestCriteria()
+
+		aux = pd.DataFrame({'investorStrategy': self.name, 'MoneyInvested': self.investedMoney, 'MoneyNotInvested': self.nonInvestedMoney,
 							 'MoneyInvestedToday': moneyInvested, 'PerInvestToday': self.perToInvest,
 							 'TotalPortfolioValue': self.investedMoney + self.nonInvestedMoney}, index=[0])
+		return pd.concat([aux, testCriteriaEntry], axis=1)
+
+		# return pd.DataFrame({'investorStrategy': self.name, 'MoneyInvested': self.investedMoney, 'MoneyNotInvested': self.nonInvestedMoney,
+		# 					 'MoneyInvestedToday': moneyInvested, 'PerInvestToday': self.perToInvest,
+		# 					 'TotalPortfolioValue': self.investedMoney + self.nonInvestedMoney}, index=[0])
 
 	def brokerMorning(self, inputs: pd.DataFrame):
 		"""
@@ -103,6 +113,64 @@ class DailyStrategy(ABC):
 			self.investedMoney -= -self.perToInvest * self.investedMoney
 
 		return moneyInvested
+
+	def calculateTestCriteria(self):
+		if len(self.record) != 0:
+			pvs = np.append(self.record['TotalPortfolioValue'].values, self.nonInvestedMoney + self.investedMoney)
+			# MPV
+			mpv = pvs.mean()
+
+			# StdPV
+			std = pvs.std()
+
+			# Max
+			maxPV = pvs.max()
+
+			# Min
+			minPV = pvs.min()
+
+			# Absolute Gain
+			absGain = pvs[-1] - pvs[0]
+
+			# Per Gain
+			perGain = (pvs[-1] - pvs[0]) / pvs[0] * 100
+
+			# Max gain
+			maxGain = (pvs[1:] - pvs[:-1]).max()
+
+			# Min gain
+			minGain = (pvs[1:] - pvs[:-1]).min()
+
+			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
+								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
+
+		else:
+			# MPV
+			mpv = self.initialInvestment
+
+			# StdPV
+			std = 0
+
+			# Max
+			maxPV = self.initialInvestment
+
+			# Min
+			minPV = self.initialInvestment
+
+			# Absolute Gain
+			absGain = 0
+
+			# Per Gain
+			perGain = 0
+
+			# Max gain
+			maxGain = 0
+
+			# Min gain
+			minGain = 0
+
+			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
+								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
 
 	"""
 	ABSTRACT METHODS

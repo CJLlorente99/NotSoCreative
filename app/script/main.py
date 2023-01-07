@@ -53,10 +53,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = datetime.datetime.now()
-	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2022, 12, 28)
-	# now = datetime.datetime(2022, 12, 28, closingHour, closingMinute+20, 0)
+	# dateToday = datetime.datetime.now()
+	# now = datetime.datetime.now()
+	dateToday = datetime.datetime(2022, 12, 28)
+	now = datetime.datetime(2022, 12, 28, openingHour, openingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -71,7 +71,7 @@ def main():
 	out = retrieveStockData(dateToday, operation)
 	data = out['data']
 	if not out['status']:
-		pass
+		return
 		# Launch message to user
 
 	# 4) open csv file and read inversor status
@@ -184,23 +184,26 @@ def retrieveStockData(todayDate: datetime.date, operation) -> pd.DataFrame():
 		numRetries += 1
 		data = yf.download('^GSPC', start=startDate, end=todayDate + CDay(calendar=USFederalHolidayCalendar()))
 
-	if len(data) != 0:
-		status = True
-		errMsg = "retrieveStockData OK"
-		logManager.writeLog('INFO', errMsg)
+	res = checkStockOpened(data, todayDate)
+	if res['status']:
+		if len(data) != 0:
+			status = True
+			errMsg = "retrieveStockData OK"
+			logManager.writeLog('INFO', errMsg)
 
-		# Depending on the moment of operation some values are definitive for the day or not
-		if operation == 'Morning':
-			data['Open'] = data['Open'].shift(-1)
-			data = data[:-1]
-		elif operation == 'Afternoon':
-			pass
+			# Depending on the moment of operation some values are definitive for the day or not
+			if operation == 'Morning':
+				data['Open'] = data['Open'].shift(-1)
+				data = data[:-1]
+			elif operation == 'Afternoon':
+				pass
+		else:
+			status = False
+			errMsg = 'retrieveStockData ERROR'
+			logManager.writeLog('ERROR', errMsg)
 	else:
-		status = False
-		errMsg = 'retrieveStockData ERROR'
-		logManager.writeLog('ERROR', errMsg)
-		errMsg = "NoDataRetrieved. Is S&P500 closed today?"
-		logManager.writeLog('INFO', errMsg)
+		status = res['status']
+		errMsg = res['errorMsg']
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
@@ -446,6 +449,22 @@ def checkNoRepeat(investorInfo, operation, dateToday):
 	else:
 		status = False
 		errMsg = 'checkNoRepeat already computed this day and moment'
+		logManager.writeLog('INFO', errMsg)
+
+	return {'status': status, 'errorMsg': errMsg, 'data': data}
+
+def checkStockOpened(stockData, todayDate):
+	status = False
+	errMsg = ''
+	data = None
+
+	if stockData.index[-1].to_pydatetime().date() != todayDate.date():
+		errMsg = 'checkStockOpened. Not open today'
+		status = False
+		logManager.writeLog('INFO', errMsg)
+	else:
+		errMsg = 'checkStockOpened OK'
+		status = True
 		logManager.writeLog('INFO', errMsg)
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
