@@ -33,7 +33,7 @@ def data_shift(X, window, inp):
     return X_plc
 
 def main():
-    data = pd.read_csv("featureSelectionDataset_Paul_Class_shift_forBackt_close_open.csv", sep=',', header=0,
+    data = pd.read_csv("../featureSelectionDataset_Paul_Class_shift_forBackt_close_open.csv", sep=',', header=0,
                            index_col=0, parse_dates=True,
                            decimal=".")
     data_or = data.copy()

@@ -6,6 +6,7 @@ from TAIndicators.rsi import InvestorRSI
 from TAIndicators.ma import InvestorMACD
 from TAIndicators.bb import InvestorBB
 from DecisionFunction.investorDecisionTree import InvestorDecisionTree
+from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
 from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass, InvestorLSTMConfidenceProb
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
@@ -149,29 +150,35 @@ def main():
         #                                experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
         # print("investorDT created")
 
+        # Create investor based on Random Forest Classifier
+        investorRFClass = InvestorRandomForestClassifier(10000, 'data/random_forest_class.joblib')
+        experimentManager.addStrategy(investorRFClass, 'RFClass',
+                                      [experimentManager.createTIInput("df")], True)
+        print('investorRFClass created')
+
         # Create investor based on LSTM Threshold
-        file = "../data/modellstm.h5"
-        lstmParams = LSTMInvestorParams(file, 0.05)
-        investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
-        experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
-        print("investorLSTMThreshold created")
-
-        # Create investor based on LSTM Prob
-        file = "../data/modellstm.h5"
-        lstmParams = LSTMInvestorParams(file, 0.05)
-        investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
-        experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
-        print("investorLSTMProb created")
-
-        # Create investor based on class voting (only sell and buy everything)
-        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)
-        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceClass",
-                                      [experimentManager.createTIInput("df")], True)
-
-        # Create investor based on class voting (only sell and buy depending on prob)
-        investorLSTMConfidenceProb = InvestorLSTMConfidenceProb(10000, 10)
-        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceProb",
-                                      [experimentManager.createTIInput("df")], True)
+        # file = "../data/modellstm.h5"
+        # lstmParams = LSTMInvestorParams(file, 0.05)
+        # investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
+        # experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
+        # print("investorLSTMThreshold created")
+        #
+        # # Create investor based on LSTM Prob
+        # file = "../data/modellstm.h5"
+        # lstmParams = LSTMInvestorParams(file, 0.05)
+        # investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
+        # experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
+        # print("investorLSTMProb created")
+        #
+        # # Create investor based on class voting (only sell and buy everything)
+        # investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)
+        # experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceClass",
+        #                               [experimentManager.createTIInput("df")], True)
+        #
+        # # Create investor based on class voting (only sell and buy depending on prob)
+        # investorLSTMConfidenceProb = InvestorLSTMConfidenceProb(10000, 10)
+        # experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceProb",
+        #                               [experimentManager.createTIInput("df")], True)
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
@@ -206,7 +213,7 @@ def main():
         auxLoop = pd.DataFrame()
         # Run for loop as if days passed
         pastStockValue = df.Close[0]
-        nDay = 1
+        nDay = 0
         for i in range(nDays+1):
             todayData = dataGetter.getToday()
             df = dataGetter.getUntilToday()

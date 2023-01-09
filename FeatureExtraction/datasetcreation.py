@@ -26,7 +26,7 @@ import json
 jsonString = []
 
 # Retrive all data available from S&P500
-df = yf.download("^GSPC", "2015-12-30", "2022-12-27")
+df = yf.download("^GSPC", "1999-12-30", "2023-01-09")
 
 # Calculate return
 df["Return"] = df["Open"].shift(-1) - df["Open"]
