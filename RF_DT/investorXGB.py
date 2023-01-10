@@ -1,4 +1,8 @@
 import pandas as pd
+import xgboost as xgb
+from classes.investorClass import Investor
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from TAIndicators.atr import averageTrueRange
 from TAIndicators.stochasticRsi import stochasticRSI
 from TAIndicators.ma import movingAverageConvergenceDivergence
@@ -7,37 +11,35 @@ from TAIndicators.rsi import relativeStrengthIndex
 from TAIndicators.bb import bollingerBands
 from TAIndicators.aroon import aroon
 from classes.investorParamsClass import ATRInvestorParams, ADXInvestorParams, StochasticRSIInvestorParams, MACDInvestorParams, RSIInvestorParams, BBInvestorParams, AroonInvestorParams
-from classes.investorClass import Investor
-import joblib
 import numpy as np
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from sklearn.preprocessing import StandardScaler
 
-class InvestorRandomForestClassifier(Investor):
+
+class InvestorXGB(Investor):
 	def __init__(self, initialInvestment, fileName):
 		super().__init__(initialInvestment)
-		self.model = joblib.load(fileName)
-
+		self.model = xgb.XGBClassifier()
+		self.model.load_model(fileName)
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestRFClass': moneyInvestedToday,
-			 'investedMoneyRFClass': self.investedMoney, 'nonInvestedMoneyRFClass': self.nonInvestedMoney},
+			{'moneyToInvestXGB': moneyInvestedToday,
+			 'investedMoneyXGB': self.investedMoney, 'nonInvestedMoneyXGB': self.nonInvestedMoney},
 			index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculateInputsMorning(data['df'])
-		self.perToInvest = self.model.predict([res.to_numpy()[-1]])[0]
+		self.perToInvest = self.model.predict([res[-1]])[0]
 
 	def possiblyInvestAfternoon(self, data):
 		self.perToInvest = -1
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
-		Function that plots the actual status of the investor investment as well as the decisions that have been made
-		:param indicatorData: Data belonging to the indicator used to take decisions
-		:param stockMarketData: df with the stock market data
-		:param recordPredictedValue: Predicted data dataframe
-		"""
+				Function that plots the actual status of the investor investment as well as the decisions that have been made
+				:param indicatorData: Data belonging to the indicator used to take decisions
+				:param stockMarketData: df with the stock market data
+				:param recordPredictedValue: Predicted data dataframe
+				"""
 		# Plot indicating the evolution of the total value and contain (moneyInvested and moneyNotInvested)
 		fig = go.Figure()
 		fig.add_trace(
@@ -46,11 +48,11 @@ class InvestorRandomForestClassifier(Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using RF Class (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using XGB (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioRFClass(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioXGB(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -69,9 +71,9 @@ class InvestorRandomForestClassifier(Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under RFClass (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under XGB (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingRFClass(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingXGB(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
 
@@ -156,5 +158,8 @@ class InvestorRandomForestClassifier(Investor):
 		# stochRsi_k_w29_s18_s219
 		params = StochasticRSIInvestorParams(29, 8, 19)
 		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(data['Close'], params)['k']
+
+		scaler = StandardScaler()
+		res = scaler.fit_transform(np.asarray(res))
 
 		return res

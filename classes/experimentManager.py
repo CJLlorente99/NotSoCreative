@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 from investorClass import Investor
@@ -70,7 +71,7 @@ class ExperimentManager:
 			aux = investor.brokerMorning(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
 
-			print(f"Experiment {expNum} Day {round(numDay/2)} Morning {name} Completed")
+			print(f"Experiment {expNum} Day {math.floor(numDay/2)} Morning {name} Completed")
 
 	def runAfternoon(self, todayData, df, nextNextData, nextData, pastOpen, expNum, numDay):
 		dataManager = {}
@@ -119,7 +120,7 @@ class ExperimentManager:
 			aux = investor.brokerAfternoon(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
 
-			print(f"Experiment {expNum} Day {round(numDay/2)} Afternoon {name} Completed")
+			print(f"Experiment {expNum} Day {math.floor(numDay/2)} Afternoon {name} Completed")
 
 	def returnExpData(self):
 		aux = pd.DataFrame()

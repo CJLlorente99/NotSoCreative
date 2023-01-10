@@ -45,7 +45,7 @@ def main():
     # include t-window data points as additional features
     inp = X.columns.values.tolist()
     # window mabye 0 to 1,2,3
-    window = 0
+    window = 1
     X = data_shift(X, window, inp)
     # print(X)
     X = np.asarray(X)
@@ -94,8 +94,8 @@ def main():
     print('build model')
     n_iter_search = 30
     # n_estimator: if more or less better, you can try in your script out
-    model = RandomForestClassifier(verbose=2)
-    #model = xgb.XGBClassifier()
+    # model = RandomForestClassifier(verbose=2)
+    model = xgb.XGBClassifier()
 
     # optimize: if it takes to long, reduce n_estimators or define it directly like RandomForestClassifier(
     # n_estimators=100, verbose=2) and delete it out of the params
@@ -103,7 +103,7 @@ def main():
     # Bayes or Random Search
     # for xgb -> you have to change rf_params to xgb_params
     # search_reg = RandomizedSearchCV(model, rf_params_rand , n_iter=n_iter_search, scoring='accuracy')
-    search_reg = BayesSearchCV(model, rf_params_bs, n_iter=n_iter_search, scoring='accuracy', cv=5)
+    search_reg = BayesSearchCV(model, xgb_params_bs, n_iter=n_iter_search, scoring='accuracy', cv=5)
     search_reg.fit(X_train, y_train)
     print('Best Params', search_reg.best_params_)
     print(f'best score: {search_reg.best_score_}')

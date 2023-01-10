@@ -16,7 +16,7 @@ class DataGetter:
         # define US business days
         us_bus = CDay(calendar=USFederalHolidayCalendar())
         if name == "Charli":
-            self.today = pd.bdate_range('2022-08-01', '2022-08-31', freq=us_bus)[0]
+            self.today = pd.bdate_range('2018-08-01', '2022-08-31', freq=us_bus)[0]
         elif name == "Paul":
             self.today = pd.bdate_range('2021-04-01', '2021-04-30', freq=us_bus)[0]
         elif name == "Tobias":

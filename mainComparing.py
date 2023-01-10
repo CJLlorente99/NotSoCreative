@@ -7,6 +7,8 @@ from TAIndicators.ma import InvestorMACD
 from TAIndicators.bb import InvestorBB
 from DecisionFunction.investorDecisionTree import InvestorDecisionTree
 from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
+from RF_DT.investorXGB import InvestorXGB
+from RF_DT.investorXGBShift import InvestorXGBWindow
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
 from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass, InvestorLSTMConfidenceProb
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
@@ -32,8 +34,8 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 3
-    nDays = 10
+    numExperiments = 10
+    nDays = 30
     dfTestCriteria = pd.DataFrame()
 
     for j in range(numExperiments):
@@ -155,6 +157,24 @@ def main():
         experimentManager.addStrategy(investorRFClass, 'RFClass',
                                       [experimentManager.createTIInput("df")], True)
         print('investorRFClass created')
+
+        # Create investor based on Random Forest Classifier
+        investorRFClass2 = InvestorRandomForestClassifier(10000, 'data/random_forest_class(2).joblib')
+        experimentManager.addStrategy(investorRFClass2, 'RFClass2',
+                                      [experimentManager.createTIInput("df")], True)
+        print('investorRFClass2 created')
+
+        # Create investor based on XGB
+        investorXGB = InvestorXGB(10000, 'data/xgb_model.json')
+        experimentManager.addStrategy(investorXGB, 'XGB',
+                                      [experimentManager.createTIInput("df")], True)
+        print('investorXGB created')
+
+        # Create investor based on XGB with window
+        investorXGBWindow = InvestorXGBWindow(10000, 'data/xgb_model(2).json', 3)
+        experimentManager.addStrategy(investorXGBWindow, 'XGBWindow',
+                                      [experimentManager.createTIInput("df")], True)
+        print('investorXGBWindow created')
 
         # Create investor based on LSTM Threshold
         # file = "../data/modellstm.h5"
