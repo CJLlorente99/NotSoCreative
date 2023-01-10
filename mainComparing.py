@@ -34,7 +34,7 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 10
+    numExperiments = 4
     nDays = 30
     dfTestCriteria = pd.DataFrame()
 
@@ -120,37 +120,37 @@ def main():
         print("investorBB created")
 
         # Create investor based on DT
-        # bbWindow = 10
-        # bbStdDev = 1.5
-        # lowerBound = 1.9
-        # upperBound = 0.8
-        # a = 2.4
-        # b = 0.5
-        # bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        # RSIwindow = 3
-        # upperBound = 61
-        # lowerBound = 27.5
-        # a = 1.1
-        # b = 2.4
-        # rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
-        # adxParams = ADXInvestorParams(14)
-        # aroonParams = AroonInvestorParams(25)
-        # atrParams = ATRInvestorParams(5)
-        # stochParams = StochasticRSIInvestorParams(14, 3, 3)
-        # file = "data/dt"
-        # dtParams = DTInvestorParams(file, ["rsirsi", "bbpband", "adiacc_dist_index", "adxadx", "aroonaroon_indicator"
-        #                                    , "atraverage_true_range", "obvon_balance_volume", "stochrsistochrsi"])
-        # investorDT = InvestorDecisionTree(10000, dtParams)
-        # experimentManager.addStrategy(investorDT, "DT",
-        #                               [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1),
-        #                                experimentManager.createTIInput("bb", bbParams, "pband", 1),
-        #                                experimentManager.createTIInput("adi", None, "acc_dist_index", 1),
-        #                                experimentManager.createTIInput("adx", adxParams, "adx", 1),
-        #                                experimentManager.createTIInput("aroon", aroonParams, "aroon_indicator", 1),
-        #                                experimentManager.createTIInput("atr", atrParams, "average_true_range", 1),
-        #                                experimentManager.createTIInput("obv", None, "on_balance_volume", 1),
-        #                                experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
-        # print("investorDT created")
+        bbWindow = 10
+        bbStdDev = 1.5
+        lowerBound = 1.9
+        upperBound = 0.8
+        a = 2.4
+        b = 0.5
+        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
+        RSIwindow = 3
+        upperBound = 61
+        lowerBound = 27.5
+        a = 1.1
+        b = 2.4
+        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
+        adxParams = ADXInvestorParams(14)
+        aroonParams = AroonInvestorParams(25)
+        atrParams = ATRInvestorParams(5)
+        stochParams = StochasticRSIInvestorParams(14, 3, 3)
+        file = "data/dt"
+        dtParams = DTInvestorParams(file, ["rsirsi", "bbpband", "adiacc_dist_index", "adxadx", "aroonaroon_indicator"
+                                           , "atraverage_true_range", "obvon_balance_volume", "stochrsistochrsi"])
+        investorDT = InvestorDecisionTree(10000, dtParams)
+        experimentManager.addStrategy(investorDT, "DT",
+                                      [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1),
+                                       experimentManager.createTIInput("bb", bbParams, "pband", 1),
+                                       experimentManager.createTIInput("adi", None, "acc_dist_index", 1),
+                                       experimentManager.createTIInput("adx", adxParams, "adx", 1),
+                                       experimentManager.createTIInput("aroon", aroonParams, "aroon_indicator", 1),
+                                       experimentManager.createTIInput("atr", atrParams, "average_true_range", 1),
+                                       experimentManager.createTIInput("obv", None, "on_balance_volume", 1),
+                                       experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
+        print("investorDT created")
 
         # Create investor based on Random Forest Classifier
         investorRFClass = InvestorRandomForestClassifier(10000, 'data/random_forest_class.joblib')
@@ -177,18 +177,18 @@ def main():
         print('investorXGBWindow created')
 
         # Create investor based on LSTM Threshold
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
-        # print("investorLSTMThreshold created")
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMThreshold = InvestorLSTMThreshold(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMThreshold, "lstmThreshold", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMThreshold created")
         #
         # # Create investor based on LSTM Prob
-        # file = "../data/modellstm.h5"
-        # lstmParams = LSTMInvestorParams(file, 0.05)
-        # investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
-        # experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
-        # print("investorLSTMProb created")
+        file = "../data/modellstm.h5"
+        lstmParams = LSTMInvestorParams(file, 0.05)
+        investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
+        experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
+        print("investorLSTMProb created")
         #
         # # Create investor based on class voting (only sell and buy everything)
         # investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)

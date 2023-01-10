@@ -15,6 +15,8 @@ from strategies.idle import Idle
 from strategies.rsi import RSI
 from strategies.bb import BB
 from strategies.lstmConfidenceOpenClose import LSTMConfidenceOpenClose
+from strategies.randomForest import RandomForestStrategy
+from strategies.xgb import XGBStrategy
 from logManager.logManager import LogManager
 from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
@@ -56,7 +58,7 @@ def main():
 	dateToday = datetime.datetime.now()
 	now = datetime.datetime.now()
 	# dateToday = datetime.datetime(2022, 12, 30)
-	# now = datetime.datetime(2022, 12, 30, closingHour, closingMinute+20, 0)
+	# now = datetime.datetime(2022, 12, 30, openingHour, openingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -411,6 +413,10 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = BB(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'lstmConfidenceOpenClose':
 			aux = LSTMConfidenceOpenClose(strategyInfo, strategy).broker(operation, inputsData)
+		elif name == 'RFClassifier':
+			aux = RandomForestStrategy(strategyInfo, strategy, './models/random_forest_class.joblib').broker(operation, inputsData)
+		elif name == 'xgb':
+			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model.json').broker(operation, inputsData)
 
 		if name in ['wia', 'bia'] and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
