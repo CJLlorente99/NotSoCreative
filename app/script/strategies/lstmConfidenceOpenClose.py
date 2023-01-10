@@ -114,7 +114,7 @@ def majority_vote(yhat):
 		probs.append(np.sum(y_10))
 		n_one = np.count_nonzero(y_10 == 1)
 		length = round(y_10.shape[0] * 0.5)
-		if n_one > length:
+		if n_one >= length:
 			y_mean.append(1)
 		else:
 			y_mean.append(-1)
