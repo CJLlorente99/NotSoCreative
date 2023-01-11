@@ -35,7 +35,7 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 5
+    numExperiments = 4
     nDays = 30
     dfTestCriteria = pd.DataFrame()
 

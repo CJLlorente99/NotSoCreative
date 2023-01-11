@@ -509,7 +509,7 @@ def fillNewStrategies(newEntry: pd.DataFrame, record: pd.DataFrame):
 
 
 if __name__ == "__main__":
-	dateInit = datetime.datetime(2022, 1, 1)
+	dateInit = datetime.datetime(2022, 7, 19)
 	operation = 0
 	for i in range(400):
 		main(dateInit, operation%2)
