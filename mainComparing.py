@@ -34,7 +34,7 @@ def main():
     dataGetter = DataGetter(name=name)
 
     # Run various experiments
-    numExperiments = 4
+    numExperiments = 5
     nDays = 30
     dfTestCriteria = pd.DataFrame()
 
@@ -189,16 +189,16 @@ def main():
         investorLSTMProb = InvestorLSTMProb(10000, lstmParams)
         experimentManager.addStrategy(investorLSTMProb, "lstmProb", [experimentManager.createTIInput("lstm")], True)
         print("investorLSTMProb created")
-        #
-        # # Create investor based on class voting (only sell and buy everything)
-        # investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)
-        # experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceClass",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on class voting (only sell and buy depending on prob)
-        # investorLSTMConfidenceProb = InvestorLSTMConfidenceProb(10000, 10)
-        # experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceProb",
-        #                               [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on class voting (only sell and buy everything)
+        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)
+        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceClass",
+                                      [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on class voting (only sell and buy depending on prob)
+        investorLSTMConfidenceProb = InvestorLSTMConfidenceProb(10000, 10)
+        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceProb",
+                                      [experimentManager.createTIInput("df")], True)
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)

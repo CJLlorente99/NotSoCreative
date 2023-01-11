@@ -26,7 +26,7 @@ class DataGetter:
         elif name == "Rishabh":
             self.today = pd.bdate_range('2022-04-01', '2022-04-30', freq=us_bus)[0]
         elif name == "Kim":
-            self.today = pd.bdate_range('2022-08-01', '2022-08-31', freq=us_bus)[0]
+            self.today = pd.bdate_range('2022-06-01', '2022-08-31', freq=us_bus)[0]
         self.start = self.today - CDay(self.dataLen)
 
     def getPastData(self) -> pd.DataFrame:
