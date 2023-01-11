@@ -9,6 +9,7 @@ from DecisionFunction.investorDecisionTree import InvestorDecisionTree
 from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
 from RF_DT.investorXGB import InvestorXGB
 from RF_DT.investorXGBShift import InvestorXGBWindow
+from RF_DT.investorXGBReduced import InvestorXGBReduced
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
 from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass, InvestorLSTMConfidenceProb
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
@@ -175,6 +176,12 @@ def main():
         experimentManager.addStrategy(investorXGBWindow, 'XGBWindow',
                                       [experimentManager.createTIInput("df")], True)
         print('investorXGBWindow created')
+
+        # Create investor based on XGB Reduced
+        investorXGBReduced = InvestorXGBReduced(10000, 'data/xgb_model_reduced.json', 3)
+        experimentManager.addStrategy(investorXGBReduced, 'XGBReduced',
+                                      [experimentManager.createTIInput("df")], True)
+        print('investorXGBReduced created')
 
         # Create investor based on LSTM Threshold
         file = "../data/modellstm.h5"

@@ -417,6 +417,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = RandomForestStrategy(strategyInfo, strategy, './models/random_forest_class.joblib').broker(operation, inputsData)
 		elif name == 'xgb':
 			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model.json').broker(operation, inputsData)
+		elif name == 'xgbReduced':
+			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model_reduced.json').broker(operation, inputsData)
 
 		if name in ['wia', 'bia'] and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)

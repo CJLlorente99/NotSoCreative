@@ -22,6 +22,8 @@ def main():
 	data = data.drop(['Open', 'Close'], axis=1)
 	y_target = np.asarray([1 if data.Target[i] > 0 else 0 for i in range(len(data))]).reshape(-1, 1)
 	X = data.drop(['Target'], axis=1)
+	# drop extra features
+	X = X.drop(X.columns[10:], axis=1)
 
 	# include t-window data points as additional features
 	inp = X.columns.values.tolist()
@@ -35,11 +37,11 @@ def main():
 	# scaler = StandardScaler()
 	# X = scaler.fit_transform(X)
 
-	model = xgb.XGBClassifier(colsample_bylevel=0.4, colsample_bytree=1, learning_rate=0.1331430678429723,
-							  max_depth=17, n_estimators=500, subsample=0.5041453030448557)
+	model = xgb.XGBClassifier(colsample_bylevel=0.6452280156999572, colsample_bytree=0.9581223733932949, learning_rate=0.06266659029259186,
+							  max_depth=14, n_estimators=1000, subsample=1)
 	model.fit(X, y_target)
 
-	model.save_model('../data/xgb_model(2).json')
+	model.save_model('../data/xgb_model_reduced.json')
 
 if __name__ == '__main__':
 	main()

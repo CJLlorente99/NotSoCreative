@@ -279,3 +279,34 @@ param3 = InputParameter('Smooth2', 19)
 inputs.append(StrategyInput('stochasticRsi', '', 'stochRsi_k_w29_s18_s219', 'k', [param1, param2, param3]))
 xgb = Strategy('xgb', 'Strategy based on xgb', inputs)
 jsonmanager.addStrategy(xgb)
+
+# XGB Reduced
+inputs = []
+# Return_interday
+inputs.append(StrategyInput('Return_interday', '', 'Return_interday', 'Log', []))
+# bb_pband_w3_stdDev1.774447792366109
+param1 = InputParameter('Window', 3)
+param2 = InputParameter('StdDev', 1.774)
+inputs.append(StrategyInput('bb', 'BB value', 'bb_pband_w3_stdDev1.774447792366109', 'pband', [param1, param2]))
+# Return_open
+inputs.append(StrategyInput('Return_open', '', 'Return_open', 'Log', []))
+# adx_pos_w6
+param1 = InputParameter('Window', 6)
+inputs.append(StrategyInput('adx', '', 'adx_pos_w6', 'adx_pos', [param1]))
+# adx_pos_w42
+param1 = InputParameter('Window', 42)
+inputs.append(StrategyInput('adx', '', 'adx_pos_w42', 'adx_pos', [param1]))
+# Volume
+inputs.append(StrategyInput('Volume', '', 'Volume', 'Natural', []))
+# adx_neg_w1
+param1 = InputParameter('Window', 1)
+inputs.append(StrategyInput('adx', '', 'adx_neg_w1', 'adx_neg', [param1]))
+# Return_intraday
+inputs.append(StrategyInput('Return_intraday', '', 'Return_intraday', 'Log', []))
+# stochRsi_k_w47_s143_s212
+param1 = InputParameter('Window', 47)
+param2 = InputParameter('Smooth1', 43)
+param3 = InputParameter('Smooth2', 12)
+inputs.append(StrategyInput('stochasticRsi', '', 'stochRsi_k_w47_s143_s212', 'k', [param1, param2, param3]))
+xgbReduced = Strategy('xgbReduced', 'Strategy based on xgbReduced', inputs)
+jsonmanager.addStrategy(xgbReduced)

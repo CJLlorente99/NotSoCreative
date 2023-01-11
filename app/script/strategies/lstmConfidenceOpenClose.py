@@ -2,6 +2,7 @@ from dailyStrategy import DailyStrategy
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
 from keras.callbacks import EarlyStopping
+from keras import initializers
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
@@ -23,7 +24,7 @@ def getPredictionLSTM(data):
 	data_set_scaled = scaler.fit_transform(data)
 	data_set_scaled = np.concatenate((data_set_scaled[1:], y_target[1:]), axis=1)
 
-	backcandles = 40
+	backcandles = 30
 
 	# choose columns: all but target variable (its last column)
 	liste = list(range(0, data.shape[1] - 1))
@@ -39,7 +40,7 @@ def getPredictionLSTM(data):
 	# train and predict
 	# n_members -> how many predictors we wanted to use
 	n_members = 10
-	epochs = 35
+	epochs = 32
 	batch_size = 8
 	ensemble, y_pred, prob = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)
 
@@ -48,9 +49,9 @@ def getPredictionLSTM(data):
 
 def class_LSTM(n_inputs, n_features):
 	model = Sequential()
-	model.add(LSTM(units=250, return_sequences=True, input_shape=(n_inputs, n_features)))
+	model.add(LSTM(units=197, return_sequences=True,bias_initializer=initializers.Constant(0.1) ,input_shape=(n_inputs, n_features)))
 	model.add(Dropout(0.1))
-	model.add(LSTM(175))
+	model.add(LSTM(178))
 	model.add(Dropout(0.1))
 	model.add(Dense(1, activation='sigmoid'))
 	model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
