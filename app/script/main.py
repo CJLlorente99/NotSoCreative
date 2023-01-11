@@ -49,23 +49,17 @@ openingMinute = 30
 closingHour = 22
 closingMinute = 0
 
-def main(dateToday, operation):
+def main():
 	# 1) safety procedures (operations can be done/necessary files are there)
 	if False in runSafetyProcedures().values():
 		pass
 		# Launch message to user depending on the error
 
 	# 2) get date
-	# dateToday = datetime.datetime.now()
-	# now = datetime.datetime.now()
+	dateToday = datetime.datetime.now()
+	now = datetime.datetime.now()
 	# dateToday = datetime.datetime(2022, 12, 30)
 	# now = datetime.datetime(2022, 12, 30, openingHour, openingMinute+20, 0)
-	print(dateToday)
-	print(operation)
-	if operation == 0:
-		now = dateToday.replace(hour=openingHour, minute=openingMinute+20, second=0)
-	else:
-		now = dateToday.replace(hour=closingHour, minute=closingMinute + 20, second=0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -189,7 +183,7 @@ def retrieveStockData(todayDate: datetime.date, operation) -> pd.DataFrame():
 
 	# If not, try various times along certain period of time
 	retryTime = 3 * 3600	# Retry for 3 hours
-	intervalRetry = 0.25 * 3600	# Every 15 min
+	intervalRetry = 0.02 * 3600	# Every 72 seconds
 	numRetries = 0
 	while len(data) == 0 and numRetries < retryTime/intervalRetry:
 		time.sleep(intervalRetry)
@@ -509,10 +503,4 @@ def fillNewStrategies(newEntry: pd.DataFrame, record: pd.DataFrame):
 
 
 if __name__ == "__main__":
-	dateInit = datetime.datetime(2022, 7, 19)
-	operation = 0
-	for i in range(400):
-		main(dateInit, operation%2)
-		operation += 1
-		if operation%2 == 0:
-			dateInit += timedelta(days=1)
+	main()
