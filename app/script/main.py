@@ -21,6 +21,7 @@ from logManager.logManager import LogManager
 from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
 import numpy as np
+from datetime import timedelta
 """
 The .bat (Windows) or .sh (Mac/Linux) should install all needed packages
 The script should do the following.
@@ -48,17 +49,23 @@ openingMinute = 30
 closingHour = 22
 closingMinute = 0
 
-def main():
+def main(dateToday, operation):
 	# 1) safety procedures (operations can be done/necessary files are there)
 	if False in runSafetyProcedures().values():
 		pass
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = datetime.datetime.now()
-	now = datetime.datetime.now()
+	# dateToday = datetime.datetime.now()
+	# now = datetime.datetime.now()
 	# dateToday = datetime.datetime(2022, 12, 30)
 	# now = datetime.datetime(2022, 12, 30, openingHour, openingMinute+20, 0)
+	print(dateToday)
+	print(operation)
+	if operation == 0:
+		now = dateToday.replace(hour=openingHour, minute=openingMinute+20, second=0)
+	else:
+		now = dateToday.replace(hour=closingHour, minute=closingMinute + 20, second=0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -120,6 +127,9 @@ def main():
 			aux['nDay'] = nextNDay * np.ones(len(aux))
 		except:
 			aux['nDay'] = np.zeros(len(aux))
+
+		if len(investorinfo) != 0:
+			investorinfo = fillNewStrategies(aux, investorinfo)
 
 		investorinfo = pd.concat([investorinfo, aux])
 		investorinfo.to_csv(csvDataFileHidden, index_label=['Date'])
@@ -389,7 +399,10 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		name = strategy.name
 
 		if len(investorInfo) != 0:
-			strategyInfo = investorInfo[investorInfo['investorStrategy'] == name]
+			try:
+				strategyInfo = investorInfo[investorInfo['investorStrategy'] == name]
+			except:
+				strategyInfo = pd.DataFrame()  # In case the strategy is new
 		else:
 			strategyInfo = pd.DataFrame()
 		inputsData = inputsDf[['Open', 'Close', 'High', 'Low'] + strategy.getListDfNameInputs()]
@@ -480,5 +493,26 @@ def checkStockOpened(stockData, todayDate):
 
 	return {'status': status, 'errorMsg': errMsg, 'data': data}
 
+def fillNewStrategies(newEntry: pd.DataFrame, record: pd.DataFrame):
+	# In case new Strategy has been added
+	for column in newEntry.columns:
+		if column not in record.columns:
+			record[column] = np.zeros(len(record))
+			record[column].values[-len(newEntry)+3:] = newEntry[column].values[-1]
+
+	# In case Strategy has been taken out
+	for column in record.columns:
+		if column not in newEntry.columns:
+			newEntry[column] = np.zeros(len(newEntry))
+
+	return record
+
+
 if __name__ == "__main__":
-	main()
+	dateInit = datetime.datetime(2022, 1, 1)
+	operation = 0
+	for i in range(400):
+		main(dateInit, operation%2)
+		operation += 1
+		if operation%2 == 0:
+			dateInit += timedelta(days=1)
