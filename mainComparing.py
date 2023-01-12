@@ -12,6 +12,7 @@ from RF_DT.investorXGBShift import InvestorXGBWindow
 from RF_DT.investorXGBReduced import InvestorXGBReduced
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
 from LSTM.investorLSTMEnsemble import InvestorLSTMEnsembleClass1, InvestorLSTMEnsembleClass2
+from LSTM.investorLSTMWindow import InvestorLSTMWindow
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -26,17 +27,11 @@ from experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    name = "Charli"
-    # name = "Paul"
-    # name = "Tobias"
-    # name = "Sanchita"
-    # name = "Rishabh"
-    # name = "Kim"
-    dataGetter = DataGetter(name=name)
+    dataGetter = DataGetter('2019-01-01', '2019-01-30')
 
     # Run various experiments
-    numExperiments = 4
-    nDays = 30
+    numExperiments = 10
+    nDays = 10
     dfTestCriteria = pd.DataFrame()
 
     for j in range(numExperiments):
@@ -198,13 +193,18 @@ def main():
         print("investorLSTMProb created")
 
         # Create investor based on class voting (only sell and buy everything)
-        investorLSTMEmsemble1 = InvestorLSTMEnsembleClass1(10000, 10)
+        investorLSTMEmsemble1 = InvestorLSTMEnsembleClass1(10000, 5)
         experimentManager.addStrategy(investorLSTMEmsemble1, "lstmEnsembleClass1",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on class voting (only sell and buy depending on prob)
-        investorLSTMEmsemble2 = InvestorLSTMEnsembleClass2(10000, 10)
+        investorLSTMEmsemble2 = InvestorLSTMEnsembleClass2(10000, 5)
         experimentManager.addStrategy(investorLSTMEmsemble2, "lstmEnsembleClass2",
+                                      [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on window forecasting
+        investorLSTMWindow = InvestorLSTMWindow(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindow, "lstmWindow",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor Random
@@ -270,8 +270,8 @@ def main():
             dataGetter.goNextDay()
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
-        # Reset day to have a different 2 weeks window
-        dataGetter.today += CDay(10, calendar=USFederalHolidayCalendar())
+        # Prepare next first day
+        dataGetter.today += CDay(1, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, experimentManager.returnExpData()], axis=1)
