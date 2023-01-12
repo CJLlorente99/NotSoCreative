@@ -14,7 +14,8 @@ from strategies.ca import CA
 from strategies.idle import Idle
 from strategies.rsi import RSI
 from strategies.bb import BB
-from strategies.lstmEnsemble1 import LSTMConfidenceOpenClose
+from strategies.lstmEnsemble1 import LSTMEnsemble1
+from strategies.lstmEnsemble2 import LSTMEnsemble2
 from strategies.randomForest import RandomForestStrategy
 from strategies.xgb import XGBStrategy
 from logManager.logManager import LogManager
@@ -58,8 +59,8 @@ def main():
 	# 2) get date
 	dateToday = datetime.datetime.now()
 	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2022, 12, 30)
-	# now = datetime.datetime(2022, 12, 30, openingHour, openingMinute+20, 0)
+	# dateToday = datetime.datetime(2023, 1, 11)
+	# now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -418,8 +419,10 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = RSI(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'bb':
 			aux = BB(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'lstmConfidenceOpenClose':
-			aux = LSTMConfidenceOpenClose(strategyInfo, strategy).broker(operation, inputsData)
+		elif name == 'lstmEnsemble1':
+			aux = LSTMEnsemble1(strategyInfo, strategy).broker(operation, inputsData)
+		elif name == 'lstmEnsemble2':
+			aux = LSTMEnsemble2(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'RFClassifier':
 			aux = RandomForestStrategy(strategyInfo, strategy, './models/random_forest_class.joblib').broker(operation, inputsData)
 		elif name == 'xgb':
@@ -431,6 +434,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
 			aux['Date'] = lastDateTag
 			aux.set_index('Date', inplace=True)
+		elif name in ['wia', 'bia']:
+			continue
 		else:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
 			aux['Date'] = dateTag

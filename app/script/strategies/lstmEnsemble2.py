@@ -7,7 +7,7 @@ from keras import initializers
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-class LSTMConfidenceOpenClose(DailyStrategy):
+class LSTMEnsemble2(DailyStrategy):
 	def possiblyOperationMorning(self, data):
 		self.perToInvest = getPredictionLSTM(data)
 
