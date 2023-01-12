@@ -11,7 +11,7 @@ from RF_DT.investorXGB import InvestorXGB
 from RF_DT.investorXGBShift import InvestorXGBWindow
 from RF_DT.investorXGBReduced import InvestorXGBReduced
 from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
-from LSTM.investorLSTMConfidence import InvestorLSTMConfidenceClass, InvestorLSTMConfidenceProb
+from LSTM.investorLSTMEnsemble import InvestorLSTMEnsembleClass1, InvestorLSTMEnsembleClass2
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -198,13 +198,13 @@ def main():
         print("investorLSTMProb created")
 
         # Create investor based on class voting (only sell and buy everything)
-        investorLSTMConfidenceClass = InvestorLSTMConfidenceClass(10000, 10)
-        experimentManager.addStrategy(investorLSTMConfidenceClass, "lstmConfidenceClass",
+        investorLSTMEmsemble1 = InvestorLSTMEnsembleClass1(10000, 10)
+        experimentManager.addStrategy(investorLSTMEmsemble1, "lstmEnsembleClass1",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on class voting (only sell and buy depending on prob)
-        investorLSTMConfidenceProb = InvestorLSTMConfidenceProb(10000, 10)
-        experimentManager.addStrategy(investorLSTMConfidenceProb, "lstmConfidenceProb",
+        investorLSTMEmsemble2 = InvestorLSTMEnsembleClass2(10000, 10)
+        experimentManager.addStrategy(investorLSTMEmsemble2, "lstmEnsembleClass2",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor Random

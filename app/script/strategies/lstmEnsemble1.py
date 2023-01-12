@@ -49,7 +49,7 @@ def getPredictionLSTM(data):
 
 def class_LSTM(n_inputs, n_features):
 	model = Sequential()
-	model.add(LSTM(units=197, return_sequences=True,bias_initializer=initializers.Constant(0.1) ,input_shape=(n_inputs, n_features)))
+	model.add(LSTM(units=197, return_sequences=True, bias_initializer=initializers.Constant(0.01), input_shape=(n_inputs, n_features)))
 	model.add(Dropout(0.1))
 	model.add(LSTM(178))
 	model.add(Dropout(0.1))

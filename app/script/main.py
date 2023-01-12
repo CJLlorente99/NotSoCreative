@@ -14,7 +14,7 @@ from strategies.ca import CA
 from strategies.idle import Idle
 from strategies.rsi import RSI
 from strategies.bb import BB
-from strategies.lstmConfidenceOpenClose import LSTMConfidenceOpenClose
+from strategies.lstmEnsemble1 import LSTMConfidenceOpenClose
 from strategies.randomForest import RandomForestStrategy
 from strategies.xgb import XGBStrategy
 from logManager.logManager import LogManager

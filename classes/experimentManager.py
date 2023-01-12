@@ -112,10 +112,11 @@ class ExperimentManager:
 					dataManager[tag] = stochasticRSI(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == 'df':
 					dataManager[tag] = df
-				elif inpName == "lstm":
-					returnPred = investor.model.trainAndPredictAfternoon(df)
-					returnClass = investor.model.trainAndPredictClassificationAfternoon(df)
-					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
+				elif inpName == "lstm":  # Innecessary, no action taken in the afternoon
+					pass
+					# returnPred = investor.model.trainAndPredictAfternoon(df)
+					# returnClass = investor.model.trainAndPredictClassificationAfternoon(df)
+					# dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
 
 			aux = investor.brokerAfternoon(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)
