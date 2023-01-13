@@ -112,7 +112,7 @@ class InvestorLSTMWindow (Investor):
 		y_mean = np.asarray(y_mean).flatten()
 
 		# build decision rule: if open_t+2 > open_t -> buy on open_t
-		if y_mean[0] < y_mean[2]:
+		if res.Open.values[-1] < y_mean[2]:
 			return 1
 		else:
 			return -1
