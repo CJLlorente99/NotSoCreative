@@ -27,7 +27,7 @@ class InvestorLSTMWindow (Investor):
 
 
 	def possiblyInvestAfternoon(self, data):
-		self.perToInvest = -1
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		pass
