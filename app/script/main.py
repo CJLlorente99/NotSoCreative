@@ -18,6 +18,7 @@ from strategies.lstmEnsemble1 import LSTMEnsemble1
 from strategies.lstmEnsemble2 import LSTMEnsemble2
 from strategies.randomForest import RandomForestStrategy
 from strategies.xgb import XGBStrategy
+from strategies.lstmWindow import LSTMWindow
 from logManager.logManager import LogManager
 from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
@@ -429,6 +430,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model.json').broker(operation, inputsData)
 		elif name == 'xgbReduced':
 			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model_reduced.json').broker(operation, inputsData)
+		elif name == 'lstmWindow':
+			aux = LSTMWindow(strategyInfo, strategy).broker(operation, inputsData)
 
 		if name in ['wia', 'bia'] and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)

@@ -388,3 +388,7 @@ param3 = InputParameter('Smooth2', 12)
 inputs.append(StrategyInput('stochasticRsi', '', 'stochRsi_k_w47_s143_s212', 'k', [param1, param2, param3]))
 xgbReduced = Strategy('xgbReduced', 'Strategy based on xgbReduced', inputs)
 jsonmanager.addStrategy(xgbReduced)
+
+# LSTM Window
+lstmWindow = Strategy('lstmWindow', 'Strategy based on lstmWindow', [])
+jsonmanager.addStrategy(lstmWindow)

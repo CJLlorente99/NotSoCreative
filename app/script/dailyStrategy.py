@@ -102,12 +102,17 @@ class DailyStrategy(ABC):
 		:return float representing the money that has been finally bought (positive) or sold (negative)
 		"""
 		# Calculate the money bought and sold depending on the actual nonInvested and Invested.
-		if self.perToInvest >= 0:  # We buy
+		moneyInvested = 0
+		if self.perToInvest > 0:  # We buy
+			if self.nonInvestedMoney == 0:
+				self.perToInvest = 0
 			moneyInvested = self.perToInvest * self.nonInvestedMoney
 			self.investedMoney += self.perToInvest * self.nonInvestedMoney
 			self.nonInvestedMoney -= self.perToInvest * self.nonInvestedMoney
 
 		if self.perToInvest < 0:  # We sell
+			if self.investedMoney == 0:
+				self.perToInvest = 0
 			moneyInvested = self.perToInvest * self.investedMoney
 			self.nonInvestedMoney += -self.perToInvest * self.investedMoney
 			self.investedMoney -= -self.perToInvest * self.investedMoney
