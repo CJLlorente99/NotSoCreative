@@ -46,21 +46,23 @@ for indicator in auxDict:
 		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=np.zeros(len(auxDict[indicator][0])), mode="markers",
 					  marker=dict(size=20)))
 		fig.update_layout(title=indicator.upper() + " Features Distribution", xaxis=dict(title=keys[0], gridcolor='black'), paper_bgcolor = "rgba(0,0,0,0)",
-                  font=dict(size=30))
+                  font=dict(size=40))
 		fig.write_image(indicator + " distribution.png", scale=1, width=2880, height=1800)
 		# fig.show()
 	elif dimDict[indicator] == 2:
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=auxDict[indicator][1], mode="markers",
-					  marker=dict(size=20)))
+					  marker=dict(size=30)))
 		fig.update_layout(title=indicator.upper() + " Features Distribution", paper_bgcolor = "rgba(0,0,0,0)",
-                  font=dict(size=30), xaxis=dict(title=keys[0], gridcolor='black'),
-												 yaxis=dict(title=keys[1], gridcolor='black'))
+                  font=dict(size=40), 	xaxis=dict(title=keys[0], gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44', zeroline=False),
+										yaxis=dict(title=keys[1], gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44', zeroline=False),
+						  plot_bgcolor='black')
 		fig.write_image(indicator + " distribution.png", scale=1, width=2880, height=1800)
 		# fig.show()
 	elif dimDict[indicator] == 3:
 		fig = go.Figure()
-		fig.add_trace(go.Scatter3d(x=auxDict[indicator][0], y=auxDict[indicator][1], z=auxDict[indicator][2], mode="markers"))
+		fig.add_trace(go.Scatter3d(x=auxDict[indicator][0], y=auxDict[indicator][1], z=auxDict[indicator][2],
+								   mode="markers", marker=dict(size=20)))
 		camera = dict(
 			up=dict(x=0, y=0, z=1),
 			center=dict(x=0, y=0, z=0),
@@ -68,12 +70,13 @@ for indicator in auxDict:
 		)
 		title = {'text': indicator.upper() + " Features Distribution",
 				 'y': 0.9,
-				 'x': 0.25,
+				 'x': 0.18,
 				 'xanchor': 'center',
 				 'yanchor': 'top',
-				 'font': dict(size=30)}
-		fig.update_layout(scene=dict(xaxis=dict(title=keys[0], gridcolor='black'), yaxis=dict(title=keys[1], gridcolor='black'),
-						  zaxis=dict(title=keys[2], gridcolor='black')),
-						  paper_bgcolor = "rgba(0,0,0,0)", font=dict(size=18), scene_camera=camera, title=title)
+				 'font': dict(size=70)}
+		fig.update_layout(scene=dict(xaxis=dict(title=keys[0], title_font_size=40, tickfont_size=20, gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44', zerolinewidth=10, zerolinecolor='#2D2A44', backgroundcolor="black"),
+									 yaxis=dict(title=keys[1], title_font_size=40, tickfont_size=20, gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44', zerolinewidth=10, zerolinecolor='#2D2A44', backgroundcolor="black"),
+									 zaxis=dict(title=keys[2], title_font_size=40, tickfont_size=20, gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44', zerolinewidth=10, zerolinecolor='#2D2A44', backgroundcolor="black")),
+						  paper_bgcolor = "rgba(0,0,0,0)", scene_camera=camera, title=title)
 		fig.write_image(indicator + " distribution.png", scale=1, width=3000, height=3000)
 		# fig.show()

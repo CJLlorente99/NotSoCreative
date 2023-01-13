@@ -6,6 +6,8 @@ from LSTM.investorBiLSTMWindowRobustMinMaxScalerLegacy import InvestorBiLSTMWind
 from LSTM.investorLSTMWindowRobustMinMaxScalerLegacy import InvestorLSTMWindowRobustMinMaxT2Legacy
 from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
 from RF_DT.investorXGB import InvestorXGB
+from TAStrategies.bb import InvestorBB
+from TAIndicators.ma import InvestorMACD
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
 from Benchmarks.wia import InvestorWIA
@@ -18,7 +20,7 @@ from classes.experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2020-03-01', '2020-03-30')
+    dataGetter = DataGetter('2020-05-01', '2020-05-30')
 
     # Run various experiments
     numExperiments = 20
@@ -67,6 +69,22 @@ def main():
 
         investorXGBoost = InvestorXGB(10000)
         experimentManager.addStrategy(investorXGBoost, "xgBoost",
+                                      [experimentManager.createTIInput("df")], False)
+
+        """
+        MACD
+        """
+
+        investorMACD = InvestorMACD(10000)
+        experimentManager.addStrategy(investorMACD, "macd",
+                                      [experimentManager.createTIInput("df")], False)
+
+        """
+        MACD
+        """
+
+        investorBB = InvestorBB(10000)
+        experimentManager.addStrategy(investorBB, "bb",
                                       [experimentManager.createTIInput("df")], False)
 
 
