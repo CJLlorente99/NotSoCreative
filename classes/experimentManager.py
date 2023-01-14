@@ -24,7 +24,15 @@ class ExperimentManager:
 				 , "plotEvolution": plotEvolution}
 		self.strategies.append(entry)
 
-	def runMorning(self, todayData, df, nextNextData, nextData, pastOpen, expNum, numDay):
+	def runMorning(self, todayData, data: pd.DataFrame, nextNextData, nextData, pastOpen, expNum, numDay):
+		df = data.copy()
+		df['Low'] = df['Low'].shift()
+		df['High'] = df['High'].shift()
+		df['Close'] = df['Close'].shift()
+		df['Adj Close'] = df['Adj Close'].shift()
+		df['Volume'] = df['Volume'].shift()
+		df.dropna(inplace=True)
+
 		dataManager = {}
 
 		dataManager["nDay"] = numDay
@@ -44,27 +52,23 @@ class ExperimentManager:
 				inpNumValues = inp["numValues"]
 				tag = inpName + (inpKey if inpKey else "")
 				if inpName == "adi":
-					dataManager[tag] = accDistIndexIndicator(df.High[:-1], df.Low[:-1], df.Close[:-1], df.Volume[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = accDistIndexIndicator(df.High, df.Low, df.Close, df.Volume, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "adx":
-					dataManager[tag] = averageDirectionalMovementIndex(df.High[:-1], df.Low[:-1], df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = averageDirectionalMovementIndex(df.High, df.Low, df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "aroon":
-					dataManager[tag] = aroon(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = aroon(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "atr":
-					dataManager[tag] = averageTrueRange(df.High[:-1], df.Low[:-1], df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = averageTrueRange(df.High, df.Low, df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "bb":
-					dataManager[tag] = bollingerBands(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = bollingerBands(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "macd":
-					dataManager[tag] = movingAverageConvergenceDivergence(df.Close[:-1], inpParams)[inpKey]
+					dataManager[tag] = movingAverageConvergenceDivergence(df.Close, inpParams)[inpKey]
 				elif inpName == "obv":
-					dataManager[tag] = on_balance_volume(df.Close[:-1], df.Volume[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = on_balance_volume(df.Close, df.Volume, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "rsi":
-					dataManager[tag] = relativeStrengthIndex(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
+					dataManager[tag] = relativeStrengthIndex(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == "stochrsi":
-					dataManager[tag] = stochasticRSI(df.Close[:-1], inpParams)[inpKey].values[-inpNumValues:]
-				elif inpName == "lstm":
-					returnPred = investor.model.trainAndPredictMorning(df)
-					returnClass = investor.model.trainAndPredictClassificationMorning(df)
-					dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
+					dataManager[tag] = stochasticRSI(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == 'df':
 					dataManager['df'] = df
 
@@ -112,11 +116,6 @@ class ExperimentManager:
 					dataManager[tag] = stochasticRSI(df.Close, inpParams)[inpKey].values[-inpNumValues:]
 				elif inpName == 'df':
 					dataManager[tag] = df
-				elif inpName == "lstm":  # Innecessary, no action taken in the afternoon
-					pass
-					# returnPred = investor.model.trainAndPredictAfternoon(df)
-					# returnClass = investor.model.trainAndPredictClassificationAfternoon(df)
-					# dataManager[tag] = {"return": returnPred[0], "prob0": returnClass[:, 0], "prob1": returnClass[:, 1]}
 
 			aux = investor.brokerAfternoon(dataManager)
 			strategy["expData"] = pd.concat([strategy["expData"], aux], ignore_index=True)

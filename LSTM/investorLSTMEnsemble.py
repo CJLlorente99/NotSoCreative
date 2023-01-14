@@ -85,86 +85,83 @@ class InvestorLSTMEnsembleClass1(Investor):
 		# fig.show()
 
 	def calculateInputsMorning(self, df: pd.DataFrame):
-		data = df.copy()
-		data['Open'] = data['Open'].shift(-1)
-		data = data[:-1]
 		res = pd.DataFrame()
 
 		# Return_interday
-		res['Return_interday'] = np.log(data['Open']) - np.log(data['Close'])
+		res['Return_interday'] = np.log(df['Open']) - np.log(df['Close'])
 
 		# bb_pband_w3_stdDev1.774447792366109
 		params = BBInvestorParams(3, 1.775)
-		res['bb_pband_w3_stdDev1.774447792366109'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w3_stdDev1.774447792366109'] = bollingerBands(df['Close'], params)['pband']
 
 		# Return_open
-		res['Return_open'] = np.log(data['Open']) - np.log(data['Open'].shift())
+		res['Return_open'] = np.log(df['Open']) - np.log(df['Open'].shift())
 
 		# adx_pos_w6
 		params = ADXInvestorParams(6)
-		res['adx_pos_w6'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_pos']
+		res['adx_pos_w6'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_pos']
 
 		# adx_pos_w42
 		params = ADXInvestorParams(42)
-		res['adx_pos_w42'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_pos']
+		res['adx_pos_w42'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_pos']
 
 		# Volume
-		res['Volume'] = data['Volume']
+		res['Volume'] = df['Volume']
 
 		# adx_neg_w1
 		params = ADXInvestorParams(1)
-		res['adx_neg_w1'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_neg']
+		res['adx_neg_w1'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_neg']
 
 		# Return_intraday
-		res['Return_intraday'] = np.log(data['Close']) - np.log(data['Open'])
+		res['Return_intraday'] = np.log(df['Close']) - np.log(df['Open'])
 
 		# stochRsi_k_w47_s143_s212
 		params = StochasticRSIInvestorParams(47, 43, 12)
-		res['stochRsi_k_w47_s143_s212'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w47_s143_s212'] = stochasticRSI(df['Close'], params)['k']
 
 		# stochRsi_d_w9_s144_s246
 		params = StochasticRSIInvestorParams(9, 44, 46)
-		res['stochRsi_d_w9_s144_s246'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w9_s144_s246'] = stochasticRSI(df['Close'], params)['d']
 
 		# stochRsi_d_w4_s16_s233
 		params = StochasticRSIInvestorParams(4, 6, 33)
-		res['stochRsi_d_w4_s16_s233'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w4_s16_s233'] = stochasticRSI(df['Close'], params)['d']
 
 		# adx_w10
 		params = ADXInvestorParams(10)
-		res['adx_w10'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+		res['adx_w10'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx']
 
 		# bb_pband_w7_stdDev1.4065306043590475
 		params = BBInvestorParams(7, 1.407)
-		res['bb_pband_w7_stdDev1.4065306043590475'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w7_stdDev1.4065306043590475'] = bollingerBands(df['Close'], params)['pband']
 
 		# bb_pband_w13_stdDev1.7961852973078898
 		params = BBInvestorParams(13, 1.796)
-		res['bb_pband_w13_stdDev1.7961852973078898'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w13_stdDev1.7961852973078898'] = bollingerBands(df['Close'], params)['pband']
 
 		# adx_w18
 		params = ADXInvestorParams(18)
-		res['adx_w18'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+		res['adx_w18'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx']
 
 		# stochRsi_k_w4_s16_s233
 		params = StochasticRSIInvestorParams(4, 6, 33)
-		res['stochRsi_k_w4_s16_s233'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w4_s16_s233'] = stochasticRSI(df['Close'], params)['k']
 
 		# adx_neg_w25
 		params = ADXInvestorParams(25)
-		res['adx_neg_w25'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_neg']
+		res['adx_neg_w25'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_neg']
 
 		# stochRsi_d_w12_s125_s25
 		params = StochasticRSIInvestorParams(12, 25, 5)
-		res['stochRsi_d_w12_s125_s25'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w12_s125_s25'] = stochasticRSI(df['Close'], params)['d']
 
 		# macd_difffW5_sW39_signal14
 		params = MACDInvestorParams(5, 39, 14)
-		res['macd_difffW5_sW39_signal14'] = movingAverageConvergenceDivergence(data['Close'], params)['diff']
+		res['macd_difffW5_sW39_signal14'] = movingAverageConvergenceDivergence(df['Close'], params)['diff']
 
 		# stochRsi_k_w29_s18_s219
 		params = StochasticRSIInvestorParams(29, 8, 19)
-		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(df['Close'], params)['k']
 
 		return res
 
@@ -267,86 +264,83 @@ class InvestorLSTMEnsembleClass2(Investor):
 		# fig.show()
 
 	def calculateInputsMorning(self, df: pd.DataFrame):
-		data = df.copy()
-		data['Open'] = data['Open'].shift(-1)
-		data = data[:-1]
 		res = pd.DataFrame()
 
 		# Return_interday
-		res['Return_interday'] = np.log(data['Open']) - np.log(data['Close'])
+		res['Return_interday'] = np.log(df['Open']) - np.log(df['Close'])
 
 		# bb_pband_w3_stdDev1.774447792366109
 		params = BBInvestorParams(3, 1.775)
-		res['bb_pband_w3_stdDev1.774447792366109'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w3_stdDev1.774447792366109'] = bollingerBands(df['Close'], params)['pband']
 
 		# Return_open
-		res['Return_open'] = np.log(data['Open']) - np.log(data['Open'].shift())
+		res['Return_open'] = np.log(df['Open']) - np.log(df['Open'].shift())
 
 		# adx_pos_w6
 		params = ADXInvestorParams(6)
-		res['adx_pos_w6'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_pos']
+		res['adx_pos_w6'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_pos']
 
 		# adx_pos_w42
 		params = ADXInvestorParams(42)
-		res['adx_pos_w42'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_pos']
+		res['adx_pos_w42'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_pos']
 
 		# Volume
-		res['Volume'] = data['Volume']
+		res['Volume'] = df['Volume']
 
 		# adx_neg_w1
 		params = ADXInvestorParams(1)
-		res['adx_neg_w1'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_neg']
+		res['adx_neg_w1'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_neg']
 
 		# Return_intraday
-		res['Return_intraday'] = np.log(data['Close']) - np.log(data['Open'])
+		res['Return_intraday'] = np.log(df['Close']) - np.log(df['Open'])
 
 		# stochRsi_k_w47_s143_s212
 		params = StochasticRSIInvestorParams(47, 43, 12)
-		res['stochRsi_k_w47_s143_s212'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w47_s143_s212'] = stochasticRSI(df['Close'], params)['k']
 
 		# stochRsi_d_w9_s144_s246
 		params = StochasticRSIInvestorParams(9, 44, 46)
-		res['stochRsi_d_w9_s144_s246'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w9_s144_s246'] = stochasticRSI(df['Close'], params)['d']
 
 		# stochRsi_d_w4_s16_s233
 		params = StochasticRSIInvestorParams(4, 6, 33)
-		res['stochRsi_d_w4_s16_s233'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w4_s16_s233'] = stochasticRSI(df['Close'], params)['d']
 
 		# adx_w10
 		params = ADXInvestorParams(10)
-		res['adx_w10'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+		res['adx_w10'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx']
 
 		# bb_pband_w7_stdDev1.4065306043590475
 		params = BBInvestorParams(7, 1.407)
-		res['bb_pband_w7_stdDev1.4065306043590475'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w7_stdDev1.4065306043590475'] = bollingerBands(df['Close'], params)['pband']
 
 		# bb_pband_w13_stdDev1.7961852973078898
 		params = BBInvestorParams(13, 1.796)
-		res['bb_pband_w13_stdDev1.7961852973078898'] = bollingerBands(data['Close'], params)['pband']
+		res['bb_pband_w13_stdDev1.7961852973078898'] = bollingerBands(df['Close'], params)['pband']
 
 		# adx_w18
 		params = ADXInvestorParams(18)
-		res['adx_w18'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+		res['adx_w18'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx']
 
 		# stochRsi_k_w4_s16_s233
 		params = StochasticRSIInvestorParams(4, 6, 33)
-		res['stochRsi_k_w4_s16_s233'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w4_s16_s233'] = stochasticRSI(df['Close'], params)['k']
 
 		# adx_neg_w25
 		params = ADXInvestorParams(25)
-		res['adx_neg_w25'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_neg']
+		res['adx_neg_w25'] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], params)['adx_neg']
 
 		# stochRsi_d_w12_s125_s25
 		params = StochasticRSIInvestorParams(12, 25, 5)
-		res['stochRsi_d_w12_s125_s25'] = stochasticRSI(data['Close'], params)['d']
+		res['stochRsi_d_w12_s125_s25'] = stochasticRSI(df['Close'], params)['d']
 
 		# macd_difffW5_sW39_signal14
 		params = MACDInvestorParams(5, 39, 14)
-		res['macd_difffW5_sW39_signal14'] = movingAverageConvergenceDivergence(data['Close'], params)['diff']
+		res['macd_difffW5_sW39_signal14'] = movingAverageConvergenceDivergence(df['Close'], params)['diff']
 
 		# stochRsi_k_w29_s18_s219
 		params = StochasticRSIInvestorParams(29, 8, 19)
-		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(data['Close'], params)['k']
+		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(df['Close'], params)['k']
 
 		return res
 
