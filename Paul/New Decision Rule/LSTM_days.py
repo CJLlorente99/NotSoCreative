@@ -168,6 +168,7 @@ def main():
     data = yf.download(tickers='^GSPC', start='2016-01-04', end='2022-01-13')
     data['Close_t1'] = data.Close.shift()
     data['Volume_t1'] = data.Volume.shift()
+    data['Adj_Close_t1'] = data['Adj Close'].shift()
     data['High_t1'] = data.High.shift()
     data['Low_t1'] = data.Low.shift()
     data['Diff_outra'] = data.Open - data.Close_t1
@@ -175,33 +176,13 @@ def main():
     data['Diff_intra'] = data.Close_t1 - data.Open.shift()
     data['Return_intra'] = np.log(data.Close_t1) - np.log(data.Open.shift())
     data['Diff_open'] = data.Open - data.Open.shift()
-    data = data.drop(['Volume', 'Close', 'Low', 'High'], axis=1)
+    data = data.drop(['Volume', 'Close', 'Low', 'High', 'Adj Close'], axis=1)
     data.dropna(inplace=True)
     #print(data)
     
     # to choose interval where we want to test
-    data = data.iloc[500:1700, :]
+    data = data.iloc[200:1100, :]
     print(data)
-    
-    # only for optimization
-    test_list = [800, 500, 800, 300]
-    backc = [20]
-    
-    
-    # also only for optimization
-    acc_list = np.empty((len(test_list), len(backc)))
-
-    gain_list = np.empty((len(test_list), len(backc)))
-    mpv_list = np.empty((len(test_list), len(backc)))
-    bench_list = np.empty((len(test_list), len(backc)))
-
-    gain_list_prob = np.empty((len(test_list), len(backc)))
-    mpv_list_prob = np.empty((len(test_list), len(backc)))
-
-    gain_list_best = np.empty((len(test_list), len(backc)))
-    mpv_list_best = np.empty((len(test_list), len(backc)))
-
-
 
     data_or = data.copy()
     # print(data_or.Return_intraday.iloc[:7], data_or.Return_intraday.iloc[-10:], data_or.iloc[:7, -1], data_or.iloc[-10:, -1])
@@ -286,14 +267,14 @@ def main():
 
     # train and predict
     # n_members -> how many predictors we wanted to use
-    n_members = 2
-    epochs = 2 # 36
+    n_members = 1
+    epochs = 20 # 36
     batch_size = 8
     print('train')
     ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
                                                     batch_size)
-    print('scaled y_pred', y_pred_scale)
-    print('scaled y_test', y_test)
+    #print('scaled y_pred', y_pred_scale)
+    #print('scaled y_test', y_test)
     
     # inverse scaling
     y_pred = inverse_scaling(data, y_pred_scale, scaler)
@@ -367,21 +348,39 @@ def main():
     
 
     # build decision rule: if open_t+2 > open_t -> buy on open_t
-    decision = []
+    
     
     # one more value: I want to compare the current value_t to my predicted value_t+n and make decision on day_t
     # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict 
     data_open = data.Open[-(test_days+1):]
     
     #print('open for decision', data_open)
+    decision = []
+    decision2 = []
     for q in range(len(y_mean_list)):
         y_pr = y_mean_list[q]
-        print('pred', y_pr[2])
         print('open',data_open[q])
+        print('pred', y_pr[2])
+            
         if data_open[q] < y_pr[2]:
             decision.append(+1)
+            decision2.append(+1)
         else:
             decision.append(-1)
+            decision2.append(-1)
+            
+        if q == len(y_mean_list) - 1:
+            if data_open[q+1] < y_pr[2]:
+                decision2.append(+1)
+            else:
+                decision2.append(-1)
+            
+            if data_open[q+2] < y_pr[2]:
+                decision2.append(+1)
+            else:
+                decision2.append(-1)
+            
+            
 
     # to see decision   
     print('Decision', decision)
@@ -395,19 +394,24 @@ def main():
     # we predict the first value for day_t+1 and make the decision for day_t -> so the first value we have to include here is day_t 
     # before the first value was day_t+1, but mabye iam wrong?
     gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision)
-    print('this was for our prediction')
+    print('this was for our prediction: Decision 1')
+    print('----------')
+    print('----------')
+    gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
+    print('this was for our prediction: Decision 2')
+    print('----------')
+    print('----------')
     
     
     # build decision rule for real values
     real_decision = []
-    print('----------')
     #print('data_Open', data_open)
     
     # here I make everyday prediction, just to compare
     for j in range(len(y_test_list)):
         y_true = y_test_list[j]
-        print('true', y_true[0])
         print('open',data_open[j])
+        print('true', y_true[0])
         if data_open[j] < y_true[0]:
             real_decision.append(+1)
         else:
@@ -416,6 +420,8 @@ def main():
 
     # backtest it
     print('REAL', real_decision)
+    print('----------')
+    print('----------')
     gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_decision)
     print('this was for the real value')
     
