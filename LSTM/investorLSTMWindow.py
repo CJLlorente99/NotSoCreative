@@ -72,7 +72,7 @@ class InvestorLSTMWindow (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 30  # 10
+		backcandles = 20  # 10
 
 		# to save decision and predictions
 		y_predictions = []
@@ -89,7 +89,7 @@ class InvestorLSTMWindow (Investor):
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 36 #
+		epochs = 15 #
 		batch_size = 8
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
