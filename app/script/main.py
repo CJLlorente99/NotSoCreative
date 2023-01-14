@@ -60,8 +60,8 @@ def main():
 	# 2) get date
 	dateToday = datetime.datetime.now()
 	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2023, 1, 11)
-	# now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
+	# dateToday = datetime.datetime(2023, 1, 13)
+	# now = datetime.datetime(2023, 1, 13, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)

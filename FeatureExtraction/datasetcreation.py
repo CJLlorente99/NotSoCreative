@@ -29,7 +29,11 @@ jsonString = []
 df = yf.download("^GSPC", "1999-12-30", "2023-01-09")
 
 # Shift everything but Open
-df['Open'] = df['Open'].shift(-1)
+df['Low'] = df['Low'].shift()
+df['High'] = df['High'].shift()
+df['Close'] = df['Close'].shift()
+df['Adj Close'] = df['Adj Close'].shift()
+df['Volume'] = df['Volume'].shift()
 df.dropna(inplace=True)
 
 # Accumulation Distribution Indicator (ADI)
