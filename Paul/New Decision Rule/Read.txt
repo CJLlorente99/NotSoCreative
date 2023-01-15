@@ -35,9 +35,11 @@ How its working:
  Difference between scripts:
  LSTM_days: I take yfinance data
  LSTMCharli_days: I take data from charli where my inputs are TIs and so on
- LSTM_daysloop: I backtest for different time interval and different number of backcandles and compare them at the end of script:
-                -> You can check the plots, and at the end the sum of gains and mean Of MPVs to see which backcandle (column) 
-                -> has performed the best
+ LSTM_daysloop: I backtest for different time interval and different number of backcandles and compare them at the end ofscript
+                -> You can check the plots, and at the end the sum of Acc, gains and mean Of MPVs to see which backcandle
+                   has performed the best: Gain, MPV are saved in an (number of different time intervals, number of different       
+                   backcandles) -> watch columns to see which backcandle was the best
+                 
 LSTMCharli_daysloop: same as LSTM_daysloop but with charli input data
 
 Important for us are the scripts with Charli:
