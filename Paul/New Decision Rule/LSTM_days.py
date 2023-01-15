@@ -179,7 +179,7 @@ def main():
     #print(data)
     
     # to choose interval where we want to test
-    data = data.iloc[200:1100, :]
+    data = data.iloc[-1000:, :]
     print(data)
 
     data_or = data.copy()
