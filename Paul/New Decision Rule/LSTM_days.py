@@ -140,7 +140,7 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
     y_t = np.array(data_set_scaled[:, -1])
     
     # with this method the last column y_t will be shifted by once back and get the shape: (pred_days=n_row, step_out)
-    # X will be prepared for LSTM in shape: (length(data) -  number of backcandles, number of backcandles, number of features)
+    # X will be prepared for LSTM in shape: (length(data) -  number of backcandles-step_out, number of backcandles, number of features)
     for i in range(backcandles, data_set_scaled.shape[0] + 1 - step_out): 
         X.append(data_set_scaled[i - backcandles:i, :-1])
         y.append(y_t[i:i + step_out])
@@ -148,11 +148,9 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
     # make array for getting shape
     X = np.array(X)
     y = np.array(y)
-
+    
+    # reshape
     X = X.reshape(y.shape[0], backcandles, data_set_scaled.shape[1] - 1)
-    '''print('X_last', X.shape, X[-test_d:, :, :])
-    print('X_last 1', X[-1:, :, :].shape, X[-1:, :, :])
-    print('y_after', y.shape, y[-test_d:])'''
 
     # only last row because it contains the last step_out values (step_out is a number: first iteration: 10, last 1)
     splitlimit = X.shape[0] - pred_days
@@ -246,7 +244,7 @@ def main():
     
     scaler = StandardScaler()
     data_set_scaled = scaler.fit_transform(data)
-    #print('data_set_scaled', data_set_scaled)
+    print('data_set_scaled', data_set_scaled)
 
 
     # prepare data for lstm
@@ -255,6 +253,7 @@ def main():
     X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, n_row, step_out)
    
     print('data_open', data.Open[-(test_days+1):])
+    print('scaled y_test', y_test)
     # just to look at values -> to check for mistakes
     '''print('data_set_scaled', data_set_scaled[-15:, -1])
     print('y_test', y_test.shape, y_test)
@@ -274,7 +273,6 @@ def main():
     ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
                                                     batch_size)
     #print('scaled y_pred', y_pred_scale)
-    #print('scaled y_test', y_test)
     
     # inverse scaling
     y_pred = inverse_scaling(data, y_pred_scale, scaler)
@@ -345,17 +343,16 @@ def main():
 
     y_predictions.append(np.asarray(y_mean))
     y_mean = np.asarray(y_mean).flatten()'''
-    
 
-    # build decision rule: if open_t+2 > open_t -> buy on open_t
-    
-    
     # one more value: I want to compare the current value_t to my predicted value_t+n and make decision on day_t
     # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict 
     data_open = data.Open[-(test_days+1):]
     
-    #print('open for decision', data_open)
+     # build decision rule: if open_p_t+3 > open_t -> buy on open_t
     decision = []
+    # with the rule above you dont take decisions anymore  if open_t+3 is the last day:
+    # therefore for the last 3 days, i compare open_t < open_p_t+2 and then open_t+1 < open_p_t+2
+    # _p means predicted
     decision2 = []
     for q in range(len(y_mean_list)):
         y_pr = y_mean_list[q]
@@ -363,13 +360,14 @@ def main():
         print('pred', y_pr[2])
             
         if data_open[q] < y_pr[2]:
-            decision.append(+1)
+            #decision.append(+1)
             decision2.append(+1)
         else:
-            decision.append(-1)
+            #decision.append(-1)
             decision2.append(-1)
             
         if q == len(y_mean_list) - 1:
+            print('before dec2',len(decision2))
             if data_open[q+1] < y_pr[2]:
                 decision2.append(+1)
             else:
@@ -379,51 +377,74 @@ def main():
                 decision2.append(+1)
             else:
                 decision2.append(-1)
-            
-            
+                
 
-    # to see decision   
-    print('Decision', decision)
-    
-            
-    # backtest it: because I make no loop: my predictions stops if y_pred[2] in decision function is the last value
-    # therefore I  do nothing at the last 3 days -> have to fix this
-    # before we made here also a mistake, mabye thats why our stratey wasnt that good?
-    
-    # charlie pls check:
-    # we predict the first value for day_t+1 and make the decision for day_t -> so the first value we have to include here is day_t 
-    # before the first value was day_t+1, but mabye iam wrong?
-    gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision)
-    print('this was for our prediction: Decision 1')
-    print('----------')
-    print('----------')
-    gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
-    print('this was for our prediction: Decision 2')
-    print('----------')
-    print('----------')
-    
-    
     # build decision rule for real values
     real_decision = []
-    #print('data_Open', data_open)
+    # for comparing accuracy
+    real_dec = []
     
     # here I make everyday prediction, just to compare
     for j in range(len(y_test_list)):
         y_true = y_test_list[j]
         print('open',data_open[j])
-        print('true', y_true[0])
+        print('true+1', y_true[0])
+        
+        # everyday prediction as benchmark comparison
         if data_open[j] < y_true[0]:
             real_decision.append(+1)
         else:
             real_decision.append(-1)
+            
+        # just to compare predictions accuracy  
+        if data_open[j] < y_true[2]:
+            real_dec.append(+1)
+        else:
+            real_dec.append(-1)
+            
+        
+        if j == len(y_test_list) - 1: 
+            
+            if data_open[j+1] < y_true[2]:
+                real_dec.append(+1)
+            else:
+                real_dec.append(-1)
 
-
+            if data_open[j+2] < y_true[2]:
+                real_dec.append(+1)
+            else:
+                real_dec.append(-1)
+                
+    print('real_dec', real_dec)
+    print('dec2', decision2)
+    print('----------')
+    print('----------')
+    print('ACC', accuracy_score(real_dec, decision2))
+    print('----------')
+    print('----------')
+    # backtest it: because I make no loop: my predictions stops if y_pred[2] in decision function is the last value
+    # therefore I  do nothing at the last 3 days -> have to fix this
+    # before we made here also a mistake, mabye thats why our stratey wasnt that good?
+    
+    # PLS CHECK:
+    # we predict the first value for day_t+1 and make the decision for day_t -> so the first value we have to include here is day_t 
+    # before the first value was day_t+1, but mabye iam wrong?
+    
+    #gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision)
+    #print('this was for our prediction: Decision 1')
+    #print(data_or.iloc[-test_days-1:])
     # backtest it
+    print('this is for our prediction: Decision 2')
+    print('Decision 2', decision2)
+    gain_pct_prob, mpv_prob, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
+    print('----------')
+    print('----------')
+    print('----------')
+    print('----------')
+    print('this is for the real value')
     print('REAL', real_decision)
-    print('----------')
-    print('----------')
     gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_decision)
-    print('this was for the real value')
+    
     
     
 
