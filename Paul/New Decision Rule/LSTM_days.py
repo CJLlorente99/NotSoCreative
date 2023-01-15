@@ -11,7 +11,7 @@ from keras.layers import LSTM, Bidirectional
 from keras import initializers
 import tensorflow as tf
 import keras
-from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error, accuracy_score
 from tensorflow.keras.optimizers import Adam, Adamax
 from keras.callbacks import History
 from keras.models import Model
