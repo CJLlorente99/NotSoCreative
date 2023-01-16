@@ -115,6 +115,8 @@ def backtest_func(df, decision):
     for i in range(len(df) - len(decision)):
         decision.append(0)
        
+    print(len(df) - len(decision))
+       
 
     # backtest
     states_buy, states_sell, total_gain, gain_pct, money_notinv, total_inv, total_sell, current_money_inv, mpv \
@@ -140,3 +142,5 @@ def backtest_func(df, decision):
     plt.show()
     
     return gain_pct, mpv, gain_bench
+
+

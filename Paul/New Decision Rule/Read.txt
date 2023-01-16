@@ -1,0 +1,79 @@
+Read LSTM_days: many comments:
+
+What Im trying to do:
+- predict on day_t next 3 open prices: open_t+1, open_t+2, open_t+3
+- afterwards make a decison on day_t: if open_t < open_t+3 -> buy else sell
+- then doing this iteratively: -> day_t+1:
+    -> predict on day_t+1: open_t+2, open_t+3, open_t+4
+    -> compare real open price open_t+1 for day_t+1 with predicted price for open_t+4:
+    -> if open_t+1 < open_t+4 -> buy else sell
+
+How its working:
+ - take data: write in the last column the target variable: -> we predict returns (because of stationarity)
+   -> return defined as follows: np.log(open_t) - np.log(open_t-1) -> so difference between current and last day and what we want    to predict is the difference between current open_t and next day open_t+1
+   
+ - then scale the data with standard scaler
+   
+ - then the prepare_multidata preparing the data for the LSTM in the following way:
+   -> it selects the last column as target y and shifts it by once: so that on day_t I want to predict price/return for tomorrow,
+   but because we predict on day_t the next 3 values at once, each row of y got 3 values (open/return_t+1, t+2, t+3)
+   -> In the input X are only values from t-1 but open_t -> all other values we dont have on day_t
+   and it has the input shape like (len(data) - backcandles-step_out, backcandles, number of features)
+   => number of features are the columns of the dataset - 1 ( -1 because Im not allowed to include the target)
+   => backcandles are the number of past days what my prediction is based on
+   
+  
+  PLS CHECK the prepare multidata method if I dont use anything that Im not allowed to -> no values from t:
+  -> after the method in y should be the shifted open_returns
+
+ - then I predict with more than 1 model (with # of n_ensemble models) the target variables (called          ensembling) and scale it back
+ - after that I calculate the mean of the different predictions (with method calculate_bounds)
+ - and transform the returns back to prices: so that my final y_pred are the raw prices:
+ - afterwards I build my decision signals like described above: +1 for buy and -1 for sell 
+ - and backtest it: calculate gain, MPV, ...
+ 
+ Difference between scripts:
+ LSTM_days: I take yfinance data
+ LSTMCharli_days: I take data from charli where my inputs are TIs and so on
+ LSTM_daysloop: I backtest for different time interval and different number of backcandles and compare them at the end ofscript
+                -> You can check the plots, and at the end the sum of Acc, gains and mean Of MPVs to see which backcandle
+                   has performed the best: Gain, MPV are saved in an (number of different time intervals, number of different       
+                   backcandles) -> watch columns to see which backcandle was the best
+                 
+LSTMCharli_daysloop: same as LSTM_daysloop but with charli input data
+
+Important for us are the scripts with Charli:
+
+TO DO:
+Optimize lSTM:
+You can begin with LSTMCharli_days: watch the val_loss -> how to reduce val_loss? Train loss is going down, but not val_loss?Google if something is wrong?
+My opinion was overfitting but the val_loss increases from the first epoch on -> something is wrong? or is it normal for stock return prediction? read it somewhere, whats going on here?
+
+Change the paramters for LSTM:
+
+def build_model(n_inputs, n_features, n_outputs):
+    opt = Adam(learning_rate=0.001)
+    model = Sequential()
+    model.add(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01), 
+                   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.1))
+    model.add(LSTM(units=200))
+    model.add(Dropout(0.1))
+    # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
+    model.add(Dense(units=n_outputs, activation='linear'))
+    model.compile(optimizer=opt, loss='mean_squared_error')
+    # history = model.fit
+    return model
+    
+Change units, in first and second LSTM layer, 
+change learnign_rate, you could change optimizer Adam, also possible to just say opt='Adam' without specifying a learning rate
+change/delete kernel initializer, 
+change epochs and batch_size
+change backcandles
+can also add layers
+
+Try it out, watch Accuracy, gain, MPV in the end (I think most important accuracy)
+
+
+          
+ 

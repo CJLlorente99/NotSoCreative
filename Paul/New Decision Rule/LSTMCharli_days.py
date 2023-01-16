@@ -113,7 +113,6 @@ def inverse_scaling(data, y_p, scaler):
     return y_ensemble 
 
 
-
 def calculate_bounds(y_ensemble):
     # calculating mean of ensemble predictions for every row of prediction
     # each row consists of step_out predictions and there exists n_rows
@@ -140,7 +139,7 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
     y_t = np.array(data_set_scaled[:, -1])
     
     # with this method the last column y_t will be shifted by once back and get the shape: (pred_days=n_row, step_out)
-    # X will be prepared for LSTM in shape: (length(data) -  number of backcandles-step_out, number of backcandles, number of features)
+    # X will be prepared for LSTM in shape: (length(data) -  number of backcandles, number of backcandles, number of features)
     for i in range(backcandles, data_set_scaled.shape[0] + 1 - step_out): 
         X.append(data_set_scaled[i - backcandles:i, :-1])
         y.append(y_t[i:i + step_out])
@@ -148,9 +147,11 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
     # make array for getting shape
     X = np.array(X)
     y = np.array(y)
-    
-    # reshape
+
     X = X.reshape(y.shape[0], backcandles, data_set_scaled.shape[1] - 1)
+    '''print('X_last', X.shape, X[-test_d:, :, :])
+    print('X_last 1', X[-1:, :, :].shape, X[-1:, :, :])
+    print('y_after', y.shape, y[-test_d:])'''
 
     # only last row because it contains the last step_out values (step_out is a number: first iteration: 10, last 1)
     splitlimit = X.shape[0] - pred_days
@@ -163,27 +164,19 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
 def main():
     print('go')
     # data prepaaring -> got no close and so on on day t
-    data = yf.download(tickers='^GSPC', start='2016-01-04', end='2022-01-13')
-    data['Close_t1'] = data.Close.shift()
-    data['Volume_t1'] = data.Volume.shift()
-    data['Adj_Close_t1'] = data['Adj Close'].shift()
-    data['High_t1'] = data.High.shift()
-    data['Low_t1'] = data.Low.shift()
-    data['Diff_outra'] = data.Open - data.Close_t1
-    data['Return_outra'] = np.log(data.Open) - np.log(data.Close_t1)
-    data['Diff_intra'] = data.Close_t1 - data.Open.shift()
-    data['Return_intra'] = np.log(data.Close_t1) - np.log(data.Open.shift())
-    data['Diff_open'] = data.Open - data.Open.shift()
-    data = data.drop(['Volume', 'Close', 'Low', 'High', 'Adj Close'], axis=1)
+    data = pd.read_csv('featureSelectionDataset_CharliTIs.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
     data.dropna(inplace=True)
-    #print(data)
+    print('len data', len(data))
+    #print(data, data.Open, data.Return_Open, data.Target)
+    #data_true = yf.download(tickers='^GSPC', start='2016-01-04', end='2023-01-07')
+    #print('true', data_true)
     
     # to choose interval where we want to test
-    data = data.iloc[-1000:, :]
-    print(data)
-
+    data = data.iloc[2300:-2400, :]
+    data = data.drop(['Target'], axis=1)
+    print('len data', len(data))
     data_or = data.copy()
-    # print(data_or.Return_intraday.iloc[:7], data_or.Return_intraday.iloc[-10:], data_or.iloc[:7, -1], data_or.iloc[-10:, -1])
+
     
     # transformation
     # to decide if we want to predict raw prices or returns -> i think returns might work better cause of non-stationarity
@@ -201,17 +194,19 @@ def main():
         # writing the return twice because in prepare_multidata method I choose the last column as target and this column gets shifted
         # so to keep the returns that I actually have as Input, I take this as twice
         # -> I could also have defined it in the beginning, but the last column has to be the target variable
-        data['Return_Open'] = df_log_diff
+        #data['Return_Open'] = df_log_diff
         data['Target'] = df_log_diff
         data.dropna(inplace=True)
-    print(data.Target.iloc[-20:])   
+    #print(data.Target.iloc[-20:])
+    #print('dataopen', data.Open)
+    # both right
  
 
     # choose columns: all but target variable (its last column)
     liste = list(range(0, data.shape[1]))
 
     # what I choose at my test set: I make n_row predictions: In each prediction I predict step_out days at once
-    n_row = 7
+    n_row = 20 #7
 
     # how many days i want to predict at once -> I do this n_row times
     step_out = 3
@@ -237,23 +232,21 @@ def main():
 
     # for plotting reasons
     test_or = data.Open.iloc[-(test_days):]
+    #print('test_pr', test_or) right
     
     # just to check for mistakes -> easier to debug with this in prepare_multidata than with data_set_scaled
-    data_arr = np.asarray(data)
+    #data_arr = np.asarray(data)
+    print(data)
     #scaling
-    
     scaler = StandardScaler()
     data_set_scaled = scaler.fit_transform(data)
-    print('data_set_scaled', data_set_scaled)
+    #print('data_set_scaled', data_set_scaled)
 
 
     # prepare data for lstm
     print('data preparation')
-    # X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, j, pred_days, step_out)
     X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, n_row, step_out)
-   
-    print('data_open', data.Open[-(test_days+1):])
-    print('scaled y_test', y_test)
+
     # just to look at values -> to check for mistakes
     '''print('data_set_scaled', data_set_scaled[-15:, -1])
     print('y_test', y_test.shape, y_test)
@@ -267,12 +260,13 @@ def main():
     # train and predict
     # n_members -> how many predictors we wanted to use
     n_members = 1
-    epochs = 20 # 36
+    epochs = 2 # 36
     batch_size = 8
     print('train')
     ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
                                                     batch_size)
     #print('scaled y_pred', y_pred_scale)
+    #print('scaled y_test', y_test)
     
     # inverse scaling
     y_pred = inverse_scaling(data, y_pred_scale, scaler)
@@ -343,12 +337,16 @@ def main():
 
     y_predictions.append(np.asarray(y_mean))
     y_mean = np.asarray(y_mean).flatten()'''
+    
 
+    
+    
+    
     # one more value: I want to compare the current value_t to my predicted value_t+n and make decision on day_t
     # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict 
     data_open = data.Open[-(test_days+1):]
     
-     # build decision rule: if open_p_t+3 > open_t -> buy on open_t
+    # build decision rule: if open_p_t+3 > open_t -> buy on open_t
     decision = []
     # with the rule above you dont take decisions anymore  if open_t+3 is the last day:
     # therefore for the last 3 days, i compare open_t < open_p_t+2 and then open_t+1 < open_p_t+2
