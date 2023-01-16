@@ -30,9 +30,9 @@ from datetime import timedelta
 logFile = './log.txt'
 logManager = LogManager(logFile)
 
-openingHour = 15
+openingHour = 14
 openingMinute = 30
-closingHour = 22
+closingHour = 21
 closingMinute = 0
 
 def main():
@@ -42,10 +42,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	# dateToday = datetime.datetime.now()
-	# now = datetime.datetime.now()
-	dateToday = datetime.datetime(2023, 1, 11)
-	now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
+	dateToday = datetime.datetime.now()
+	now = datetime.datetime.now()
+	# dateToday = datetime.datetime(2023, 1, 11)
+	# now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)

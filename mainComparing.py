@@ -10,7 +10,6 @@ from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
 from RF_DT.investorXGB import InvestorXGB
 from RF_DT.investorXGBShift import InvestorXGBWindow
 from RF_DT.investorXGBReduced import InvestorXGBReduced
-from LSTM.investorLSTMThreshold import InvestorLSTMThreshold, InvestorLSTMProb
 from LSTM.investorLSTMEnsemble import InvestorLSTMEnsembleClass1, InvestorLSTMEnsembleClass2
 from LSTM.investorLSTMWindow import InvestorLSTMWindow
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams

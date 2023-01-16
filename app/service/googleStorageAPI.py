@@ -9,7 +9,7 @@ projectName = 'datascienceii'
 bucketName = 'datascienceii'
 objectNameDf = 'myData.csv'
 objectNameJson = 'strategies.json'
-credentials = 'C:/Users/carlo/AppData/Roaming/gcloud/application_default_credentials.json'
+credentials = './application_default_credentials.json'
 
 
 def readBlobDf():
@@ -45,3 +45,7 @@ def updateBlobJson(jsonData):
 	bucket = storageClient.bucket(bucketName)
 	blob = bucket.blob(objectNameJson)
 	blob.upload_from_string(jsonData)
+
+if __name__ == '__main__':
+	df = readBlobDf()
+	print(df)
