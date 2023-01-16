@@ -389,11 +389,11 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		elif name == 'lstmEnsemble2':
 			aux = LSTMEnsemble2(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'RFClassifier':
-			aux = RandomForestStrategy(strategyInfo, strategy, 'models/random_forest_class.joblib').broker(operation, inputsData)
+			aux = RandomForestStrategy(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'xgb':
-			aux = XGBStrategy(strategyInfo, strategy, 'models/xgb_model.json').broker(operation, inputsData)
+			aux = XGBStrategy(strategyInfo, strategy, 1).broker(operation, inputsData)
 		elif name == 'xgbReduced':
-			aux = XGBStrategy(strategyInfo, strategy, 'models/xgb_model_reduced.json').broker(operation, inputsData)
+			aux = XGBStrategy(strategyInfo, strategy, 2).broker(operation, inputsData)
 		elif name == 'lstmWindow':
 			aux = LSTMWindow(strategyInfo, strategy).broker(operation, inputsData)
 

@@ -58,10 +58,10 @@ def main():
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = datetime.datetime.now()
-	now = datetime.datetime.now()
-	# dateToday = datetime.datetime(2023, 1, 13)
-	# now = datetime.datetime(2023, 1, 13, closingHour, closingMinute+20, 0)
+	# dateToday = datetime.datetime.now()
+	# now = datetime.datetime.now()
+	dateToday = datetime.datetime(2023, 1, 13)
+	now = datetime.datetime(2023, 1, 13, closingHour, closingMinute+20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -425,11 +425,11 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		elif name == 'lstmEnsemble2':
 			aux = LSTMEnsemble2(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'RFClassifier':
-			aux = RandomForestStrategy(strategyInfo, strategy, './models/random_forest_class.joblib').broker(operation, inputsData)
+			aux = RandomForestStrategy(strategyInfo, strategy).broker(operation, inputsData)
 		elif name == 'xgb':
-			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model.json').broker(operation, inputsData)
+			aux = XGBStrategy(strategyInfo, strategy, 1).broker(operation, inputsData)
 		elif name == 'xgbReduced':
-			aux = XGBStrategy(strategyInfo, strategy, './models/xgb_model_reduced.json').broker(operation, inputsData)
+			aux = XGBStrategy(strategyInfo, strategy, 2).broker(operation, inputsData)
 		elif name == 'lstmWindow':
 			aux = LSTMWindow(strategyInfo, strategy).broker(operation, inputsData)
 
