@@ -22,14 +22,15 @@ from Benchmarks.idle import InvestorIdle
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from experimentManager import ExperimentManager
+import warnings
 
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2019-01-01', '2019-01-30')
+    dataGetter = DataGetter('2018-01-01', '2019-01-30')
 
     # Run various experiments
-    numExperiments = 10
+    numExperiments = 20
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -43,136 +44,103 @@ def main():
         # Load data
         df = dataGetter.getPastData()
 
-        # Create investor RSI
-        RSIwindow = 3
-        upperBound = 61
-        lowerBound = 27.5
-        a = 1.1
-        b = 2.4
-        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
-        investorRSI = InvestorRSI(10000, rsiParams)
-        experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)], False)
-        print("investorRSI created")
-
-        # Create investor MACD grad
-        sellGradient = GradientQuarter(-50, 150, 0, 0)
-        buyGradient = GradientQuarter(-200, 150, -150, 0)
-        macdFastWindow = 2
-        macdSlowWindow = 6
-        signal = 7
-        a = 0.7
-        b = 2.5
-        macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
-                                            a, b, "grad")
-        investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
-        experimentManager.addStrategy(investorMACDGrad, "macdGrad",
-                                      [experimentManager.createTIInput("macd", macdParamsGrad, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)], False)
-        print("investorMACDGrad created")
-
-        # Create investor MACD zero
-        sellGradient = GradientQuarter(-50, 0, 150, 0)
-        buyGradient = GradientQuarter(-100, 100, -200, 0)
-        macdFastWindow = 2
-        macdSlowWindow = 9
-        signal = 7
-        a = 0.7
-        b = 2.5
-        macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
-                                            a, b, "grad_crossZero")
-        investorMACDZero = InvestorMACD(10000, macdParamsZero)
-        experimentManager.addStrategy(investorMACDZero, "macdGradZero",
-                                      [experimentManager.createTIInput("macd", macdParamsZero, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)], False)
-        print("investorMACDZero created")
-
-        # Create investor MACD signal
-        sellGradient = GradientQuarter(-150, 150, -200, 0)
-        buyGradient = GradientQuarter(-200, 0, 100, 0)
-        macdFastWindow = 2
-        macdSlowWindow = 6
-        signal = 5
-        a = 0.7
-        b = 2.5
-        macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
-                                        a, b, "grad_crossSignal")
-        investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
-        experimentManager.addStrategy(investorMACDSignal, "macdGradSignal",
-                                      [experimentManager.createTIInput("macd", macdParamsSignal, "macd", 5),
-                                       experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)], False)
-        print("investorMACDSignal created")
-
-        # Create investor BB
-        bbWindow = 10
-        bbStdDev = 1.5
-        lowerBound = 1.9
-        upperBound = 0.8
-        a = 2.4
-        b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        investorBB = InvestorBB(10000, bbParams)
-        experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], False)
-        print("investorBB created")
-
-        # Create investor based on DT
-        bbWindow = 10
-        bbStdDev = 1.5
-        lowerBound = 1.9
-        upperBound = 0.8
-        a = 2.4
-        b = 0.5
-        bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
-        RSIwindow = 3
-        upperBound = 61
-        lowerBound = 27.5
-        a = 1.1
-        b = 2.4
-        rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
-        adxParams = ADXInvestorParams(14)
-        aroonParams = AroonInvestorParams(25)
-        atrParams = ATRInvestorParams(5)
-        stochParams = StochasticRSIInvestorParams(14, 3, 3)
-        file = "data/dt"
-        dtParams = DTInvestorParams(file, ["rsirsi", "bbpband", "adiacc_dist_index", "adxadx", "aroonaroon_indicator"
-                                           , "atraverage_true_range", "obvon_balance_volume", "stochrsistochrsi"])
-        investorDT = InvestorDecisionTree(10000, dtParams)
-        experimentManager.addStrategy(investorDT, "DT",
-                                      [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1),
-                                       experimentManager.createTIInput("bb", bbParams, "pband", 1),
-                                       experimentManager.createTIInput("adi", None, "acc_dist_index", 1),
-                                       experimentManager.createTIInput("adx", adxParams, "adx", 1),
-                                       experimentManager.createTIInput("aroon", aroonParams, "aroon_indicator", 1),
-                                       experimentManager.createTIInput("atr", atrParams, "average_true_range", 1),
-                                       experimentManager.createTIInput("obv", None, "on_balance_volume", 1),
-                                       experimentManager.createTIInput("stochrsi", stochParams, "stochrsi", 1)], True)
-        print("investorDT created")
+        # # Create investor RSI
+        # RSIwindow = 3
+        # upperBound = 61
+        # lowerBound = 27.5
+        # a = 1.1
+        # b = 2.4
+        # rsiParams = RSIInvestorParams(upperBound, lowerBound, RSIwindow, a, b)
+        # investorRSI = InvestorRSI(10000, rsiParams)
+        # experimentManager.addStrategy(investorRSI, "rsi", [experimentManager.createTIInput("rsi", rsiParams, "rsi", 1)], False)
+        # print("investorRSI created")
+        #
+        # # Create investor MACD grad
+        # sellGradient = GradientQuarter(-50, 150, 0, 0)
+        # buyGradient = GradientQuarter(-200, 150, -150, 0)
+        # macdFastWindow = 2
+        # macdSlowWindow = 6
+        # signal = 7
+        # a = 0.7
+        # b = 2.5
+        # macdParamsGrad = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+        #                                     a, b, "grad")
+        # investorMACDGrad = InvestorMACD(10000, macdParamsGrad)
+        # experimentManager.addStrategy(investorMACDGrad, "macdGrad",
+        #                               [experimentManager.createTIInput("macd", macdParamsGrad, "macd", 5),
+        #                                experimentManager.createTIInput("macd", macdParamsGrad, "signal", 5)], False)
+        # print("investorMACDGrad created")
+        #
+        # # Create investor MACD zero
+        # sellGradient = GradientQuarter(-50, 0, 150, 0)
+        # buyGradient = GradientQuarter(-100, 100, -200, 0)
+        # macdFastWindow = 2
+        # macdSlowWindow = 9
+        # signal = 7
+        # a = 0.7
+        # b = 2.5
+        # macdParamsZero = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+        #                                     a, b, "grad_crossZero")
+        # investorMACDZero = InvestorMACD(10000, macdParamsZero)
+        # experimentManager.addStrategy(investorMACDZero, "macdGradZero",
+        #                               [experimentManager.createTIInput("macd", macdParamsZero, "macd", 5),
+        #                                experimentManager.createTIInput("macd", macdParamsZero, "signal", 5)], False)
+        # print("investorMACDZero created")
+        #
+        # # Create investor MACD signal
+        # sellGradient = GradientQuarter(-150, 150, -200, 0)
+        # buyGradient = GradientQuarter(-200, 0, 100, 0)
+        # macdFastWindow = 2
+        # macdSlowWindow = 6
+        # signal = 5
+        # a = 0.7
+        # b = 2.5
+        # macdParamsSignal = MACDInvestorParams(sellGradient, buyGradient, macdFastWindow, macdSlowWindow, signal,
+        #                                 a, b, "grad_crossSignal")
+        # investorMACDSignal = InvestorMACD(10000, macdParamsSignal)
+        # experimentManager.addStrategy(investorMACDSignal, "macdGradSignal",
+        #                               [experimentManager.createTIInput("macd", macdParamsSignal, "macd", 5),
+        #                                experimentManager.createTIInput("macd", macdParamsSignal, "signal", 5)], False)
+        # print("investorMACDSignal created")
+        #
+        # # Create investor BB
+        # bbWindow = 10
+        # bbStdDev = 1.5
+        # lowerBound = 1.9
+        # upperBound = 0.8
+        # a = 2.4
+        # b = 0.5
+        # bbParams = BBInvestorParams(bbWindow, bbStdDev, lowerBound, upperBound, a, b)
+        # investorBB = InvestorBB(10000, bbParams)
+        # experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], False)
+        # print("investorBB created")
 
         # Create investor based on Random Forest Classifier
-        investorRFClass = InvestorRandomForestClassifier(10000, 'data/random_forest_class.joblib')
+        investorRFClass = InvestorRandomForestClassifier(10000, 1)
         experimentManager.addStrategy(investorRFClass, 'RFClass',
                                       [experimentManager.createTIInput("df")], True)
         print('investorRFClass created')
 
         # Create investor based on Random Forest Classifier
-        investorRFClass2 = InvestorRandomForestClassifier(10000, 'data/random_forest_class(2).joblib')
+        investorRFClass2 = InvestorRandomForestClassifier(10000, 2)
         experimentManager.addStrategy(investorRFClass2, 'RFClass2',
                                       [experimentManager.createTIInput("df")], True)
         print('investorRFClass2 created')
 
         # Create investor based on XGB
-        investorXGB = InvestorXGB(10000, 'data/xgb_model.json')
+        investorXGB = InvestorXGB(10000)
         experimentManager.addStrategy(investorXGB, 'XGB',
                                       [experimentManager.createTIInput("df")], True)
         print('investorXGB created')
 
         # Create investor based on XGB with window
-        investorXGBWindow = InvestorXGBWindow(10000, 'data/xgb_model(2).json', 3)
+        investorXGBWindow = InvestorXGBWindow(10000, 3)
         experimentManager.addStrategy(investorXGBWindow, 'XGBWindow',
                                       [experimentManager.createTIInput("df")], True)
         print('investorXGBWindow created')
 
         # Create investor based on XGB Reduced
-        investorXGBReduced = InvestorXGBReduced(10000, 'data/xgb_model_reduced.json', 3)
+        investorXGBReduced = InvestorXGBReduced(10000, 3)
         experimentManager.addStrategy(investorXGBReduced, 'XGBReduced',
                                       [experimentManager.createTIInput("df")], True)
         print('investorXGBReduced created')
@@ -263,8 +231,8 @@ def main():
         aux.to_csv("images/advancedData.csv", index_label="nExperiment", mode="a")
 
         # Calculate summary results
-        firstDate = investorRSI.record.index.values[0]
-        letzteDate = investorRSI.record.index.values[-1]
+        firstDate = investorBaH.record.index.values[0]
+        letzteDate = investorBaH.record.index.values[-1]
 
         dfTestCriteria = pd.concat([dfTestCriteria, experimentManager.criteriaCalculationAndPlotting(initDate, lastDate, firstDate, letzteDate, j)])
 
@@ -276,6 +244,7 @@ def main():
 
 
 if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
     if not os.path.exists("images"):
         os.mkdir("images")
     main()

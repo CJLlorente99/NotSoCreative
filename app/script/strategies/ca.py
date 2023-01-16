@@ -1,3 +1,5 @@
+import math
+
 from dailyStrategy import DailyStrategy
 import pandas as pd
 from jsonManagement.inversionStrategyJSONAPI import Strategy
@@ -13,9 +15,9 @@ class CA(DailyStrategy):
 	def possiblyOperationMorning(self, data):
 		self.perToInvest = 0
 		if 1 - self.nDay * self.dailyWindow > 0:
-			self.perToInvest = self.dailyWindow / (1 - self.nDay * self.dailyWindow)
+			self.perToInvest = self.dailyWindow / (1 - math.floor(self.nDay/2) * self.dailyWindow)
 
 	def possiblyOperationAfternoon(self, data):
 		self.perToInvest = 0
-		if 1 - self.nDay * self.dailyWindow > 0:
-			self.perToInvest = self.dailyWindow / (1 - self.nDay * self.dailyWindow)
+		# if 1 - self.nDay * self.dailyWindow > 0:
+		# 	self.perToInvest = self.dailyWindow / (1 - self.nDay * self.dailyWindow)

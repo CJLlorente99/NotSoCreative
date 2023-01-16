@@ -2,7 +2,7 @@ from dailyStrategy import DailyStrategy
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
 from keras.callbacks import EarlyStopping
-from tensorflow.keras.optimizers import Adam
+from keras.optimizers import Adam
 from keras import initializers
 from sklearn.preprocessing import StandardScaler
 import numpy as np

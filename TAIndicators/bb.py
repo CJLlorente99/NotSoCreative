@@ -40,8 +40,8 @@ class InvestorBB(Investor):
         params = self.bbParams
 
         self.perToInvest = 0
-        if bb < params.lowerBound:
-            self.perToInvest = math.tanh(params.a * (params.lowerBound - bb) ** params.b)
+        # if bb < params.lowerBound:
+        #     self.perToInvest = math.tanh(params.a * (params.lowerBound - bb) ** params.b)
 
     def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """

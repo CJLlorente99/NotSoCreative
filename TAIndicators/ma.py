@@ -92,28 +92,28 @@ class InvestorMACD(Investor):
 
         # Depending on the strategy, act accordingly
         self.perToInvest = 0
-        if type == "grad":
-            if params.buyGradients.lowerBoundGradient < firstGradient[
-                -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < \
-                    secondGradient[-1]:
-                self.perToInvest = math.tanh(
-                    params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
-            elif params.sellGradients.lowerBoundGradient < firstGradient[
-                -1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > \
-                    secondGradient[-1]:
-                self.perToInvest = -math.tanh(
-                    params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
-        elif type == "grad_crossZero":
-            if macd.values[-2] < 0 < macd.values[-1]:
-                self.perToInvest = math.tanh(params.a * firstGradient[-1] ** params.b)
-            elif macd.values[-2] > 0 > macd.values[-1]:
-                self.perToInvest = -math.tanh(params.a * (-firstGradient[-1]) ** params.b)
-        elif type == "grad_crossSignal":
-            if (signal.values[-2] - macd.values[-2]) > 0 > (signal.values[-1] - macd.values[-1]):
-                self.perToInvest = math.tanh(
-                    params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
-            elif (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
-                self.perToInvest = -math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
+        # if type == "grad":
+        #     if params.buyGradients.lowerBoundGradient < firstGradient[
+        #         -1] < params.buyGradients.upperBoundGradient and params.buyGradients.lowBoundSquareGradient < \
+        #             secondGradient[-1]:
+        #         self.perToInvest = math.tanh(
+        #             params.a * (secondGradient[-1] - params.buyGradients.lowBoundSquareGradient) ** params.b)
+        #     elif params.sellGradients.lowerBoundGradient < firstGradient[
+        #         -1] < params.sellGradients.upperBoundGradient and params.sellGradients.lowBoundSquareGradient > \
+        #             secondGradient[-1]:
+        #         self.perToInvest = -math.tanh(
+        #             params.a * (params.sellGradients.lowBoundSquareGradient - secondGradient[-1]) ** params.b)
+        # elif type == "grad_crossZero":
+        #     if macd.values[-2] < 0 < macd.values[-1]:
+        #         self.perToInvest = math.tanh(params.a * firstGradient[-1] ** params.b)
+        #     elif macd.values[-2] > 0 > macd.values[-1]:
+        #         self.perToInvest = -math.tanh(params.a * (-firstGradient[-1]) ** params.b)
+        # elif type == "grad_crossSignal":
+        #     if (signal.values[-2] - macd.values[-2]) > 0 > (signal.values[-1] - macd.values[-1]):
+        #         self.perToInvest = math.tanh(
+        #             params.a * (firstGradient[-1] - firstGradientSignal[-1]) ** params.b)
+        #     elif (signal.values[-2] - macd.values[-2]) < 0 < (signal.values[-1] - macd.values[-1]):
+        #         self.perToInvest = -math.tanh(params.a * (firstGradientSignal[-1] - firstGradient[-1]) ** params.b)
 
     def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """

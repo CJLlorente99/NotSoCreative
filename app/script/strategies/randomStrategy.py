@@ -7,4 +7,5 @@ class Random(DailyStrategy):
 		self.perToInvest = random.uniform(-1, 1)
 
 	def possiblyOperationAfternoon(self, data):
-		self.perToInvest = random.uniform(-1, 1)
+		# self.perToInvest = random.uniform(-1, 1)
+		self.perToInvest = 0

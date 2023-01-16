@@ -43,10 +43,10 @@ class InvestorRSI(Investor):
         params = self.rsiParams
 
         self.perToInvest = 0
-        if rsi < params.lowerBound:  # Buy linearly then with factor f
-            self.perToInvest = math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
-        elif rsi > params.upperBound:  # Buy linearly then with factor f
-            self.perToInvest = -math.tanh(params.a * (rsi - params.upperBound) ** params.b)
+        # if rsi < params.lowerBound:  # Buy linearly then with factor f
+        #     self.perToInvest = math.tanh(params.a * (params.lowerBound - rsi) ** params.b)
+        # elif rsi > params.upperBound:  # Buy linearly then with factor f
+        #     self.perToInvest = -math.tanh(params.a * (rsi - params.upperBound) ** params.b)
 
     def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
         """

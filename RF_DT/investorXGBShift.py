@@ -16,10 +16,8 @@ from sklearn.preprocessing import StandardScaler
 
 
 class InvestorXGBWindow(Investor):
-	def __init__(self, initialInvestment, fileName, window):
+	def __init__(self, initialInvestment, window):
 		super().__init__(initialInvestment)
-		self.model = xgb.XGBClassifier()
-		self.model.load_model(fileName)
 		self.window = window
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
@@ -28,11 +26,12 @@ class InvestorXGBWindow(Investor):
 			index=[0])
 
 	def possiblyInvestMorning(self, data):
+		model = self.createAndTrainModel(data['df'])
 		res = self.calculateInputsMorning(data['df'])
-		self.perToInvest = self.model.predict([res[-1]])[0]
+		self.perToInvest = model.predict([res[-1]])[0]
 
 	def possiblyInvestAfternoon(self, data):
-		self.perToInvest = -1
+		self.perToInvest = 0
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -77,6 +76,110 @@ class InvestorXGBWindow(Investor):
 		fig.write_image("images/DecisionMakingXGBWindow(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
+
+	def createAndTrainModel(self, df: pd.DataFrame):
+		data = df.copy()
+		data['Open'] = data['Open'].shift(-1)
+		data = data[:-2]  # last is nan and second last is the input for prediction
+
+		res = pd.DataFrame()
+		# Intraday return (target)
+		res['Target'] = data['Open'] - data['Open'].shift()
+		y_target = np.asarray([1 if res.Target[i] > 0 else 0 for i in range(len(res))]).reshape(-1, 1)
+
+		# Return_interday
+		res['Return_interday'] = np.log(data['Open']) - np.log(data['Close'])
+
+		# bb_pband_w3_stdDev1.774447792366109
+		params = BBInvestorParams(3, 1.775)
+		res['bb_pband_w3_stdDev1.774447792366109'] = bollingerBands(data['Close'], params)['pband']
+
+		# Return_open
+		res['Return_open'] = np.log(data['Open']) - np.log(data['Open'].shift())
+
+		# adx_pos_w6
+		params = ADXInvestorParams(6)
+		res['adx_pos_w6'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_pos']
+
+		# adx_pos_w42
+		params = ADXInvestorParams(42)
+		res['adx_pos_w42'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)[
+			'adx_pos']
+
+		# Volume
+		res['Volume'] = data['Volume']
+
+		# adx_neg_w1
+		params = ADXInvestorParams(1)
+		res['adx_neg_w1'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx_neg']
+
+		# Return_intraday
+		res['Return_intraday'] = np.log(data['Close']) - np.log(data['Open'])
+
+		# stochRsi_k_w47_s143_s212
+		params = StochasticRSIInvestorParams(47, 43, 12)
+		res['stochRsi_k_w47_s143_s212'] = stochasticRSI(data['Close'], params)['k']
+
+		# stochRsi_d_w9_s144_s246
+		params = StochasticRSIInvestorParams(9, 44, 46)
+		res['stochRsi_d_w9_s144_s246'] = stochasticRSI(data['Close'], params)['d']
+
+		# stochRsi_d_w4_s16_s233
+		params = StochasticRSIInvestorParams(4, 6, 33)
+		res['stochRsi_d_w4_s16_s233'] = stochasticRSI(data['Close'], params)['d']
+
+		# adx_w10
+		params = ADXInvestorParams(10)
+		res['adx_w10'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+
+		# bb_pband_w7_stdDev1.4065306043590475
+		params = BBInvestorParams(7, 1.407)
+		res['bb_pband_w7_stdDev1.4065306043590475'] = bollingerBands(data['Close'], params)['pband']
+
+		# bb_pband_w13_stdDev1.7961852973078898
+		params = BBInvestorParams(13, 1.796)
+		res['bb_pband_w13_stdDev1.7961852973078898'] = bollingerBands(data['Close'], params)['pband']
+
+		# adx_w18
+		params = ADXInvestorParams(18)
+		res['adx_w18'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)['adx']
+
+		# stochRsi_k_w4_s16_s233
+		params = StochasticRSIInvestorParams(4, 6, 33)
+		res['stochRsi_k_w4_s16_s233'] = stochasticRSI(data['Close'], params)['k']
+
+		# adx_neg_w25
+		params = ADXInvestorParams(25)
+		res['adx_neg_w25'] = averageDirectionalMovementIndex(data['High'], data['Low'], data['Close'], params)[
+			'adx_neg']
+
+		# stochRsi_d_w12_s125_s25
+		params = StochasticRSIInvestorParams(12, 25, 5)
+		res['stochRsi_d_w12_s125_s25'] = stochasticRSI(data['Close'], params)['d']
+
+		# macd_difffW5_sW39_signal14
+		params = MACDInvestorParams(5, 39, 14)
+		res['macd_difffW5_sW39_signal14'] = movingAverageConvergenceDivergence(data['Close'], params)['diff']
+
+		# stochRsi_k_w29_s18_s219
+		params = StochasticRSIInvestorParams(29, 8, 19)
+		res['stochRsi_k_w29_s18_s219'] = stochasticRSI(data['Close'], params)['k']
+
+		res.dropna(inplace=True)
+		y_target = y_target[1:]
+		X = res.drop(['Target'], axis=1)
+
+		# include t-window data points as additional features
+		inp = X.columns.values.tolist()
+		# window mabye 0 to 1,2,3
+		X = data_shift(X, self.window, inp)
+		X = np.asarray(X)
+
+		model = xgb.XGBClassifier(colsample_bylevel=0.4, colsample_bytree=1, learning_rate=0.1331430678429723,
+							  max_depth=17, n_estimators=500, subsample=0.5041453030448557)
+		model.fit(X, y_target)
+
+		return model
 
 	def calculateInputsMorning(self, df: pd.DataFrame):
 		data = df.copy()

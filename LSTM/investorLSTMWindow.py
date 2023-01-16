@@ -27,7 +27,11 @@ class InvestorLSTMWindow (Investor):
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
 		if res >= 0:
-			self.perToInvest = 0.5*res
+			x = 5000/self.nonInvestedMoney
+			if x > 1:
+				self.perToInvest = 1
+			else:
+				self.perToInvest = x
 		else:
 			self.perToInvest = res
 
