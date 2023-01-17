@@ -365,7 +365,13 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 				strategyInfo = pd.DataFrame()  # In case the strategy is new
 		else:
 			strategyInfo = pd.DataFrame()
-		inputsData = inputsDf[['Open', 'Close', 'High', 'Low'] + strategy.getListDfNameInputs()]
+
+		aux = []
+		for i in ['Open', 'Close', 'High', 'Low', 'Volume']:
+			if i not in strategy.getListDfNameInputs():
+				aux.append(i)
+
+		inputsData = inputsDf[aux + strategy.getListDfNameInputs()]
 
 		aux = pd.DataFrame()
 		if name == 'bia':

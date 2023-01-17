@@ -40,7 +40,7 @@ def getPredictionLSTM(data):
 
 	# train and predict
 	# n_members -> how many predictors we wanted to use
-	n_members = 10
+	n_members = 5
 	epochs = 21
 	batch_size = 8
 	ensemble, y_pred, prob = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size)

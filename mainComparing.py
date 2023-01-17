@@ -11,7 +11,8 @@ from RF_DT.investorXGB import InvestorXGB
 from RF_DT.investorXGBShift import InvestorXGBWindow
 from RF_DT.investorXGBReduced import InvestorXGBReduced
 from LSTM.investorLSTMEnsemble import InvestorLSTMEnsembleClass1, InvestorLSTMEnsembleClass2
-from LSTM.investorLSTMWindow import InvestorLSTMWindow
+from LSTM.investorLSTMWindowStandardScaler import InvestorLSTMWindowStandardScalerT1, InvestorLSTMWindowStandardScalerT2
+from LSTM.investorLSTMWindowMinMaxScaler import InvestorLSTMWindowMinMaxT1, InvestorLSTMWindowMinMaxT2
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -115,49 +116,64 @@ def main():
         # experimentManager.addStrategy(investorBB, "bb", [experimentManager.createTIInput("bb", bbParams, "pband", 1)], False)
         # print("investorBB created")
 
-        # Create investor based on Random Forest Classifier
-        investorRFClass = InvestorRandomForestClassifier(10000, 1)
-        experimentManager.addStrategy(investorRFClass, 'RFClass',
-                                      [experimentManager.createTIInput("df")], True)
-        print('investorRFClass created')
+        # # Create investor based on Random Forest Classifier
+        # investorRFClass = InvestorRandomForestClassifier(10000, 1)
+        # experimentManager.addStrategy(investorRFClass, 'RFClass',
+        #                               [experimentManager.createTIInput("df")], True)
+        # print('investorRFClass created')
+        #
+        # # Create investor based on Random Forest Classifier
+        # investorRFClass2 = InvestorRandomForestClassifier(10000, 2)
+        # experimentManager.addStrategy(investorRFClass2, 'RFClass2',
+        #                               [experimentManager.createTIInput("df")], True)
+        # print('investorRFClass2 created')
+        #
+        # # Create investor based on XGB
+        # investorXGB = InvestorXGB(10000)
+        # experimentManager.addStrategy(investorXGB, 'XGB',
+        #                               [experimentManager.createTIInput("df")], True)
+        # print('investorXGB created')
+        #
+        # # Create investor based on XGB with window
+        # investorXGBWindow = InvestorXGBWindow(10000, 3)
+        # experimentManager.addStrategy(investorXGBWindow, 'XGBWindow',
+        #                               [experimentManager.createTIInput("df")], True)
+        # print('investorXGBWindow created')
+        #
+        # # Create investor based on XGB Reduced
+        # investorXGBReduced = InvestorXGBReduced(10000, 3)
+        # experimentManager.addStrategy(investorXGBReduced, 'XGBReduced',
+        #                               [experimentManager.createTIInput("df")], True)
+        # print('investorXGBReduced created')
 
-        # Create investor based on Random Forest Classifier
-        investorRFClass2 = InvestorRandomForestClassifier(10000, 2)
-        experimentManager.addStrategy(investorRFClass2, 'RFClass2',
-                                      [experimentManager.createTIInput("df")], True)
-        print('investorRFClass2 created')
+        # # Create investor based on class voting (only sell and buy everything)
+        # investorLSTMEmsemble1 = InvestorLSTMEnsembleClass1(10000, 5)
+        # experimentManager.addStrategy(investorLSTMEmsemble1, "lstmEnsembleClass1",
+        #                               [experimentManager.createTIInput("df")], True)
+        #
+        # # Create investor based on class voting (only sell and buy depending on prob)
+        # investorLSTMEmsemble2 = InvestorLSTMEnsembleClass2(10000, 5)
+        # experimentManager.addStrategy(investorLSTMEmsemble2, "lstmEnsembleClass2",
+        #                               [experimentManager.createTIInput("df")], True)
 
-        # Create investor based on XGB
-        investorXGB = InvestorXGB(10000)
-        experimentManager.addStrategy(investorXGB, 'XGB',
-                                      [experimentManager.createTIInput("df")], True)
-        print('investorXGB created')
-
-        # Create investor based on XGB with window
-        investorXGBWindow = InvestorXGBWindow(10000, 3)
-        experimentManager.addStrategy(investorXGBWindow, 'XGBWindow',
-                                      [experimentManager.createTIInput("df")], True)
-        print('investorXGBWindow created')
-
-        # Create investor based on XGB Reduced
-        investorXGBReduced = InvestorXGBReduced(10000, 3)
-        experimentManager.addStrategy(investorXGBReduced, 'XGBReduced',
-                                      [experimentManager.createTIInput("df")], True)
-        print('investorXGBReduced created')
-
-        # Create investor based on class voting (only sell and buy everything)
-        investorLSTMEmsemble1 = InvestorLSTMEnsembleClass1(10000, 5)
-        experimentManager.addStrategy(investorLSTMEmsemble1, "lstmEnsembleClass1",
+        # Create investor based on window forecasting (open_t - open_t+2)
+        investorLSTMWindowSCT1 = InvestorLSTMWindowStandardScalerT1(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowSCT1, "lstmWindowSCT1",
                                       [experimentManager.createTIInput("df")], True)
 
-        # Create investor based on class voting (only sell and buy depending on prob)
-        investorLSTMEmsemble2 = InvestorLSTMEnsembleClass2(10000, 5)
-        experimentManager.addStrategy(investorLSTMEmsemble2, "lstmEnsembleClass2",
+        # Create investor based on window forecasting (open_t - open_t+3)
+        investorLSTMWindowSCT2 = InvestorLSTMWindowStandardScalerT2(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowSCT2, "lstmWindowSCT2",
                                       [experimentManager.createTIInput("df")], True)
 
-        # Create investor based on window forecasting
-        investorLSTMWindow = InvestorLSTMWindow(10000, 5)
-        experimentManager.addStrategy(investorLSTMWindow, "lstmWindow",
+        # Create investor based on window forecasting (open_t - open_t+2)
+        investorLSTMWindowMMT1 = InvestorLSTMWindowMinMaxT1(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowMMT1, "lstmWindowMMT1",
+                                      [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on window forecasting (open_t - open_t+3)
+        investorLSTMWindowMMT2 = InvestorLSTMWindowStandardScalerT1(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowMMT2, "lstmWindowMMT2",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor Random
