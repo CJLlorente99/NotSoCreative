@@ -28,10 +28,10 @@ import warnings
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2018-01-01', '2019-01-30')
+    dataGetter = DataGetter('2021-01-01', '2021-01-30')
 
     # Run various experiments
-    numExperiments = 20
+    numExperiments = 15
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
