@@ -24,28 +24,51 @@ from matplotlib.pyplot import figure
 
 def show_graph(NewDayValue, data_n, i):
      # Plot candlesticks
-     mpf_style = mpf.make_mpf_style(base_mpf_style="nightclouds", marketcolors=color_graph())
 
-     #Create list filled with buy/hold/sell actions
+     # Create list filled with buy/hold/sell actions
      action = []
      for (columnName, columnData) in NewDayValue["MoneyInvestedToday"].items():
          if columnData > 0:
-           action.append(1)
-         elif columnData< 0:
+             action.append(1)
+         elif columnData < 0:
              action.append(-1)
          else:
              action.append(0)
      data_n["Decision"] = action
 
+     color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up(), down=get_Color_Sell_Down(), wick="inherit", edge="inherit", volume="in")
+     colors_apd = [get_Color_Buy_Up() if v == 1 else get_Color_Hold() if v == 0 else get_Color_Sell_Down() for v in data_n["Decision"].iloc[-i:]]
+
+
      # Investment action visualization - Triangles
-     colors_2 = ['g' if v == 1 else "#FFA500" if v==0 else 'r' for v in data_n["Decision"].iloc[-i:]]
-     apd = mpf.make_addplot(data_n["Decision"].iloc[-i:], type='scatter', markersize=200, marker='^', color=colors_2)
+     apd = mpf.make_addplot(data_n["Decision"].iloc[-i:], type='scatter', markersize=200, marker='^', color=colors_apd)
 
-
+     #plot candelsticks
+     mpf_style = mpf.make_mpf_style(base_mpf_style="nightclouds", marketcolors=color_candels)
      fig_1, axl = mpf.plot(data_n.iloc[-i:, :], type='candle', volume=False,
                            style=mpf_style, returnfig=True, addplot=apd, figsize=(6,3.5))
      return fig_1
 
+
+def get_Color_Buy_Up():
+    if color_mode()==0:
+        color = "#00ff00"
+    elif color_mode()==1:
+        color ="#5D02FF"
+    return color
+def get_Color_Hold():
+    if color_mode()==0:
+        color = "#FFA500"
+    elif color_mode()==1:
+        color ="#FFA500"
+    return color
+
+def get_Color_Sell_Down():
+    if color_mode()==0:
+        color = "#ff0000"
+    elif color_mode()==1:
+        color ="#E60400"
+    return color
 
 def getCurrentValue(df, strategy, kind):
     #newest date
@@ -106,18 +129,15 @@ root.grid_rowconfigure((0, 1, 2), weight=1)
 
 
 switch_var = ctk.StringVar(value="off")
-def color_graph():
-    #print("switch toggled, current value:", switch_var.get())
-
+def color_mode():
+    #returns 0 or 1 for differnet color modes
+    color =0
     if switch_var.get() == "off":
-        colors = mpf.make_marketcolors(up="#00ff00", down="#ff0000", wick="inherit", edge="inherit",
-                                       volume="in")
-
+        color=0
     elif switch_var.get() == "on":
-        colors = mpf.make_marketcolors(up="#5D02FF", down="#E60400", wick="inherit", edge="inherit",
-                                       volume="in")
+        color=1
+    return color
 
-    return colors
 
 
 def update():
@@ -184,7 +204,7 @@ def update():
 
     #switch_var = ctk.StringVar(value="on")
 
-    switch_1 = ctk.CTkSwitch(sidebar_frame,text="Color", variable=switch_var, command=color_graph, onvalue="on", offvalue="off")
+    switch_1 = ctk.CTkSwitch(sidebar_frame,text="Color", variable=switch_var, command=color_mode(), onvalue="on", offvalue="off")
 
     switch_1.pack(side=BOTTOM,padx=20, pady=(5, 0))
 
@@ -206,7 +226,7 @@ def update():
         labelL1 = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=22, weight="bold"))
         #labelL1.grid(row=0, column=1, padx=10, pady=10, sticky="")
         labelL1.pack(side=TOP, padx=10, pady=(10,5))
-        labelL2 = ctk.CTkLabel(recommendation_frame, text='Buy', font=ctk.CTkFont(size=20, weight='bold'), text_color='green')
+        labelL2 = ctk.CTkLabel(recommendation_frame, text='Buy', font=ctk.CTkFont(size=20, weight='bold'), text_color= get_Color_Buy_Up())
         #labelL2.grid(row=1, column=1, pady=10, padx=20, sticky="n")
         labelL2.pack(side=TOP,pady=(0,10), padx=20)
         decision = 'Buy'
@@ -214,7 +234,7 @@ def update():
         labelL1 = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=20, weight="bold"))
         # labelL1.grid(row=0, column=1, padx=10, pady=10, sticky="")
         labelL1.pack(side=TOP, padx=10, pady=(10,5))
-        labelL2 = ctk.CTkLabel(recommendation_frame, text='Sell', font=ctk.CTkFont(size=20, weight='bold'), text_color='red')
+        labelL2 = ctk.CTkLabel(recommendation_frame, text='Sell', font=ctk.CTkFont(size=20, weight='bold'), text_color=get_Color_Sell_Down())
         # labelL2.grid(row=1, column=1, pady=10, padx=20, sticky="n")
         labelL2.pack(side=TOP, pady=(0, 10), padx=20)
         decision = 'sell'
@@ -222,7 +242,7 @@ def update():
         labelL1 = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=20, weight="bold"))
         # labelL1.grid(row=0, column=1, padx=10, pady=10, sticky="")
         labelL1.pack(side=TOP, padx=10, pady=(10,5))
-        labelL2 = ctk.CTkLabel(recommendation_frame, text='Hold', font=ctk.CTkFont(size=20, weight='bold'))
+        labelL2 = ctk.CTkLabel(recommendation_frame, text='Hold', font=ctk.CTkFont(size=20, weight='bold'), text_color=get_Color_Hold())
         # labelL2.grid(row=1, column=1, pady=10, padx=20, sticky="n")
         labelL2.pack(side=TOP, pady=(0, 10), padx=20)
         decision = 'hold'
