@@ -136,10 +136,10 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 
 		# scale data with robust
 		scaler_r = RobustScaler()
-		data_set_scaled = scaler_r.fit_transform(data)
+		data_set_scaled = scaler_r.fit_transform(res)
 		# scale data
 		scaler_m = MinMaxScaler()
-		data_set_scaled = scaler_m.fit_transform(res)
+		data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
@@ -152,7 +152,7 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 											   batch_size)
 
 		# inverse scaling
-		y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+		y_pred_scale = inverse_scaling(res, y_pred_scale, scaler_m)
 
 		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
@@ -299,10 +299,10 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 
 		# scale data with robust
 		scaler_r = RobustScaler()
-		data_set_scaled = scaler_r.fit_transform(data)
+		data_set_scaled = scaler_r.fit_transform(res)
 		# scale data
 		scaler_m = MinMaxScaler()
-		data_set_scaled = scaler_m.fit_transform(res)
+		data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
@@ -311,11 +311,11 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 		n_members = self.n_members
 		epochs = 15  #
 		batch_size = 8
-		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
+		ensemble, y_pred_scale = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
 		# inverse scaling
-		y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+		y_pred_scale = inverse_scaling(res, y_pred_scale, scaler_m)
 
 		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
