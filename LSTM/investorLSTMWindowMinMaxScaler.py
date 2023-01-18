@@ -56,11 +56,11 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using LSTM Window (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using LSTM Window MM T2 (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMWindow(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioLSTMWindowMMT2(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -79,9 +79,9 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under LSTM Window (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under LSTM Window MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMWindow(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingLSTMWindowMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -214,11 +214,11 @@ class InvestorLSTMWindowMinMaxT1 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using LSTM Window (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using LSTM Window MM T1(" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMWindow(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioLSTMWindowMMT1(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -237,9 +237,9 @@ class InvestorLSTMWindowMinMaxT1 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under LSTM Window (" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under LSTM Window MM T1(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMWindow(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingLSTMWindowMMT1(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
