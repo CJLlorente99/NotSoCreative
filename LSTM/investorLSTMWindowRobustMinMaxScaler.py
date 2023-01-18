@@ -27,8 +27,11 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
+		if self.nonInvestedMoney == 0:
+			x = 0
+		else:
+			x = 5000 / self.nonInvestedMoney
 		if res >= 0:
-			x = 5000/self.nonInvestedMoney
 			if x > 1:
 				self.perToInvest = 1
 			else:
@@ -190,8 +193,11 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
+		if self.nonInvestedMoney == 0:
+			x = 0
+		else:
+			x = 5000 / self.nonInvestedMoney
 		if res >= 0:
-			x = 5000/self.nonInvestedMoney
 			if x > 1:
 				self.perToInvest = 1
 			else:
