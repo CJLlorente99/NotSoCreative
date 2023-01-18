@@ -5,7 +5,7 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as ta
 from Backtest_days import backtest_func
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from keras.models import Sequential
 from keras.layers import LSTM, Bidirectional
 from keras import initializers
@@ -27,21 +27,58 @@ from keras import initializers
 # from keras.layers.normalization import BatchNormalization
 
 # tf.random.set_seed(20)
-np.random.seed(10)
+# np.random.seed(10)
 # 100 neurons ?
+
+
 def build_model(n_inputs, n_features, n_outputs):
     opt = Adam(learning_rate=0.001)
     model = Sequential()
-    model.add(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01), 
+    model.add(LSTM(units=200, return_sequences=True, bias_initializer=initializers.Constant(0.01),
                    kernel_initializer='he_uniform', input_shape=(n_inputs, n_features)))
     model.add(Dropout(0.1))
     model.add(LSTM(units=200))
     model.add(Dropout(0.1))
     # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
     model.add(Dense(units=n_outputs, activation='linear'))
-    model.compile(optimizer=opt, loss='mean_squared_error')
+    model.compile(optimizer=opt, loss='mse')
     # history = model.fit
     return model
+
+
+def build_model2(n_inputs, n_features, n_outputs):
+    opt = Adam(learning_rate=0.0005)
+    model = Sequential()
+    model.add(LSTM(units=100, return_sequences=True, bias_initializer=initializers.Constant(0.01),
+                   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.1))
+    model.add(LSTM(units=100))
+    model.add(Dropout(0.1))
+    # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
+    model.add(Dense(units=n_outputs, activation='linear'))
+    model.compile(optimizer=opt, loss='mse')
+    # history = model.fit
+    return model
+
+
+'''OrderedDict([('batch_size', 9), ('layers1', 0), ('layers2', 1), 
+('learning_rate', 0.001), ('nb_epoch', 30), ('unit1', 167), ('unit2', 250)])'''
+
+
+# learning rate should be even lower i think, so test it again with HPO
+def build_model(n_inputs, n_features, n_outputs):
+    opt = Adam(learning_rate=0.001)
+    model = Sequential()
+    model.add(LSTM(units=100, return_sequences=True, input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.1))
+    model.add(LSTM(units=100))
+    model.add(Dropout(0.1))
+    # model.add(Dense(32, activation='relu'))
+    model.add(Dense(units=n_outputs, activation='linear'))
+    model.compile(optimizer=opt, loss='mse')
+    # history = model.fit
+    return model
+
 
 '''def build_model(n_inputs, n_features, n_outputs):
     model = Sequential()
@@ -57,23 +94,23 @@ def build_model(n_inputs, n_features, n_outputs):
 
 
 def fit_model(X_train, y_train, epochs, batch_size):
-    
     # define neural network model
     n_inputs = X_train.shape[1]
     n_features = X_train.shape[2]
     n_outputs = y_train.shape[1]
-    model = build_model(n_inputs, n_features, n_outputs)
-    
+    model = build_modelHPO(n_inputs, n_features, n_outputs)
+
     # fit the model on the training dataset
     early_stopping = EarlyStopping(monitor="loss", patience=10, mode='auto', min_delta=0)
-    model.fit(X_train, y_train, verbose=2, epochs=epochs, batch_size=batch_size, validation_split=0.15, callbacks=[early_stopping])
+    model.fit(X_train, y_train, verbose=2, epochs=epochs, batch_size=batch_size, validation_split=0.15,
+              callbacks=[early_stopping])
     return model
 
 
 def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size):
     # ensemble consists of several predictors
     ensemble = list()
-    
+
     # to save arrays of prediction in this list
     y_pred = []
 
@@ -82,16 +119,16 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
         model = fit_model(X_train, y_train, epochs, batch_size)
         # evaluate model on the test set
         yhat = model.predict(X_test, verbose=2)
-        #print('yhat', yhat.shape, yhat)
+        # print('yhat', yhat.shape, yhat)
         mae = mean_absolute_error(y_test, yhat)
         print('>%d, MAE: %.3f' % (i + 1, mae))
         print(f'MAPE:', mean_absolute_percentage_error(y_test, yhat))
-        
+
         # store the model and prediction
         ensemble.append(model)
         y_pred.append(yhat)
-        
-    #print('y_pred_list', y_pred, len(y_pred))
+
+    # print('y_pred_list', y_pred, len(y_pred))
     return ensemble, y_pred
 
 
@@ -110,7 +147,7 @@ def inverse_scaling(data, y_p, scaler):
             y_pred = y_pred[:, -1]
             y_preds[i, :] = y_pred
         y_ensemble.append(y_preds)
-    return y_ensemble 
+    return y_ensemble
 
 
 def calculate_bounds(y_ensemble):
@@ -123,8 +160,8 @@ def calculate_bounds(y_ensemble):
             y_e = y_ensemble[j]
             # add each row of every ensemble together then ->
             y_pji[i, :] += y_e[i, :]
-            
-    # then: divide through numbers of predictors 
+
+    # then: divide through numbers of predictors
     y_pji = y_pji / len(y_ensemble)
     return y_pji
 
@@ -137,10 +174,10 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
     y = list()
     # take last column as y_t because there is our return
     y_t = np.array(data_set_scaled[:, -1])
-    
+
     # with this method the last column y_t will be shifted by once back and get the shape: (pred_days=n_row, step_out)
     # X will be prepared for LSTM in shape: (length(data) -  number of backcandles, number of backcandles, number of features)
-    for i in range(backcandles, data_set_scaled.shape[0] + 1 - step_out): 
+    for i in range(backcandles, data_set_scaled.shape[0] + 1 - step_out):
         X.append(data_set_scaled[i - backcandles:i, :-1])
         y.append(y_t[i:i + step_out])
 
@@ -164,84 +201,86 @@ def prepare_multidata(data_set_scaled, backcandles, pred_days, step_out):
 def main():
     print('go')
     # data prepaaring -> got no close and so on on day t
-    data = pd.read_csv('featureSelectionDataset_CharliTIs.csv', sep=',', header=0, index_col=0, parse_dates=True, decimal=".")
+    data = pd.read_csv('featureSelectionDataset_CharliTIs.csv', sep=',', header=0, index_col=0, parse_dates=True,
+                       decimal=".")
     data.dropna(inplace=True)
     print('len data', len(data))
-    #print(data, data.Open, data.Return_Open, data.Target)
-    #data_true = yf.download(tickers='^GSPC', start='2016-01-04', end='2023-01-07')
-    #print('true', data_true)
-    
+    # print(data, data.Open, data.Return_Open, data.Target)
+    # data_true = yf.download(tickers='^GSPC', start='2016-01-04', end='2023-01-07')
+    # print('true', data_true)
+
     # to choose interval where we want to test
-    data = data.iloc[2300:-2400, :]
+    data = data.iloc[-2000:, :]
     data = data.drop(['Target'], axis=1)
     print('len data', len(data))
     data_or = data.copy()
 
-    
     # transformation
     # to decide if we want to predict raw prices or returns -> i think returns might work better cause of non-stationarity
     transformation = 1
     if transformation == 0:
-        
+
         data['Target'] = data.Open
-        
+
     elif transformation == 1:
-        
+
         df_log = (np.log(data.Open))
         data['Open_log'] = df_log
         df_log_diff = df_log - df_log.shift()
-        
+
         # writing the return twice because in prepare_multidata method I choose the last column as target and this column gets shifted
         # so to keep the returns that I actually have as Input, I take this as twice
         # -> I could also have defined it in the beginning, but the last column has to be the target variable
-        #data['Return_Open'] = df_log_diff
+        # data['Return_Open'] = df_log_diff
         data['Target'] = df_log_diff
         data.dropna(inplace=True)
-    #print(data.Target.iloc[-20:])
-    #print('dataopen', data.Open)
+    # print(data.Target.iloc[-20:])
+    # print('dataopen', data.Open)
     # both right
- 
+    print(data)
 
     # choose columns: all but target variable (its last column)
     liste = list(range(0, data.shape[1]))
 
     # what I choose at my test set: I make n_row predictions: In each prediction I predict step_out days at once
-    n_row = 20 #7
+    n_row = 7  # 7
 
     # how many days i want to predict at once -> I do this n_row times
     step_out = 3
-    
+
     # how many last days I include in my prediction
-    backcandles = 30 #10
-    
-    # days to predict: these are the actually different days I predict 
+    backcandles = 15  # 10
+
+    # days to predict: these are the actually different days I predict
     # because the algorithm works as follows:(y_t = true value on day_t, y_p_t = predicted value on day_t)
-    
+
     # Example: n_rows=2 step_out=3
-    # 1. iteration: 
+    # 1. iteration:
     # at day_t so for X_t I predict:
     # 1: inp: X_t, y_t ---predict-----> y_p_t+1, y_p_t+2, y_p_t+3
     # 2: inp: X_t+1, y_t+1 --predict--> y_p_t+2, y_p_t+3, y_p_t+4
     # this are step_out + n_row - 1 different days: 3+2-1=4 -> day_t+1 to day_t+4
-    # 
-    
-    
+    #
+
     # days to predict: these are the actually different days I predict: example above
-    # works for step_out= 3 dont know for other values but should be 
+    # works for step_out= 3 dont know for other values but should be
     test_days = step_out + n_row - 1
 
     # for plotting reasons
-    test_or = data.Open.iloc[-(test_days):]
-    #print('test_pr', test_or) right
-    
-    # just to check for mistakes -> easier to debug with this in prepare_multidata than with data_set_scaled
-    #data_arr = np.asarray(data)
-    print(data)
-    #scaling
-    scaler = StandardScaler()
-    data_set_scaled = scaler.fit_transform(data)
-    #print('data_set_scaled', data_set_scaled)
+    test_or = data_or.Open.iloc[-(test_days):]
+    # print('test_pr', test_or) right
 
+    # just to check for mistakes -> easier to debug with this in prepare_multidata than with data_set_scaled
+    # data_arr = np.asarray(data)
+
+    # scaling
+    scaling = 2
+    if scaling == 2:
+        scaler_r = RobustScaler()  # MinMaxScaler() #MinMaxScaler(feature_range=(-1, 1)) #StandardScaler()
+        data_set_scaled = scaler_r.fit_transform(data)
+    scaler_m = MinMaxScaler()
+    data_set_scaled = scaler_m.fit_transform(data_set_scaled)
+    # print('data_set_scaled', data_set_scaled)
 
     # prepare data for lstm
     print('data preparation')
@@ -254,45 +293,54 @@ def main():
     print('iter', i+1)'''
 
     # to see shape and values
-    #print('y_test', y_test.shape, y_test)
-    #print('X_test', X_test.shape, X_test)
+    # print('y_test', y_test.shape, y_test)
+    # print('X_test', X_test.shape, X_test)
 
     # train and predict
     # n_members -> how many predictors we wanted to use
     n_members = 1
-    epochs = 2 # 36
+    epochs = 15  # 30 # 36
     batch_size = 8
     print('train')
     ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
-                                                    batch_size)
-    #print('scaled y_pred', y_pred_scale)
-    #print('scaled y_test', y_test)
-    
+                                           batch_size)
+    # print('scaled y_pred', y_pred_scale)
+    # print('scaled y_test', y_test)
+
     # inverse scaling
-    y_pred = inverse_scaling(data, y_pred_scale, scaler)
-    #print('after inverse scaling y_pred', y_pred)
-    
-    # y_test inverse scaling: not really actually need that but I do this for comparison 
-    y_tests = np.zeros((y_test.shape[0], y_test.shape[1]))
-    for i in range(y_test.shape[0]):
+    if scaling == 2:
+        y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+        y_test_m = np.zeros((y_test.shape[0], y_test.shape[1]))
+        for i in range(y_test.shape[0]):
             yhat = y_test[i, :]
             yhat = yhat.reshape(-1, 1)
             y_t = np.tile(yhat, (1, data.shape[1]))
-            y_t = scaler.inverse_transform(y_t)
+            y_t = scaler_m.inverse_transform(y_t)
             y_t = y_t[:, -1]
-            y_tests[i, :] = y_t
-    #print('after inverse scaling y_test', y_test)
+            y_test_m[i, :] = y_t
+        y_test = y_test_m
 
-    
-    # Calculating mean of ensembles 
+    y_pred = inverse_scaling(data, y_pred_scale, scaler_r)
+
+    y_tests = np.zeros((y_test.shape[0], y_test.shape[1]))
+    for i in range(y_test.shape[0]):
+        yhat = y_test[i, :]
+        yhat = yhat.reshape(-1, 1)
+        y_t = np.tile(yhat, (1, data.shape[1]))
+        y_t = scaler_r.inverse_transform(y_t)
+        y_t = y_t[:, -1]
+        y_tests[i, :] = y_t
+    # print('after inverse scaling y_test', y_test)
+
+    # Calculating mean of ensembles
     y_mean = calculate_bounds(y_pred)
-    
+
     # just to look at the values
     '''print('return mean pred', y_mean.shape, y_mean)
     print('test back tr return', y_tests.shape, y_tests)
     print('Target', data.Target.iloc[-test_days:])
     print('real', test_or)'''
-    
+
     # inverse transformation: not possible to use for real script -> because of index, in real script we have no test_or
     # so for real script it might be better to use not a index or so
     if transformation == 1:
@@ -300,24 +348,22 @@ def main():
         y_test_list = []
         for k in range(y_mean.shape[0]):
             df_shift = df_log.shift().values[-test_days:]
-            
-            y_mean_pd = pd.DataFrame(y_mean[k, :], test_or.iloc[k:k+1 * y_mean.shape[1]].index, columns=['Open'])
-            y_mean_pd['Open'] = y_mean_pd['Open'] + df_shift[k:k+1 * y_mean.shape[1]]
-            #y_mean = (y_mean ** 2)
+
+            y_mean_pd = pd.DataFrame(y_mean[k, :], test_or.iloc[k:k + 1 * y_mean.shape[1]].index, columns=['Open'])
+            y_mean_pd['Open'] = y_mean_pd['Open'] + df_shift[k:k + 1 * y_mean.shape[1]]
+            # y_mean = (y_mean ** 2)
             y_mean_pd = np.exp(y_mean_pd)
             print('pred', y_mean_pd)
             y_mean_pd = np.asarray(y_mean_pd)
             y_mean_list.append(y_mean_pd)
-            
-            y_test_pd = pd.DataFrame(y_tests[k, :], test_or.iloc[k:k+1 * y_tests.shape[1]].index, columns=['Open'])
-            y_test_pd['Open'] = y_test_pd['Open'] + df_shift[k:k+1 * y_test.shape[1]]
-            #y_mean = (y_mean ** 2)
+
+            y_test_pd = pd.DataFrame(y_tests[k, :], test_or.iloc[k:k + 1 * y_tests.shape[1]].index, columns=['Open'])
+            y_test_pd['Open'] = y_test_pd['Open'] + df_shift[k:k + 1 * y_test.shape[1]]
+            # y_mean = (y_mean ** 2)
             y_test_pd = np.exp(y_test_pd)
             print('test', y_test_pd)
             y_test_pd = np.asarray(y_test_pd)
             y_test_list.append(y_test_pd)
-            
-
 
     '''# plot of every predicted priced for each day
     plt.figure(figsize=(16, 8))
@@ -337,114 +383,147 @@ def main():
 
     y_predictions.append(np.asarray(y_mean))
     y_mean = np.asarray(y_mean).flatten()'''
-    
 
-    
-    
-    
     # one more value: I want to compare the current value_t to my predicted value_t+n and make decision on day_t
-    # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict 
-    data_open = data.Open[-(test_days+1):]
-    
+    # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict
+    data_open = data.Open[-(test_days + 1):]
+
     # build decision rule: if open_p_t+3 > open_t -> buy on open_t
     decision = []
     # with the rule above you dont take decisions anymore  if open_t+3 is the last day:
     # therefore for the last 3 days, i compare open_t < open_p_t+2 and then open_t+1 < open_p_t+2
     # _p means predicted
     decision2 = []
+    decision1 = []
+
     for q in range(len(y_mean_list)):
         y_pr = y_mean_list[q]
-        print('open',data_open[q])
-        print('pred', y_pr[2])
-            
+        # print('open',data_open[q])
+        # print('pred', y_pr[2])
+
         if data_open[q] < y_pr[2]:
-            #decision.append(+1)
             decision2.append(+1)
+
         else:
-            #decision.append(-1)
             decision2.append(-1)
-            
+
+        if data_open[q] < y_pr[1]:
+            decision1.append(+1)
+        else:
+            decision1.append(-1)
+
         if q == len(y_mean_list) - 1:
-            print('before dec2',len(decision2))
-            if data_open[q+1] < y_pr[2]:
+
+            if data_open[q + 1] < y_pr[2]:
                 decision2.append(+1)
+                decision1.append(+1)
             else:
                 decision2.append(-1)
-            
-            if data_open[q+2] < y_pr[2]:
+                decision1.append(-1)
+
+            if data_open[q + 2] < y_pr[2]:
                 decision2.append(+1)
+                decision1.append(1)
             else:
                 decision2.append(-1)
-                
+                decision1.append(-1)
 
     # build decision rule for real values
     real_decision = []
     # for comparing accuracy
-    real_dec = []
-    
+    real_dec2 = []
+    real_dec1 = []
+
     # here I make everyday prediction, just to compare
     for j in range(len(y_test_list)):
         y_true = y_test_list[j]
-        print('open',data_open[j])
-        print('true+1', y_true[0])
-        
+        # print('open',data_open[j])
+        # print('true+1', y_true[0])
+
         # everyday prediction as benchmark comparison
         if data_open[j] < y_true[0]:
             real_decision.append(+1)
         else:
             real_decision.append(-1)
-            
-        # just to compare predictions accuracy  
-        if data_open[j] < y_true[2]:
-            real_dec.append(+1)
-        else:
-            real_dec.append(-1)
-            
-        
-        if j == len(y_test_list) - 1: 
-            
-            if data_open[j+1] < y_true[2]:
-                real_dec.append(+1)
-            else:
-                real_dec.append(-1)
 
-            if data_open[j+2] < y_true[2]:
-                real_dec.append(+1)
+        # just to compare predictions accuracy
+        if data_open[j] < y_true[2]:
+            real_dec2.append(+1)
+        else:
+            real_dec2.append(-1)
+
+        if data_open[j] < y_true[1]:
+            real_dec1.append(+1)
+        else:
+            real_dec1.append(-1)
+
+        if j == len(y_test_list) - 1:
+
+            if data_open[j + 1] < y_true[2]:
+                real_dec2.append(+1)
+                real_dec1.append(+1)
             else:
-                real_dec.append(-1)
-                
-    print('real_dec', real_dec)
+                real_dec2.append(-1)
+                real_dec1.append(-1)
+
+            if data_open[j + 2] < y_true[2]:
+                real_dec2.append(+1)
+                real_dec1.append(+1)
+            else:
+                real_dec2.append(-1)
+                real_dec1.append(-1)
+
+    print('----------')
+    print('----------')
+    print('real_dec2', real_dec2)
     print('dec2', decision2)
     print('----------')
     print('----------')
-    print('ACC', accuracy_score(real_dec, decision2))
+    print('ACC 2', accuracy_score(real_dec2, decision2))
     print('----------')
     print('----------')
+    print('real_dec1', real_dec1)
+    print('dec1', decision1)
+    print('----------')
+    print('----------')
+    print('ACC 1', accuracy_score(real_dec1, decision1))
+    print('----------')
+    print('----------')
+
     # backtest it: because I make no loop: my predictions stops if y_pred[2] in decision function is the last value
     # therefore I  do nothing at the last 3 days -> have to fix this
     # before we made here also a mistake, mabye thats why our stratey wasnt that good?
-    
+
     # PLS CHECK:
-    # we predict the first value for day_t+1 and make the decision for day_t -> so the first value we have to include here is day_t 
+    # we predict the first value for day_t+1 and make the decision for day_t -> so the first value we have to include here is day_t
     # before the first value was day_t+1, but mabye iam wrong?
-    
-    #gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision)
-    #print('this was for our prediction: Decision 1')
-    #print(data_or.iloc[-test_days-1:])
+
+    # gain_pct, mpv, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision)
+    # print('this was for our prediction: Decision 1')
+    # print(data_or.iloc[-test_days-1:])
     # backtest it
     print('this is for our prediction: Decision 2')
     print('Decision 2', decision2)
-    gain_pct_prob, mpv_prob, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
+    gain_pct_prob, mpv_prob, gain_bench = backtest_func(df=data_or.iloc[-test_days - 1:], decision=decision2)
     print('----------')
     print('----------')
-    print('----------')
-    print('----------')
-    print('this is for the real value')
+    print('this is for the real value 2')
     print('REAL', real_decision)
-    gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_decision)
-    
-    
-    
+    gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days - 1:], decision=real_dec2)
+    print('----------')
+    print('----------')
+    print('this is for our prediction: Decision 1')
+    print('Decision 1', decision1)
+    gain_pct_prob, mpv_prob, gain_bench = backtest_func(df=data_or.iloc[-test_days - 1:], decision=decision1)
+    print('----------')
+    print('----------')
+    print('this is for the real value 1')
+    print('REAL', real_decision)
+    gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days - 1:], decision=real_dec1)
+    print('----------')
+    print('----------')
+
 
 if __name__ == '__main__':
+    main()
     main()
