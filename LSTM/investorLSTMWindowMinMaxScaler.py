@@ -11,7 +11,7 @@ from keras import initializers
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-modelMinMaxScaler = None
+modelMinMaxScaler = [None, None, None, None, None]
 
 class InvestorLSTMWindowMinMaxT2 (Investor):
 
@@ -39,7 +39,7 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 	def possiblyInvestAfternoon(self, data):
 		global modelMinMaxScaler
 		self.perToInvest = 0
-		modelMinMaxScaler = None
+		modelMinMaxScaler = [None, None, None, None, None]
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -197,7 +197,7 @@ class InvestorLSTMWindowMinMaxT1 (Investor):
 	def possiblyInvestAfternoon(self, data):
 		global modelMinMaxScaler
 		self.perToInvest = 0
-		modelMinMaxScaler = None
+		modelMinMaxScaler = [None, None, None, None, None]
 
 	def plotEvolution(self, expData, stockMarketData, recordPredictedValue=None):
 		"""
@@ -363,13 +363,13 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
 
 	for i in range(n_members):
 		# define and fit the model on the training set
-		if not modelMinMaxScaler:
+		if not modelMinMaxScaler[i]:
 			print('Creating model MM')
 			model = fit_model(X_train, y_train, epochs, batch_size)
-			modelMinMaxScaler = model
+			modelMinMaxScaler[i] = model
 		else:
 			print('Already created model MM')
-			model = modelMinMaxScaler
+			model = modelMinMaxScaler[i]
 		# evaluate model on the test set
 		yhat = model.predict(X_test, verbose=2)
 		mae = mean_absolute_error(y_test, yhat)
