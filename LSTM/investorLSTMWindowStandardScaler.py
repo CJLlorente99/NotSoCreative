@@ -21,9 +21,9 @@ class InvestorLSTMWindowStandardScalerT2 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindow': moneyInvestedToday,
-			 'investedMoneyLSTMWindow': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindow': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestLSTMWindowSCT2': moneyInvestedToday,
+			 'investedMoneyLSTMWindowSCT2': self.investedMoney,
+			 'nonInvestedMoneyLSTMWindowSCT2': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -179,9 +179,9 @@ class InvestorLSTMWindowStandardScalerT1 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindow': moneyInvestedToday,
-			 'investedMoneyLSTMWindow': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindow': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestLSTMWindowSCT1': moneyInvestedToday,
+			 'investedMoneyLSTMWindowSCT1': self.investedMoney,
+			 'nonInvestedMoneyLSTMWindowSCT1': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])

@@ -13,6 +13,7 @@ from RF_DT.investorXGBReduced import InvestorXGBReduced
 from LSTM.investorLSTMEnsemble import InvestorLSTMEnsembleClass1, InvestorLSTMEnsembleClass2
 from LSTM.investorLSTMWindowStandardScaler import InvestorLSTMWindowStandardScalerT1, InvestorLSTMWindowStandardScalerT2
 from LSTM.investorLSTMWindowMinMaxScaler import InvestorLSTMWindowMinMaxT1, InvestorLSTMWindowMinMaxT2
+from LSTM.investorLSTMWindowRobustMinMaxScaler import InvestorLSTMWindowRobustMinMaxT2, InvestorLSTMWindowRobustMinMaxT1
 from classes.investorParamsClass import RSIInvestorParams, MACDInvestorParams, BBInvestorParams, GradientQuarter, NNInvestorParams, DTInvestorParams, ADXInvestorParams, ADIInvestorParams, AroonInvestorParams, OBVInvestorParams, StochasticRSIInvestorParams, ATRInvestorParams, LSTMInvestorParams
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
@@ -156,15 +157,15 @@ def main():
         # experimentManager.addStrategy(investorLSTMEmsemble2, "lstmEnsembleClass2",
         #                               [experimentManager.createTIInput("df")], True)
 
-        # Create investor based on window forecasting (open_t - open_t+2)
-        investorLSTMWindowSCT1 = InvestorLSTMWindowStandardScalerT1(10000, 5)
-        experimentManager.addStrategy(investorLSTMWindowSCT1, "lstmWindowSCT1",
-                                      [experimentManager.createTIInput("df")], True)
-
-        # Create investor based on window forecasting (open_t - open_t+3)
-        investorLSTMWindowSCT2 = InvestorLSTMWindowStandardScalerT2(10000, 5)
-        experimentManager.addStrategy(investorLSTMWindowSCT2, "lstmWindowSCT2",
-                                      [experimentManager.createTIInput("df")], True)
+        # # Create investor based on window forecasting (open_t - open_t+2)
+        # investorLSTMWindowSCT1 = InvestorLSTMWindowStandardScalerT1(10000, 5)
+        # experimentManager.addStrategy(investorLSTMWindowSCT1, "lstmWindowSCT1",
+        #                               [experimentManager.createTIInput("df")], True)
+        #
+        # # Create investor based on window forecasting (open_t - open_t+3)
+        # investorLSTMWindowSCT2 = InvestorLSTMWindowStandardScalerT2(10000, 5)
+        # experimentManager.addStrategy(investorLSTMWindowSCT2, "lstmWindowSCT2",
+        #                               [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+2)
         investorLSTMWindowMMT1 = InvestorLSTMWindowMinMaxT1(10000, 5)
@@ -172,8 +173,18 @@ def main():
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+3)
-        investorLSTMWindowMMT2 = InvestorLSTMWindowStandardScalerT1(10000, 5)
+        investorLSTMWindowMMT2 = InvestorLSTMWindowMinMaxT2(10000, 5)
         experimentManager.addStrategy(investorLSTMWindowMMT2, "lstmWindowMMT2",
+                                      [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on window forecasting (open_t - open_t+2)
+        investorLSTMWindowRobMMT1 = InvestorLSTMWindowRobustMinMaxT1(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowRobMMT1, "lstmWindowRobMMT1",
+                                      [experimentManager.createTIInput("df")], True)
+
+        # Create investor based on window forecasting (open_t - open_t+3)
+        investorLSTMWindowRobMMT2 = InvestorLSTMWindowRobustMinMaxT2(10000, 5)
+        experimentManager.addStrategy(investorLSTMWindowRobMMT2, "lstmWindowRobMMT2",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor Random

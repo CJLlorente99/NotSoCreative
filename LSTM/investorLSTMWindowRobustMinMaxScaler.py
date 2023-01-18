@@ -1,6 +1,6 @@
 from classes.investorClass import Investor
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from keras.models import Sequential
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 from keras.optimizers import Adam
@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 
 modelMinMaxScaler = [None, None, None, None, None]
 
-class InvestorLSTMWindowMinMaxT2 (Investor):
+class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -21,9 +21,9 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindowMinMaxT2': moneyInvestedToday,
-			 'investedMoneyLSTMWindowMinMaxT2': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindowMinMaxT2': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestLSTMWindowRobustMinMaxT2': moneyInvestedToday,
+			 'investedMoneyLSTMWindowRobustMinMaxT2': self.investedMoney,
+			 'nonInvestedMoneyLSTMWindowRobustMinMaxT2': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -56,11 +56,11 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using LSTM Window MM T2 (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using LSTM Window Rob MM T2 (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMWindowMMT2(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioLSTMWindowRobMMT2(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -79,9 +79,9 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under LSTM Window MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under LSTM Window Rob MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMWindowMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingLSTMWindowRobMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -134,9 +134,12 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 		# days to predict
 		test_days = step_out
 
+		# scale data with robust
+		scaler_r = RobustScaler()
+		data_set_scaled = scaler_r.fit_transform(data)
 		# scale data
-		scaler = MinMaxScaler()
-		data_set_scaled = scaler.fit_transform(res)
+		scaler_m = MinMaxScaler()
+		data_set_scaled = scaler_m.fit_transform(res)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
@@ -149,7 +152,9 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 											   batch_size)
 
 		# inverse scaling
-		y_pred = inverse_scaling(res, y_pred_scale, scaler)
+		y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+
+		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
 		# bounds, mean -> further I only use mean
 		lower, y_mean, upper = calculate_bounds(y_pred)
@@ -171,7 +176,7 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 		else:
 			return -1
 
-class InvestorLSTMWindowMinMaxT1 (Investor):
+class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -179,9 +184,9 @@ class InvestorLSTMWindowMinMaxT1 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindowMinMaxT1': moneyInvestedToday,
-			 'investedMoneyLSTMWindowMinMaxT1': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindowMinMaxT1': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestLSTMWindowRobustMinMaxT1': moneyInvestedToday,
+			 'investedMoneyLSTMWindowRobustMinMaxT1': self.investedMoney,
+			 'nonInvestedMoneyLSTMWindowRobustMinMaxT1': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -292,22 +297,27 @@ class InvestorLSTMWindowMinMaxT1 (Investor):
 		# days to predict
 		test_days = step_out
 
+		# scale data with robust
+		scaler_r = RobustScaler()
+		data_set_scaled = scaler_r.fit_transform(data)
 		# scale data
-		scaler = MinMaxScaler()
-		data_set_scaled = scaler.fit_transform(res)
+		scaler_m = MinMaxScaler()
+		data_set_scaled = scaler_m.fit_transform(res)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 15 #
+		epochs = 15  #
 		batch_size = 8
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
 		# inverse scaling
-		y_pred = inverse_scaling(res, y_pred_scale, scaler)
+		y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+
+		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
 		# bounds, mean -> further I only use mean
 		lower, y_mean, upper = calculate_bounds(y_pred)
