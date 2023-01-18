@@ -22,7 +22,7 @@ from Benchmarks.bah import InvestorBaH
 from Benchmarks.idle import InvestorIdle
 from pandas.tseries.offsets import CDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
-from experimentManager import ExperimentManager
+from classes.experimentManager import ExperimentManager
 import warnings
 
 

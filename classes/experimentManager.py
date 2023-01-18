@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
-from investorClass import Investor
+from classes.investorClass import Investor
 from TAIndicators.adi import accDistIndexIndicator
 from TAIndicators.adx import averageDirectionalMovementIndex
 from TAIndicators.aroon import aroon
