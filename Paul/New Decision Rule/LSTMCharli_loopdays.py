@@ -1,10 +1,11 @@
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import yfinance as yf
 import pandas_ta as ta
 from Backtest_days import backtest_func
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from keras.models import Sequential
 from keras.layers import LSTM, Bidirectional
 from keras import initializers
@@ -183,7 +184,7 @@ def main():
     # data_list is the time interval: where I cut the data
     data_list = [1500, 1200, 700, 500, 1300, 800]
     # number of backcandle
-    backc = [15, 40, 64]
+    backc = [15, 64]
     
     # look at these values for optimization
     acc_list = np.empty((len(data_list), len(backc)))
@@ -253,9 +254,12 @@ def main():
         #data_arr = np.asarray(data)
         
         #scaling
-        scaler = StandardScaler()
-        data_set_scaled = scaler.fit_transform(data)
-        #print('data_set_scaled', data_set_scaled)
+        scaling = 2
+        if scaling == 2:
+            scaler_r = RobustScaler()#MinMaxScaler() #MinMaxScaler(feature_range=(-1, 1)) #StandardScaler()
+            data_set_scaled = scaler_r.fit_transform(data)
+        scaler_m = MinMaxScaler()
+        data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
         for b, b_c in enumerate(backc):
             
@@ -277,28 +281,36 @@ def main():
             # train and predict
             # n_members -> how many predictors we wanted to use
             n_members = 1
-            epochs = 15 # 36
+            epochs = 20 # 36
             batch_size = 8
             print('train')
             ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
                                                             batch_size)
-            #print('scaled y_pred', y_pred_scale)
-            #print('scaled y_test', y_test)
-
             # inverse scaling
-            y_pred = inverse_scaling(data, y_pred_scale, scaler)
-            #print('after inverse scaling y_pred', y_pred)
-
-            # y_test inverse scaling: not really actually need that but I do this for comparison 
-            y_tests = np.zeros((y_test.shape[0], y_test.shape[1]))
-            for t_i in range(y_test.shape[0]):
-                    yhat = y_test[t_i, :]
+            if scaling == 2:
+                y_pred_scale = inverse_scaling(data, y_pred_scale, scaler_m)
+                y_test_m = np.zeros((y_test.shape[0], y_test.shape[1]))
+                for i in range(y_test.shape[0]):
+                    yhat = y_test[i, :]
                     yhat = yhat.reshape(-1, 1)
                     y_t = np.tile(yhat, (1, data.shape[1]))
-                    y_t = scaler.inverse_transform(y_t)
+                    y_t = scaler_m.inverse_transform(y_t)
                     y_t = y_t[:, -1]
-                    y_tests[t_i, :] = y_t
-            #print('after inverse scaling y_test', y_test)
+                    y_test_m[i, :] = y_t
+                y_test = y_test_m
+
+            y_pred = inverse_scaling(data, y_pred_scale, scaler_r)
+
+
+            y_tests = np.zeros((y_test.shape[0], y_test.shape[1]))
+            for i in range(y_test.shape[0]):
+                yhat = y_test[i, :]
+                yhat = yhat.reshape(-1, 1)
+                y_t = np.tile(yhat, (1, data.shape[1]))
+                y_t = scaler_r.inverse_transform(y_t)
+                y_t = y_t[:, -1]
+                y_tests[i, :] = y_t
+     
 
 
             # Calculating mean of ensembles 
@@ -360,81 +372,111 @@ def main():
 
             # one more value: I want to compare the current value_t to my predicted value_t+n and make decision on day_t
             # if I would just take data.Open[-(test_days):] the first value of this would be the first value I want to predict 
-            data_open = data.Open[-(test_days+1):]
-
-            #print('open for decision', data_open)
+             # build decision rule: if open_p_t+3 > open_t -> buy on open_t
+            data_open = data_or.Open[-(test_days+1):]
             decision = []
+            # with the rule above you dont take decisions anymore  if open_t+3 is the last day:
+            # therefore for the last 3 days, i compare open_t < open_p_t+2 and then open_t+1 < open_p_t+2
+            # _p means predicted
             decision2 = []
-            
-            true_dec = []
-            true_dec2 = []
-            print('----------')
-            print('----------')
+            decision1 = []
+
             for q in range(len(y_mean_list)):
                 y_pr = y_mean_list[q]
-                print('open',data_open[q])
-                print('pred:', y_pr[2])
+                #print('open',data_open[q])
+                #print('pred', y_pr[2])
 
                 if data_open[q] < y_pr[2]:
-                    decision.append(+1)
                     decision2.append(+1)
+
                 else:
-                    decision.append(-1)
                     decision2.append(-1)
 
+                if data_open[q] < y_pr[1]:
+                    decision1.append(+1)
+                else:
+                    decision1.append(-1)
+
                 if q == len(y_mean_list) - 1:
+
                     if data_open[q+1] < y_pr[2]:
                         decision2.append(+1)
+                        decision1.append(+1)
                     else:
                         decision2.append(-1)
+                        decision1.append(-1)
 
                     if data_open[q+2] < y_pr[2]:
                         decision2.append(+1)
+                        decision1.append(1)
                     else:
                         decision2.append(-1)
-
-
+                        decision1.append(-1)
 
             # build decision rule for real values
             real_decision = []
             # for comparing accuracy
-            real_dec = []
+            real_dec2 = []
+            real_dec1 = []
 
             # here I make everyday prediction, just to compare
             for j in range(len(y_test_list)):
                 y_true = y_test_list[j]
-                print('open',data_open[j])
-                print('true+1', y_true[0])
+                #print('open',data_open[j])
+                #print('true+1', y_true[0])
 
                 # everyday prediction as benchmark comparison
-                if data_open[j] < y_true[0]:
+                if data_open[j] < data_open[j+1]:
                     real_decision.append(+1)
                 else:
                     real_decision.append(-1)
 
                 # just to compare predictions accuracy  
-                if data_open[j] < y_true[2]:
-                    real_dec.append(+1)
+                if data_open[j] < data_open[j+3]:
+                    real_dec2.append(+1)
                 else:
-                    real_dec.append(-1)
+                    real_dec2.append(-1)
+
+                if data_open[j] < data_open[j+2]:
+                    real_dec1.append(+1)
+                else: 
+                    real_dec1.append(-1)
+
 
 
                 if j == len(y_test_list) - 1: 
-                    if data_open[j+1] < y_true[2]:
-                        real_dec.append(+1)
-                    else:
-                        real_dec.append(-1)
 
-                    if data_open[j+2] < y_true[2]:
-                        real_dec.append(+1)
+                    if data_open[j+1] < data_open[j+3]:
+                        real_dec2.append(+1)
+                        real_dec1.append(+1)
                     else:
-                        real_dec.append(-1)
+                        real_dec2.append(-1)
+                        real_dec1.append(-1)
 
-     
-            acc = accuracy_score(real_dec, decision2)
-            print('ACC', acc)
+                    if data_open[j+2] < data_open[j+3]:
+                        real_dec2.append(+1)
+                        real_dec1.append(+1)
+                    else:
+                        real_dec2.append(-1)
+                        real_dec1.append(-1)
+
             print('----------')
             print('----------')
+            print('real_dec2', real_dec2)
+            print('dec2', decision2)
+            print('----------')
+            print('----------')
+            print('ACC 2', accuracy_score(real_dec2, decision2))
+            print('----------')
+            print('----------')
+            print('real_dec1', real_dec1)
+            print('dec1', decision1)
+            print('----------')
+            print('----------')
+            print('ACC 1', accuracy_score(real_dec1, decision1))
+            print('----------')
+            print('----------')
+
             # backtest it: because I make no loop: my predictions stops if y_pred[2] in decision function is the last value
             # therefore I  do nothing at the last 3 days -> have to fix this
             # before we made here also a mistake, mabye thats why our stratey wasnt that good?
@@ -449,15 +491,24 @@ def main():
             # backtest it
             print('this is for our prediction: Decision 2')
             print('Decision 2', decision2)
-            gain_pct_prob, mpv_prob, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
+            gain_pct_prob2, mpv_prob2, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision2)
             print('----------')
             print('----------')
-            print('----------')
-            print('----------')
-            print('this is for the real value')
+            print('this is for the real value 2')
             print('REAL', real_decision)
-            gain_pct_best, mpv_best, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_decision)
-
+            gain_pct_best2, mpv_best2, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_dec2)          
+            print('----------')
+            print('----------')    
+            print('this is for our prediction: Decision 1')
+            print('Decision 1', decision1)                
+            gain_pct_prob1, mpv_prob1, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=decision1)
+            print('----------')
+            print('----------')
+            print('this is for the real value 1')
+            print('REAL', real_decision)
+            gain_pct_best1, mpv_best1, gain_bench = backtest_func(df=data_or.iloc[-test_days-1:], decision=real_dec1)
+            print('----------')
+            print('----------')
             print('----------')
             print('----------')
             print(f'test_list{c}, {i} ;backcandles: {b_c}')
@@ -473,28 +524,41 @@ def main():
             acc_list[c, b] = acc
             bench_list[c, b] = gain_bench
             
-            gain_list_prob[c, b] = gain_pct_prob
-            mpv_list_prob[c, b] = mpv_prob
+            gain_list_prob2[c, b] = gain_pct_prob2
+            mpv_list_prob2[c, b] = mpv_prob2
             
-            mpv_list_best[c, b] = mpv_best
-            gain_list_best[c, b] = gain_pct_best
+            mpv_list_best2[c, b] = mpv_best2
+            gain_list_best2[c, b] = gain_pct_best2
+            
+            gain_list_prob1[c, b] = gain_pct_prob1
+            mpv_list_prob1[c, b] = mpv_prob1
+            
+            mpv_list_best1[c, b] = mpv_best1
+            gain_list_best1[c, b] = gain_pct_best1
 
     print(f'acc: {acc_list} %')
     print('----------')
     print('----------')
     #print(f'Gain rule: {gain_list} %')
-    print(f'Gain rule prob: {gain_list_prob} %')
-    print(f'Gain best: {gain_list_best} %')
+    print(f'Gain rule prob2: {gain_list_prob2} %')
+    print(f'Gain best 2: {gain_list_best2} %')
+    print(f'Gain rule prob1: {gain_list_prob1} %')
+    print(f'Gain best 1: {gain_list_best1} %')
     print(f'Gain bench: {bench_list} %')
+    print('----------')
+    print('----------')
+    print('MPV rule prob2', mpv_list_prob2)
+    print('MPV best2', mpv_list_best2)
+    print('MPV rule prob1', mpv_list_prob1)
+    print('MPV best1', mpv_list_best1)
     #print(f'Gain sum of rule: {np.sum(gain_list, axis=0)}')
-    print(f'Gain sum of prob: {np.sum(gain_list_prob, axis=0)}')
+    print(f'Gain sum of prob2: {np.sum(gain_list_prob2, axis=0)}')
+    print(f'Gain sum of prob1: {np.sum(gain_list_prob1, axis=0)}')
     print('----------')
     print('----------')
-    #print('MPV rule', mpv_list)
-    print('MPV rule prob', mpv_list_prob)
-    print('MPV best', mpv_list_best)
     #print(f'MPV mean of rule: {np.mean(mpv_list, axis=0)}')
-    print(f'MPV mean of prob: {np.mean(mpv_list_prob, axis=0)}')
+    print(f'MPV mean of prob2: {np.mean(mpv_list_prob2, axis=0)}')
+    print(f'MPV mean of prob1: {np.mean(mpv_list_prob1, axis=0)}')
     
     
 
