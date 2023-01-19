@@ -1,8 +1,8 @@
 from classes.investorClass import Investor
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_absolute_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.layers import Dense, Dropout, LSTM
@@ -74,8 +74,6 @@ class InvestorLSTMWindowStandardScalerT2 (Investor):
 
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
-								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]),
 					  row=2, col=1, secondary_y=False)
 
@@ -235,8 +233,6 @@ class InvestorLSTMWindowStandardScalerT1 (Investor):
 
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
-								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]),
 					  row=2, col=1, secondary_y=False)
 
