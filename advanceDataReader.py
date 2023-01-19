@@ -2,19 +2,18 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 
-fileName = './images/advancedData.csv'
+fileName = './images/advancedData1.csv'
 
 df = pd.read_csv(fileName, index_col='date')
 
-df.drop(['nExperiment', 'voter0', 'voter1', 'voter2', 'voter3', 'voter4', 'voter0.1', 'voter1.1',
-		 'voter2.1', 'voter3.1', 'voter4.1', 'nextStockValue', 'actualStockValue', 'nextStockValue.1', 'actualStockValue.1',
+df.drop(['nExperiment', 'nextStockValue', 'actualStockValue', 'nextStockValue.1', 'actualStockValue.1',
 		 'actualStockValue.2', 'actualStockValue.3', 'actualStockValue.4'], axis=1, inplace=True)
-df.rename({'moneyToInvestRFClass.1': 'moneyToInvestRFClass2', 'investedMoneyRFClass.1': 'investedMoneyRFClass2',
-		   'nonInvestedMoneyRFClass.1': 'nonInvestedMoneyRFClass2'}, axis=1, inplace=True)
-df.rename({'moneyToInvestXGB.1': 'moneyToInvestXGBWindow', 'investedMoneyXGB.1': 'investedMoneyXGBWindow',
-		   'nonInvestedMoneyXGB.1': 'nonInvestedMoneyXGBWindow'}, axis=1, inplace=True)
-df.rename({'moneyToInvestXGB.2': 'moneyToInvestXGBReduced', 'investedMoneyXGB.2': 'investedMoneyXGBReduced',
-		   'nonInvestedMoneyXGB.2': 'nonInvestedMoneyXGBReduced'}, axis=1, inplace=True)
+# df.rename({'moneyToInvestRFClass.1': 'moneyToInvestRFClass2', 'investedMoneyRFClass.1': 'investedMoneyRFClass2',
+# 		   'nonInvestedMoneyRFClass.1': 'nonInvestedMoneyRFClass2'}, axis=1, inplace=True)
+# df.rename({'moneyToInvestXGB.1': 'moneyToInvestXGBWindow', 'investedMoneyXGB.1': 'investedMoneyXGBWindow',
+# 		   'nonInvestedMoneyXGB.1': 'nonInvestedMoneyXGBWindow'}, axis=1, inplace=True)
+# df.rename({'moneyToInvestXGB.2': 'moneyToInvestXGBReduced', 'investedMoneyXGB.2': 'investedMoneyXGBReduced',
+# 		   'nonInvestedMoneyXGB.2': 'nonInvestedMoneyXGBReduced'}, axis=1, inplace=True)
 
 df.rename({'nExperiment.1': 'nExperiment'}, axis=1, inplace=True)
 df = df[df['nExperiment'] != 'nExperiment']

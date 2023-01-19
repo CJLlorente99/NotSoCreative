@@ -1,11 +1,11 @@
 from classes.investorClass import Investor
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from keras.models import Sequential
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-from keras.layers import Dense, Dropout, LSTM
+from keras.layers import Dense, Dropout, LSTM, Bidirectional
 import numpy as np
 from keras import initializers
 import plotly.graph_objects as go
@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 
 modelMinMaxScaler = [None, None, None, None, None]
 
-class InvestorLSTMWindowRobustMinMaxT2 (Investor):
+class InvestorBiLSTMWindowRobustMinMaxT2 (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -21,9 +21,9 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindowRobustMinMaxT2': moneyInvestedToday,
-			 'investedMoneyLSTMWindowRobustMinMaxT2': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindowRobustMinMaxT2': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestBiLSTMWindowRobustMinMaxT2': moneyInvestedToday,
+			 'investedMoneyBiLSTMWindowRobustMinMaxT2': self.investedMoney,
+			 'nonInvestedMoneyBiLSTMWindowRobustMinMaxT2': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -59,11 +59,11 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using LSTM Window Rob MM T2 (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using BiLSTM Window Rob MM T2 (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMWindowRobMMT2(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioBiLSTMWindowRobMMT2(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -80,9 +80,9 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under LSTM Window Rob MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under BiLSTM Window Rob MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMWindowRobMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingBiLSTMWindowRobMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -177,7 +177,7 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 		else:
 			return -1
 
-class InvestorLSTMWindowRobustMinMaxT1 (Investor):
+class InvestorBiLSTMWindowRobustMinMaxT1 (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -185,9 +185,9 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestLSTMWindowRobustMinMaxT1': moneyInvestedToday,
-			 'investedMoneyLSTMWindowRobustMinMaxT1': self.investedMoney,
-			 'nonInvestedMoneyLSTMWindowRobustMinMaxT1': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestBiLSTMWindowRobustMinMaxT1': moneyInvestedToday,
+			 'investedMoneyBiLSTMWindowRobustMinMaxT1': self.investedMoney,
+			 'nonInvestedMoneyBiLSTMWindowRobustMinMaxT1': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -223,11 +223,11 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using LSTM Window Rob MM T1(" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using BiLSTM Window Rob MM T1(" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioLSTMWindowRobMMT1(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioBiLSTMWindowRobMMT1(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -244,9 +244,9 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under LSTM Window Rob MM T1(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under BiLSTM Window Rob MM T1(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingLSTMWindowRobMMT1(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingBiLSTMWindowRobMMT1(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -344,10 +344,10 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 def build_model(n_inputs, n_features, n_outputs):
 	opt = Adam(learning_rate=0.001)
 	model = Sequential()
-	model.add(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01),
-				   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features)))
+	model.add(Bidirectional(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01),
+				   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features))))
 	model.add(Dropout(0.1))
-	model.add(LSTM(units=200))
+	model.add(Bidirectional(LSTM(units=200)))
 	model.add(Dropout(0.1))
 	# model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
 	model.add(Dense(units=n_outputs, activation='linear'))
