@@ -39,7 +39,7 @@ class ExperimentManager:
 		dataManager["pastStockValue"] = pastOpen
 		dataManager["date"] = todayData.index[0].combine(todayData.index[0], datetime.time(9, 30))
 		dataManager["actualStockValue"] = todayData.Open.values[0]
-		dataManager["nextStockValue"] = todayData.Close.values[0]
+		dataManager["nextStockValue"] = nextData.Open.values[0]
 
 		for strategy in self.strategies:
 			investor = strategy["investor"]

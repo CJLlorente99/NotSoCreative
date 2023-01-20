@@ -1,3 +1,5 @@
+import math
+
 from classes.investorClass import Investor
 import pandas as pd
 import plotly.graph_objects as go
@@ -23,7 +25,7 @@ class InvestorCA(Investor):
 		:param data: Decision data based on the type of indicator
 		"""
 		self.perToInvest = 0
-		if 1 - data["nDay"] * self.dailyWindow > 0:
+		if 1 - math.floor(data["nDay"]/2) * self.dailyWindow > 0:
 			self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
 
 
@@ -68,8 +70,8 @@ class InvestorCA(Investor):
 
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
-								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
+		# fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
+		# 						 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]
 							 ), row=2, col=1)
 

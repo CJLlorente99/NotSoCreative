@@ -66,8 +66,8 @@ class InvestorWIA(Investor):
 
 		fig.add_trace(go.Scatter(name="Stock Market Value Open", x=self.record.index,
 								 y=stockMarketData.Open[-len(self.record.index):]), row=1, col=1, secondary_y=False)
-		fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
-								 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
+		# fig.add_trace(go.Scatter(name="Stock Market Value Close", x=self.record.index,
+		# 						 y=stockMarketData.Close[-len(self.record.index):]), row=1, col=1, secondary_y=False)
 		fig.add_trace(go.Bar(name="Money Invested Today", x=self.record.index, y=self.record["moneyInvestedToday"]
 							 ), row=2, col=1)
 		fig.update_xaxes(title_text="Date", row=1, col=1)
