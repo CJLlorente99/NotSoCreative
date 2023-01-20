@@ -189,8 +189,9 @@ class TestCriteriaClass:
 					  secondary_y=True)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
 		fig.write_image("images/" + title + "(1_2).png",scale=6, width=2880, height=1800)
-		# fig.show()
+		fig.show()
 
 		# Create one figure showing the second set of test criteria
 		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
@@ -206,8 +207,9 @@ class TestCriteriaClass:
 								 y=dfResult["meanSelling"], marker_color="red"), row=2, col=1)
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="group")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
 		fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
-		# fig.show()
+		fig.show()
 
 	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
@@ -431,6 +433,7 @@ class TestCriteriaClass:
 					  col=3, secondary_y=True)
 
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
 		fig.write_image("images/" + title + "(1_2).png",scale=6, width=2880, height=1800)
 		fig.show()
 
@@ -451,5 +454,6 @@ class TestCriteriaClass:
 					  row=2, col=1)
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
 		fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
 		fig.show()

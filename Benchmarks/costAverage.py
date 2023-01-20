@@ -26,7 +26,7 @@ class InvestorCA(Investor):
 		"""
 		self.perToInvest = 0
 		if 1 - math.floor(data["nDay"]/2) * self.dailyWindow > 0:
-			self.perToInvest = self.dailyWindow / (1 - data["nDay"] * self.dailyWindow)
+			self.perToInvest = self.dailyWindow / (1 - math.floor(data["nDay"]/2) * self.dailyWindow)
 
 
 	def possiblyInvestAfternoon(self, data):
