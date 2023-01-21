@@ -92,7 +92,7 @@ def build_modelHPO(n_inputs, n_features, n_outputs):
     return model
    
 Model 2: Bi LSTM
-# batch 4, n_epoch = 24, backcandles=16
+# batch 4, n_epoch = 24, backcandles=5 mabye try also 8? or 16
 def build_Bimodel(n_inputs, n_features, n_outputs):
     opt = Adam(learning_rate=0.001)
     model = Sequential()
