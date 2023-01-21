@@ -74,6 +74,39 @@ can also add layers
 
 Try it out, watch Accuracy, gain, MPV in the end (I think most important accuracy)
 
+for Charli:
+Model 1: normal LSTM
+# batch size = 4 n_epoch = 35, backcandles=16
+def build_modelHPO(n_inputs, n_features, n_outputs):
+    opt = Adam(learning_rate=0.000149)
+    model = Sequential()
+    model.add(LSTM(units=225, return_sequences=True,  bias_initializer=initializers.Constant(0.01), 
+                   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features)))
+    model.add(Dropout(0.1))
+    model.add(LSTM(units=250))
+    model.add(Dropout(0.1))
+    # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
+    model.add(Dense(units=n_outputs, activation='linear'))
+    model.compile(optimizer=opt, loss='mean_squared_error')
+    # history = model.fit
+    return model
+   
+Model 2: Bi LSTM
+# batch 4, n_epoch = 24, backcandles=16
+def build_Bimodel(n_inputs, n_features, n_outputs):
+    opt = Adam(learning_rate=0.001)
+    model = Sequential()
+    model.add(Bidirectional(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01), 
+                   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features))))
+    model.add(Dropout(0.1))
+    model.add(Bidirectional(LSTM(units=200)))
+    model.add(Dropout(0.1))
+    # model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
+    model.add(Dense(units=n_outputs, activation='linear'))
+    model.compile(optimizer=opt, loss='mse')
+    # history = model.fit
+    return model
+
 
           
  
