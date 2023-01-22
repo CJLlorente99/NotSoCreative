@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 
-fileName = './images/advancedData1.csv'
+fileName = './images/advancedData.csv'
 
 df = pd.read_csv(fileName, index_col='date')
 
@@ -75,6 +75,7 @@ fig = go.Figure()
 fig.add_trace(go.Bar(x=mmpvs.columns, y=mmpvs.values[0]-10000,
 					 error_y=dict(type='data', array=stdMpvs.values[0], visible=True)))
 fig.update_layout(title_text='Summary of MMPV', hovermode="x unified")
+fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
 fig.show()
 
 # Calculate absolute gain
@@ -118,6 +119,7 @@ fig = go.Figure()
 fig.add_trace(go.Bar(x=mPerGain.columns, y=mPerGain.values[0],
 					 error_y=dict(type='data', array=stdPerGain.values[0], visible=True)))
 fig.update_layout(title_text='Summary of Percentage Gain', hovermode="x unified")
+fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
 fig.show()
 
 

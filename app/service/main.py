@@ -12,13 +12,9 @@ from strategies.randomStrategy import Random
 from strategies.wia import WIA
 from strategies.ca import CA
 from strategies.idle import Idle
-from strategies.rsi import RSI
-from strategies.bb import BB
-from strategies.lstmEnsemble1 import LSTMEnsemble1
-from strategies.lstmEnsemble2 import LSTMEnsemble2
-from strategies.randomForest import RandomForestStrategy
-from strategies.xgb import XGBStrategy
-from strategies.lstmWindow import LSTMWindow
+from strategies.bilstmWindowRobMMT1T2 import BiLSTMWindowRobMMT1T2
+from strategies.bilstmWindowRobMMT1 import BiLSTMWindowRobMMT1
+from strategies.bilstmWindowRobMMT2 import BiLSTMWindowRobMMT2
 from logManager.logManager import LogManager
 from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
@@ -35,17 +31,21 @@ openingMinute = 30
 closingHour = 21
 closingMinute = 0
 
-def main():
+def main(dateToday, operation):
 	# 1) safety procedures (operations can be done/necessary files are there)
 	if False in runSafetyProcedures().values():
 		pass
 		# Launch message to user depending on the error
 
 	# 2) get date
-	dateToday = datetime.datetime.now()
-	now = datetime.datetime.now()
+	# dateToday = datetime.datetime.now()
+	# now = datetime.datetime.now()
 	# dateToday = datetime.datetime(2023, 1, 11)
 	# now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
+	if operation == 0:
+		now = datetime.datetime(2023, 1, 11, openingHour, openingMinute+20, 0)
+	else:
+		now = datetime.datetime(2023, 1, 11, closingHour, closingMinute + 20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -230,6 +230,9 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 			elif key == 'Log':
 				data[dfName] = np.log(df['Open'])
 
+		elif name == 'Diff_open':
+			data[dfName] = df['Open'] - df['Open'].shift()
+
 		elif name == 'Return_open':
 			if key == 'Natural':
 				data[dfName] = df['Open'] / df['Open'].shift()
@@ -374,34 +377,24 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		inputsData = inputsDf[aux + strategy.getListDfNameInputs()]
 
 		aux = pd.DataFrame()
-		if name == 'bia':
+		if name.startswith('bia'):
 			aux = BIA(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'wia':
+		elif name.startswith('wia'):
 			aux = WIA(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'bah':
+		elif name.startswith('bah'):
 			aux = BaH(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'ca':
+		elif name.startswith('ca'):
 			aux = CA(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'random':
+		elif name.startswith('random'):
 			aux = Random(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'idle':
+		elif name.startswith('idle'):
 			aux = Idle(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'rsi':
-			aux = RSI(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'bb':
-			aux = BB(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'lstmEnsemble1':
-			aux = LSTMEnsemble1(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'lstmEnsemble2':
-			aux = LSTMEnsemble2(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'RFClassifier':
-			aux = RandomForestStrategy(strategyInfo, strategy).broker(operation, inputsData)
-		elif name == 'xgb':
-			aux = XGBStrategy(strategyInfo, strategy, 1).broker(operation, inputsData)
-		elif name == 'xgbReduced':
-			aux = XGBStrategy(strategyInfo, strategy, 2).broker(operation, inputsData)
-		elif name == 'lstmWindow':
-			aux = LSTMWindow(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('lstmWindowRobMMT1T2'):
+			aux = BiLSTMWindowRobMMT1T2(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('lstmWindowRobMMT1'):
+			aux = BiLSTMWindowRobMMT1(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('lstmWindowRobMMT2'):
+			aux = BiLSTMWindowRobMMT2(strategyInfo, strategy).broker(operation, inputsData)
 
 		if name in ['wia', 'bia'] and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
@@ -481,4 +474,13 @@ def fillNewStrategies(newEntry: pd.DataFrame, record: pd.DataFrame):
 
 
 if __name__ == "__main__":
-	main()
+	today = datetime.datetime(2023, 1, 10)
+	while today <= datetime.datetime(2023, 1, 22):
+		operation = 0
+		main(today, operation)
+
+		operation = 1
+		main(today, operation)
+
+		today += timedelta(days=1)
+	# main()

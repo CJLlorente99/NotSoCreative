@@ -49,19 +49,19 @@ class TestCriteriaClass:
 		results["name"] = name
 
 		# Calculation of the MPV
-		MPV = record["totalValue"].mean()
+		MPV = record["totalValue"][::-2].mean()
 		results["MPV"] = MPV
 
 		# Calculation of the StdPV
-		StdPV = record["totalValue"].std()
+		StdPV = record["totalValue"][::-2].std()
 		results["StdPV"] = StdPV
 
 		# Calculation of the max PV
-		maxPV = record["totalValue"].max()
+		maxPV = record["totalValue"][::-2].max()
 		results["maxPV"] = maxPV
 
 		# Calculation of the min PV
-		minPV = record["totalValue"].min()
+		minPV = record["totalValue"][::-2].min()
 		results["minPV"] = minPV
 
 		# Calculation of the PerGain
@@ -85,44 +85,44 @@ class TestCriteriaClass:
 		results["GainPerOperation"] = GainPerOperation
 
 		# Calculation of the meanNotInvested
-		meanNotInvested = record["moneyNotInvested"].mean()
+		meanNotInvested = record["moneyNotInvested"][::-2].mean()
 		results["meanNotInvested"] = meanNotInvested
 
 		# Calculation of the meanInvested
-		meanInvested = record["moneyInvested"].mean()
+		meanInvested = record["moneyInvested"][::-2].mean()
 		results["meanInvested"] = meanInvested
 
 		# Calculation of the meanBuying
-		meanBuying = record["moneyInvestedToday"][record["moneyInvestedToday"] > 0].mean()
+		meanBuying = record["moneyInvestedToday"][::-2][record["moneyInvestedToday"][::-2] > 0].mean()
 		meanBuying = meanBuying if meanBuying != 0 else 0
 		results["meanBuying"] = meanBuying
 
 		# Calculation of the meanSelling
-		meanSelling = record["moneyInvestedToday"][record["moneyInvestedToday"] < 0].mean()
+		meanSelling = record["moneyInvestedToday"][::-2][record["moneyInvestedToday"][::-2] < 0].mean()
 		meanSelling = meanSelling if meanSelling != 0 else 0
 		results["meanSelling"] = meanSelling
 
 		# Calculation of the maxGainOneDay
-		maxGainOneDay = record["totalValue"].diff().max()
+		maxGainOneDay = record["totalValue"][::-2].diff().max()
 		results["maxGainOneDay"] = maxGainOneDay
 
 		# Calculation of the maxLossOneDay
-		maxLossOneDay = record["totalValue"].diff().min()
+		maxLossOneDay = record["totalValue"][::-2].diff().min()
 		results["maxLossOneDay"] = maxLossOneDay
 
 		# Calculation of TreynorMeasure
-		beta = np.cov(record["totalValue"].diff()[1:].values, record["actualStockValue"].diff()[1:].values)[0][1] / np.var(
-			record["actualStockValue"].diff()[1:].values)
+		beta = np.cov(record["totalValue"][::-2].diff()[1:].values, record["actualStockValue"][::-2].diff()[1:].values)[0][1] / np.var(
+			record["actualStockValue"][::-2].diff()[1:].values)
 		TreynorMeasure = (PerGain - self.rfr) / beta
 		results["TreynorMeasure"] = TreynorMeasure
 
 		# Calculation of SharpeRatio
-		SP500std = record["actualStockValue"].std()
+		SP500std = record["actualStockValue"][::-2].std()
 		SharpeRatio = (PerGain - self.rfr) / SP500std
 		results["SharpeRatio"] = SharpeRatio
 
 		# Calculation of JensenMeasure
-		marketReturn = record["actualStockValue"].diff()[1:].sum() / 100
+		marketReturn = record["actualStockValue"][::-2].diff()[1:].sum() / 100
 		betaJensen = beta * (marketReturn - self.rfr)
 		capm = self.rfr + betaJensen
 		JensonMeasure = PerGain - capm
@@ -130,7 +130,7 @@ class TestCriteriaClass:
 
 		# Calculation of SortinoRatio
 		T = self.rfr
-		returns = record["totalValue"].diff()[1:] / 100
+		returns = record["totalValue"][::-2].diff()[1:] / 100
 		TDD = math.sqrt(1/returns.size * returns[returns < 0].sub(T).pow(2).sum())
 		results["SortinoRatio"] = (PerGain - self.rfr) / TDD
 
@@ -191,7 +191,7 @@ class TestCriteriaClass:
 		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
 		fig.write_image("images/" + title + "(1_2).png",scale=6, width=2880, height=1800)
-		fig.show()
+		# fig.show()
 
 		# Create one figure showing the second set of test criteria
 		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
@@ -208,8 +208,8 @@ class TestCriteriaClass:
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="group")
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
-		fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
-		fig.show()
+		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
+		# fig.show()
 
 	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
@@ -455,5 +455,5 @@ class TestCriteriaClass:
 
 		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
-		fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
-		fig.show()
+		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
+		# fig.show()

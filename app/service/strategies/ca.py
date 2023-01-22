@@ -8,14 +8,14 @@ class CA(DailyStrategy):
 	def __init__(self, record: pd.DataFrame, strategyDefinition: Strategy):
 		super().__init__(record, strategyDefinition)
 		if len(record) != 0:
-			self.nDay = record['nDay'].values[-1]
+			self.nDay = math.floor(len(record)/2)
 		else:
 			self.nDay = 0
 		self.dailyWindow = 0.05
 	def possiblyOperationMorning(self, data):
 		self.perToInvest = 0
 		if 1 - self.nDay * self.dailyWindow > 0:
-			self.perToInvest = self.dailyWindow / (1 - math.floor(self.nDay/2) * self.dailyWindow)
+			self.perToInvest = self.dailyWindow / (1 - self.nDay * self.dailyWindow)
 
 	def possiblyOperationAfternoon(self, data):
 		self.perToInvest = 0

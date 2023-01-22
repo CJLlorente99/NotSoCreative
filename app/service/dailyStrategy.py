@@ -42,12 +42,11 @@ class DailyStrategy(ABC):
 		# Morning -> Apply logic (intraday return prediction) and update portfolio value
 		if operation == 'Morning':
 			moneyInvested = self.brokerMorning(inputs)
+			testCriteriaEntry = self.calculateTestCriteriaMorning()
 		# Afternoon -> Apply logic (interday return prediction) and update portfolio value
 		elif operation == 'Afternoon':
 			moneyInvested = self.brokerAfternoon(inputs)
-
-		# Calculate test criteria
-		testCriteriaEntry = self.calculateTestCriteria()
+			testCriteriaEntry = self.calculateTestCriteriaAfternoon()
 
 		aux = pd.DataFrame({'investorStrategy': self.name, 'MoneyInvested': self.investedMoney, 'MoneyNotInvested': self.nonInvestedMoney,
 							 'MoneyInvestedToday': moneyInvested, 'PerInvestToday': self.perToInvest,
@@ -119,9 +118,68 @@ class DailyStrategy(ABC):
 
 		return moneyInvested
 
-	def calculateTestCriteria(self):
+	def calculateTestCriteriaMorning(self):
 		if len(self.record) != 0:
-			pvs = np.append(self.record['TotalPortfolioValue'].values, self.nonInvestedMoney + self.investedMoney)
+			pvs = np.append(self.record['TotalPortfolioValue'][:-1].iloc[::-2].values, self.nonInvestedMoney + self.investedMoney)
+			# MPV
+			mpv = pvs.mean()
+
+			# StdPV
+			std = pvs.std()
+
+			# Max
+			maxPV = pvs.max()
+
+			# Min
+			minPV = pvs.min()
+
+			# Absolute Gain
+			absGain = pvs[-1] - pvs[0]
+
+			# Per Gain
+			perGain = (pvs[-1] - pvs[0]) / pvs[0] * 100
+
+			# Max gain
+			maxGain = (pvs[1:] - pvs[:-1]).max()
+
+			# Min gain
+			minGain = (pvs[1:] - pvs[:-1]).min()
+
+			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
+								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
+
+		else:
+			# MPV
+			mpv = self.initialInvestment
+
+			# StdPV
+			std = 0
+
+			# Max
+			maxPV = self.initialInvestment
+
+			# Min
+			minPV = self.initialInvestment
+
+			# Absolute Gain
+			absGain = 0
+
+			# Per Gain
+			perGain = 0
+
+			# Max gain
+			maxGain = 0
+
+			# Min gain
+			minGain = 0
+
+			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
+								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
+
+	def calculateTestCriteriaAfternoon(self):
+		if len(self.record) != 0:
+			pvs = np.append(self.record['TotalPortfolioValue'].iloc[::-2].values,
+							self.nonInvestedMoney + self.investedMoney)
 			# MPV
 			mpv = pvs.mean()
 

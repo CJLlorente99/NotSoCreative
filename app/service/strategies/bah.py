@@ -1,13 +1,14 @@
 from dailyStrategy import DailyStrategy
 import pandas as pd
 from jsonManagement.inversionStrategyJSONAPI import Strategy
+import math
 
 
 class BaH(DailyStrategy):
 	def __init__(self, record: pd.DataFrame, strategyDefinition: Strategy):
 		super().__init__(record, strategyDefinition)
 		if len(record) != 0:
-			self.nDay = record['nDay'].values[-1]
+			self.nDay = math.floor(len(record)/2)
 		else:
 			self.nDay = 0
 
