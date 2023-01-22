@@ -135,7 +135,7 @@ class InvestorLSTMWindowMinMaxT2 (Investor):
 		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
 
 		# rsi_w44
-		params = RSIInvestorParams(44)
+		params = RSIInvestorParams(None, None, 44)
 		res['rsi_w44'] = relativeStrengthIndex(data.Close, params)['rsi']
 
 		# adx_neg_w14
@@ -538,7 +538,7 @@ class InvestorLSTMWindowMinMaxT1T2 (Investor):
 		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
 
 		# rsi_w44
-		params = RSIInvestorParams(44)
+		params = RSIInvestorParams(None, None, 44)
 		res['rsi_w44'] = relativeStrengthIndex(data.Close, params)['rsi']
 
 		# adx_neg_w14
