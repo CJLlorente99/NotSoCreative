@@ -18,10 +18,10 @@ from classes.experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2021-01-01', '2021-01-30')
+    dataGetter = DataGetter('2020-01-01', '2020-01-30')
 
     # Run various experiments
-    numExperiments = 10
+    numExperiments = 20
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -102,7 +102,7 @@ def main():
 
         # Create investor BIA
         investorBIA = InvestorBIA(10000)
-        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=True)
+        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=False)
         print("investorBIA created")
 
         # Create investor WIA
@@ -111,8 +111,8 @@ def main():
         print("investorWIA created")
 
         # Create investor CA
-        investorCA = InvestorCA(10000, 0.05)
-        experimentManager.addStrategy(investorCA, "ca", plotEvolution=True)
+        investorCA = InvestorCA(10000, 0.1)
+        experimentManager.addStrategy(investorCA, "ca", plotEvolution=False)
         print("investorCA created")
 
         # Create investor BaH
@@ -159,7 +159,7 @@ def main():
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
         # Prepare next first day
-        dataGetter.today += CDay(1, calendar=USFederalHolidayCalendar())
+        dataGetter.today += CDay(5, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, experimentManager.returnExpData()], axis=1)

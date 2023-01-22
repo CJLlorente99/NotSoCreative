@@ -10,6 +10,12 @@ import numpy as np
 from keras import initializers
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from TAIndicators.adx import averageDirectionalMovementIndex
+from TAIndicators.bb import bollingerBands
+from TAIndicators.rsi import relativeStrengthIndex
+from TAIndicators.stochasticRsi import stochasticRSI
+from TAIndicators.ma import movingAverageConvergenceDivergence
+from classes.investorParamsClass import ADXInvestorParams, BBInvestorParams, StochasticRSIInvestorParams, RSIInvestorParams, MACDInvestorParams
 
 modelMinMaxScaler = [None, None, None, None, None]
 
@@ -90,32 +96,80 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 	def calculatePrediction(self, data):
 		# data is already shifted when it comes here
 		res = pd.DataFrame()
-		res['Open'] = data.Open
-		res['Close_t1'] = data.Close
-		res['Volume_t1'] = data.Volume
-		res['High_t1'] = data.High
-		res['Low_t1'] = data.Low
-		res['Diff_outra'] = res.Open - res.Close_t1
-		res['Return_outra'] = np.log(res.Open) - np.log(res.Close_t1)
-		res['Diff_intra'] = res.Close_t1 - res.Open.shift()
-		res['Return_intra'] = np.log(res.Close_t1) - np.log(res.Open.shift())
-		res['Diff_open'] = res.Open - res.Open.shift()
-		res.dropna(inplace=True)
 
 		# transformation
 		# to decide if we want to predict raw prices or returns -> i think returns might work better cause of non-stationarity
 		transformation = 1
 		if transformation == 0:
-			res['Target'] = res.Open
+			res['Target'] = data.Open
 
 		elif transformation == 1:
 
-			df_log = np.sqrt(np.log(res.Open))
-			res['Open_log'] = df_log
+			df_log = np.sqrt(np.log(data.Open))
 			df_log_diff = df_log - df_log.shift()
 			res['Return_Open'] = df_log_diff
 			res['Target'] = df_log_diff
 			res.dropna(inplace=True)
+
+		# Return_outre
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# Volume
+		res['Volume'] = data.Volume
+
+		# adx_pos_w50
+		params = ADXInvestorParams(50)
+		res['adx_pos_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_pos']
+
+		# bb_lband_w31_stdDev3.5483563609690094
+		params = BBInvestorParams(31, 3.5483563609690094)
+		res['bb_lband_w31_stdDev3.5483563609690094'] = bollingerBands(data.Close, params)['lband']
+
+		# Return_Open
+		# in transformation
+
+		# Diff_open
+		res['Diff_open'] = data.Open - data.Open.shift()
+
+		# Diff_outra
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# rsi_w44
+		params = RSIInvestorParams(44)
+		res['rsi_w44'] = relativeStrengthIndex(data.Close, params)['rsi']
+
+		# adx_neg_w14
+		params = ADXInvestorParams(14)
+		res['adx_neg_w14'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_neg']
+
+		# stochRsi_d_w4_s131_s27
+		params = StochasticRSIInvestorParams(4, 31, 27)
+		res['stochRsi_d_w4_s131_s27'] = stochasticRSI(data.Close, params)['d']
+
+		# adx_w50
+		params = ADXInvestorParams(50)
+		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
+
+		# Return_intra
+		res['Diff_intra'] = data.Close - data.Open.shift()
+
+		# macd_difffW12_sW44_signal3
+		params = MACDInvestorParams(None, None, 12, 44, 3)
+		res['macd_difffW12_sW44_signal3'] = movingAverageConvergenceDivergence(data.Close, params)['diff']
+
+		# stochRsi_d_w50_s110_s218
+		params = StochasticRSIInvestorParams(50, 10, 18)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# stochRsi_d_w3_s132_s247
+		params = StochasticRSIInvestorParams(3, 32, 47)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# macd_fW1_sW41_signal34
+		params = MACDInvestorParams(None, None, 1, 41, 34)
+		res['macd_fW1_sW41_signal34'] = movingAverageConvergenceDivergence(data.Close, params)['macd']
+
+		res.dropna(inplace=True)
 
 		# choose columns: all but target variable (its last column)
 		liste = list(range(0, data.shape[1]))
@@ -127,7 +181,7 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 8
+		backcandles = 5
 
 		# to save decision and predictions
 		y_predictions = []
@@ -144,8 +198,8 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 15 #
-		batch_size = 8
+		epochs = 24 #
+		batch_size = 4
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
@@ -249,32 +303,80 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 	def calculatePrediction(self, data):
 		# data is already shifted when it comes here
 		res = pd.DataFrame()
-		res['Open'] = data.Open
-		res['Close_t1'] = data.Close
-		res['Volume_t1'] = data.Volume
-		res['High_t1'] = data.High
-		res['Low_t1'] = data.Low
-		res['Diff_outra'] = res.Open - res.Close_t1
-		res['Return_outra'] = np.log(res.Open) - np.log(res.Close_t1)
-		res['Diff_intra'] = res.Close_t1 - res.Open.shift()
-		res['Return_intra'] = np.log(res.Close_t1) - np.log(res.Open.shift())
-		res['Diff_open'] = res.Open - res.Open.shift()
-		res.dropna(inplace=True)
 
 		# transformation
 		# to decide if we want to predict raw prices or returns -> i think returns might work better cause of non-stationarity
 		transformation = 1
 		if transformation == 0:
-			res['Target'] = res.Open
+			res['Target'] = data.Open
 
 		elif transformation == 1:
 
-			df_log = np.sqrt(np.log(res.Open))
-			res['Open_log'] = df_log
+			df_log = np.sqrt(np.log(data.Open))
 			df_log_diff = df_log - df_log.shift()
 			res['Return_Open'] = df_log_diff
 			res['Target'] = df_log_diff
 			res.dropna(inplace=True)
+
+		# Return_outre
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# Volume
+		res['Volume'] = data.Volume
+
+		# adx_pos_w50
+		params = ADXInvestorParams(50)
+		res['adx_pos_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_pos']
+
+		# bb_lband_w31_stdDev3.5483563609690094
+		params = BBInvestorParams(31, 3.5483563609690094)
+		res['bb_lband_w31_stdDev3.5483563609690094'] = bollingerBands(data.Close, params)['lband']
+
+		# Return_Open
+		# in transformation
+
+		# Diff_open
+		res['Diff_open'] = data.Open - data.Open.shift()
+
+		# Diff_outra
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# rsi_w44
+		params = RSIInvestorParams(44)
+		res['rsi_w44'] = relativeStrengthIndex(data.Close, params)['rsi']
+
+		# adx_neg_w14
+		params = ADXInvestorParams(14)
+		res['adx_neg_w14'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_neg']
+
+		# stochRsi_d_w4_s131_s27
+		params = StochasticRSIInvestorParams(4, 31, 27)
+		res['stochRsi_d_w4_s131_s27'] = stochasticRSI(data.Close, params)['d']
+
+		# adx_w50
+		params = ADXInvestorParams(50)
+		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
+
+		# Return_intra
+		res['Diff_intra'] = data.Close - data.Open.shift()
+
+		# macd_difffW12_sW44_signal3
+		params = MACDInvestorParams(None, None, 12, 44, 3)
+		res['macd_difffW12_sW44_signal3'] = movingAverageConvergenceDivergence(data.Close, params)['diff']
+
+		# stochRsi_d_w50_s110_s218
+		params = StochasticRSIInvestorParams(50, 10, 18)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# stochRsi_d_w3_s132_s247
+		params = StochasticRSIInvestorParams(3, 32, 47)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# macd_fW1_sW41_signal34
+		params = MACDInvestorParams(None, None, 1, 41, 34)
+		res['macd_fW1_sW41_signal34'] = movingAverageConvergenceDivergence(data.Close, params)['macd']
+
+		res.dropna(inplace=True)
 
 		# choose columns: all but target variable (its last column)
 		liste = list(range(0, data.shape[1]))
@@ -286,7 +388,7 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 8
+		backcandles = 5
 
 		# to save decision and predictions
 		y_predictions = []
@@ -303,8 +405,8 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 15 #
-		batch_size = 8
+		epochs = 24 #
+		batch_size = 4
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
@@ -397,32 +499,80 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 	def calculatePrediction(self, data):
 		# data is already shifted when it comes here
 		res = pd.DataFrame()
-		res['Open'] = data.Open
-		res['Close_t1'] = data.Close
-		res['Volume_t1'] = data.Volume
-		res['High_t1'] = data.High
-		res['Low_t1'] = data.Low
-		res['Diff_outra'] = res.Open - res.Close_t1
-		res['Return_outra'] = np.log(res.Open) - np.log(res.Close_t1)
-		res['Diff_intra'] = res.Close_t1 - res.Open.shift()
-		res['Return_intra'] = np.log(res.Close_t1) - np.log(res.Open.shift())
-		res['Diff_open'] = res.Open - res.Open.shift()
-		res.dropna(inplace=True)
 
 		# transformation
 		# to decide if we want to predict raw prices or returns -> i think returns might work better cause of non-stationarity
 		transformation = 1
 		if transformation == 0:
-			res['Target'] = res.Open
+			res['Target'] = data.Open
 
 		elif transformation == 1:
 
-			df_log = np.sqrt(np.log(res.Open))
-			res['Open_log'] = df_log
+			df_log = np.sqrt(np.log(data.Open))
 			df_log_diff = df_log - df_log.shift()
 			res['Return_Open'] = df_log_diff
 			res['Target'] = df_log_diff
 			res.dropna(inplace=True)
+
+		# Return_outre
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# Volume
+		res['Volume'] = data.Volume
+
+		# adx_pos_w50
+		params = ADXInvestorParams(50)
+		res['adx_pos_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_pos']
+
+		# bb_lband_w31_stdDev3.5483563609690094
+		params = BBInvestorParams(31, 3.5483563609690094)
+		res['bb_lband_w31_stdDev3.5483563609690094'] = bollingerBands(data.Close, params)['lband']
+
+		# Return_Open
+		# in transformation
+
+		# Diff_open
+		res['Diff_open'] = data.Open - data.Open.shift()
+
+		# Diff_outra
+		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+
+		# rsi_w44
+		params = RSIInvestorParams(44)
+		res['rsi_w44'] = relativeStrengthIndex(data.Close, params)['rsi']
+
+		# adx_neg_w14
+		params = ADXInvestorParams(14)
+		res['adx_neg_w14'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx_neg']
+
+		# stochRsi_d_w4_s131_s27
+		params = StochasticRSIInvestorParams(4, 31, 27)
+		res['stochRsi_d_w4_s131_s27'] = stochasticRSI(data.Close, params)['d']
+
+		# adx_w50
+		params = ADXInvestorParams(50)
+		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
+
+		# Return_intra
+		res['Diff_intra'] = data.Close - data.Open.shift()
+
+		# macd_difffW12_sW44_signal3
+		params = MACDInvestorParams(None, None, 12, 44, 3)
+		res['macd_difffW12_sW44_signal3'] = movingAverageConvergenceDivergence(data.Close, params)['diff']
+
+		# stochRsi_d_w50_s110_s218
+		params = StochasticRSIInvestorParams(50, 10, 18)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# stochRsi_d_w3_s132_s247
+		params = StochasticRSIInvestorParams(3, 32, 47)
+		res['stochRsi_d_w50_s110_s218'] = stochasticRSI(data.Close, params)['d']
+
+		# macd_fW1_sW41_signal34
+		params = MACDInvestorParams(None, None, 1, 41, 34)
+		res['macd_fW1_sW41_signal34'] = movingAverageConvergenceDivergence(data.Close, params)['macd']
+
+		res.dropna(inplace=True)
 
 		# choose columns: all but target variable (its last column)
 		liste = list(range(0, data.shape[1]))
@@ -434,7 +584,7 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 8
+		backcandles = 5
 
 		# to save decision and predictions
 		y_predictions = []
@@ -451,8 +601,8 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 15 #
-		batch_size = 8
+		epochs = 24 #
+		batch_size = 4
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
@@ -497,7 +647,7 @@ def build_model(n_inputs, n_features, n_outputs):
 	model.add(Dropout(0.1))
 	# model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
 	model.add(Dense(units=n_outputs, activation='linear'))
-	model.compile(optimizer=opt, loss='mean_squared_error')
+	model.compile(optimizer=opt, loss='mse')
 	# history = model.fit
 	return model
 
