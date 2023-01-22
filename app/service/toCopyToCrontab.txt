@@ -1,0 +1,7 @@
+In order to run the service in the VM machine. Input the same in crontab.
+First) enter "crontab -e" in the terminal
+Second) write the following
+ACHTUNG/CUIDADO/ATTENTION these are absolute routes for our personal case
+
+0 15 * * 1-5 /usr/bin/python3 /home/carlosllocor/NotSoCreative/app/service/main.py &> /home/carlosllocor/NotSoCreative/app/service/output.txt
+30 21 * * 1-5 /usr/bin/python3 /home/carlosllocor/NotSoCreative/app/service/main.py &>> /home/carlosllocor/NotSoCreative/app/service/output.txt
