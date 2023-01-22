@@ -226,7 +226,7 @@ class InvestorBiLSTMWindowRobustMinMaxT2 (Investor):
 		y_mean = np.asarray(y_mean).flatten()
 
 		# build decision rule: if open_t+2 > open_t -> buy on open_t
-		if res.Open.values[-1] < y_mean[2]:
+		if data.Open.values[-1] < y_mean[2]:
 			return 1
 		else:
 			return -1
@@ -438,7 +438,7 @@ class InvestorBiLSTMWindowRobustMinMaxT1 (Investor):
 		y_mean = np.asarray(y_mean).flatten()
 
 		# build decision rule: if open_t+2 > open_t -> buy on open_t
-		if res.Open.values[-1] < y_mean[1]:
+		if data.Open.values[-1] < y_mean[1]:
 			return 1
 		else:
 			return -1
@@ -639,15 +639,15 @@ class InvestorBiLSTMWindowRobustMinMaxT1T2 (Investor):
 		y_mean = np.asarray(y_mean).flatten()
 
 		# build decision rule
-		if res.Open.values[-1] < y_mean[1] < y_mean[2]:
+		if data.Open.values[-1] < y_mean[1] < y_mean[2]:
 			return 1
-		elif res.Open.values[-1] < y_mean[2] < y_mean[1]:
+		elif data.Open.values[-1] < y_mean[2] < y_mean[1]:
 			return 0.5
-		elif y_mean[1] < res.Open.values[-1] < y_mean[2]:
+		elif y_mean[1] < data.Open.values[-1] < y_mean[2]:
 			return -0.5
-		elif y_mean[2] < res.Open.values[-1] and y_mean[1] < res.Open.values[-1]:
+		elif y_mean[2] < data.Open.values[-1] and y_mean[1] < data.Open.values[-1]:
 			return -1
-		elif y_mean[2] < res.Open.values[-1] < y_mean[1]:
+		elif y_mean[2] < data.Open.values[-1] < y_mean[1]:
 			return 0
 		else:
 			return -1
