@@ -31,21 +31,21 @@ openingMinute = 30
 closingHour = 21
 closingMinute = 0
 
-def main(dateToday, operation):
+def main():
 	# 1) safety procedures (operations can be done/necessary files are there)
 	if False in runSafetyProcedures().values():
 		pass
 		# Launch message to user depending on the error
 
 	# 2) get date
-	# dateToday = datetime.datetime.now()
-	# now = datetime.datetime.now()
+	dateToday = datetime.datetime.now()
+	now = datetime.datetime.now()
 	# dateToday = datetime.datetime(2023, 1, 11)
 	# now = datetime.datetime(2023, 1, 11, closingHour, closingMinute+20, 0)
-	if operation == 0:
-		now = datetime.datetime(2023, 1, 11, openingHour, openingMinute+20, 0)
-	else:
-		now = datetime.datetime(2023, 1, 11, closingHour, closingMinute + 20, 0)
+	# if operation == 0:
+	# 	now = datetime.datetime(2023, 1, 11, openingHour, openingMinute+20, 0)
+	# else:
+	# 	now = datetime.datetime(2023, 1, 11, closingHour, closingMinute + 20, 0)
 
 	openingTimeSP500 = now.replace(hour=openingHour, minute=openingMinute, second=0)
 	closingTimeSP500 = now.replace(hour=closingHour, minute=closingMinute, second=0)
@@ -474,13 +474,13 @@ def fillNewStrategies(newEntry: pd.DataFrame, record: pd.DataFrame):
 
 
 if __name__ == "__main__":
-	today = datetime.datetime(2023, 1, 10)
-	while today <= datetime.datetime(2023, 1, 22):
-		operation = 0
-		main(today, operation)
-
-		operation = 1
-		main(today, operation)
-
-		today += timedelta(days=1)
-	# main()
+	# today = datetime.datetime(2023, 1, 10)
+	# while today <= datetime.datetime(2023, 1, 22):
+	# 	operation = 0
+	# 	main(today, operation)
+	#
+	# 	operation = 1
+	# 	main(today, operation)
+	#
+	# 	today += timedelta(days=1)
+	main()
