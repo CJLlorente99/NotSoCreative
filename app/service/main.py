@@ -190,6 +190,7 @@ def retrieveCSVData():
 		errMsg = 'retrieveCSVData OK'
 		logManager.writeLog('INFO', errMsg)
 	except:
+		print(readBlobDf())
 		status = False
 		errMsg = 'retrieveCSVData ERROR'
 		logManager.writeLog('ERROR', errMsg)

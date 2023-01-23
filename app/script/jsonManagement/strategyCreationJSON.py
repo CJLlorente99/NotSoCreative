@@ -41,7 +41,7 @@ inputs.append(StrategyInput('Return_interday', '', 'Return_outra', 'Log', []))
 inputs.append(StrategyInput('Volume', '', 'Volume', '', []))
 # adx_pos_w50
 param1 = InputParameter('Window', 50)
-inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', param1))
+inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', [param1]))
 # bb_lband_w31_stdDev3.5483563609690094
 param1 = InputParameter('Window', 31)
 param2 = InputParameter('StdDev', 3.5483563609690094)
@@ -83,6 +83,7 @@ inputs.append(StrategyInput('stochRsi_d_w3_s132_s247', '', 'stochRsi_d_w3_s132_s
 param1 = InputParameter('FastWindow', 1)
 param2 = InputParameter('SlowWindow', 41)
 param3 = InputParameter('Signal', 34)
+inputs.append(StrategyInput('macd_fW1_sW41_signal34', '', 'macd_fW1_sW41_signal34', 'macd', [param1, param2, param3]))
 lstmWindowRobMMT1T2Strategy = Strategy('lstmWindowRobMMT1T2_23_1_2023', '', inputs)
 jsonmanager.addStrategy(lstmWindowRobMMT1T2Strategy)
 
@@ -94,7 +95,7 @@ inputs.append(StrategyInput('Return_interday', '', 'Return_outra', 'Log', []))
 inputs.append(StrategyInput('Volume', '', 'Volume', '', []))
 # adx_pos_w50
 param1 = InputParameter('Window', 50)
-inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', param1))
+inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', [param1]))
 # bb_lband_w31_stdDev3.5483563609690094
 param1 = InputParameter('Window', 31)
 param2 = InputParameter('StdDev', 3.5483563609690094)
@@ -136,6 +137,7 @@ inputs.append(StrategyInput('stochRsi_d_w3_s132_s247', '', 'stochRsi_d_w3_s132_s
 param1 = InputParameter('FastWindow', 1)
 param2 = InputParameter('SlowWindow', 41)
 param3 = InputParameter('Signal', 34)
+inputs.append(StrategyInput('macd_fW1_sW41_signal34', '', 'macd_fW1_sW41_signal34', 'macd', [param1, param2, param3]))
 lstmWindowRobMMT1Strategy = Strategy('lstmWindowRobMMT1_23_1_2023', '', inputs)
 jsonmanager.addStrategy(lstmWindowRobMMT1Strategy)
 
@@ -147,7 +149,7 @@ inputs.append(StrategyInput('Return_interday', '', 'Return_outra', 'Log', []))
 inputs.append(StrategyInput('Volume', '', 'Volume', '', []))
 # adx_pos_w50
 param1 = InputParameter('Window', 50)
-inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', param1))
+inputs.append(StrategyInput('adx_pos_w50', '', 'adx_pos_w50', 'adx_pos', [param1]))
 # bb_lband_w31_stdDev3.5483563609690094
 param1 = InputParameter('Window', 31)
 param2 = InputParameter('StdDev', 3.5483563609690094)
@@ -189,5 +191,6 @@ inputs.append(StrategyInput('stochRsi_d_w3_s132_s247', '', 'stochRsi_d_w3_s132_s
 param1 = InputParameter('FastWindow', 1)
 param2 = InputParameter('SlowWindow', 41)
 param3 = InputParameter('Signal', 34)
+inputs.append(StrategyInput('macd_fW1_sW41_signal34', '', 'macd_fW1_sW41_signal34', 'macd', [param1, param2, param3]))
 lstmWindowRobMMT2Strategy = Strategy('lstmWindowRobMMT2_23_1_2023', '', inputs)
 jsonmanager.addStrategy(lstmWindowRobMMT2Strategy)
