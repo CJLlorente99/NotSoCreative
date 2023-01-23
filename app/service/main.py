@@ -202,10 +202,8 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 
 	data = pd.DataFrame()
 
-	print(f' calculated inputs {inputs}')
-
 	for inp in inputs:
-		print(f' calculated inputs {inp.name}')
+		print(f' calculated inputs {inp.name}, df name {inp.dfName}')
 		name = inp.name
 		dfName = inp.dfName
 		key = inp.keyName
@@ -335,6 +333,8 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 	data['High'] = df['High']
 	data['Low'] = df['Low']
 	data['Volume'] = df['Volume']
+
+	print(f'df names {data.columns}')
 
 	status = True
 	errMsg = 'calculateInputs OK'
