@@ -8,7 +8,7 @@ url = 'https://storage.googleapis.com/datascienceii/myData.csv'
 projectName = 'datascienceii'
 bucketName = 'datascienceii'
 objectNameDf = 'myData.csv'
-credentials = './application_default_credentials.json'
+credentials = '/home/carlosllocor/NotSoCreative/app/service/application_default_credentials.json'
 
 
 def readBlobDf():
