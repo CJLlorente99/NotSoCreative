@@ -1,8 +1,8 @@
 from classes.investorClass import Investor
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from keras.models import Sequential
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 from keras.layers import Dense, Dropout, LSTM, Bidirectional
@@ -19,7 +19,7 @@ from classes.investorParamsClass import ADXInvestorParams, BBInvestorParams, Sto
 
 modelMinMaxScaler = [None, None, None, None, None]
 
-class InvestorBiLSTMWindowMinMaxT2 (Investor):
+class InvestorBiLSTMWindowRobustMinMaxT2Legacy (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -27,9 +27,9 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestBiLSTMWindowMinMaxT2': moneyInvestedToday,
-			 'investedMoneyBiLSTMWindowMinMaxT2': self.investedMoney,
-			 'nonInvestedMoneyBiLSTMWindowMinMaxT2': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestBiLSTMWindowRobustMinMaxT2Legacy': moneyInvestedToday,
+			 'investedMoneyBiLSTMWindowRobustMinMaxT2Legacy': self.investedMoney,
+			 'nonInvestedMoneyBiLSTMWindowRobustMinMaxT2Legacy': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -65,11 +65,11 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using BiLSTM Window MM T2 (" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using BiLSTM Window Rob MM T2 Legacy (" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioBiLSTMWindowMMT2(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioBiLSTMWindowRobMMT2Legacy(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -86,9 +86,9 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under BiLSTM Window MM T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under BiLSTM Window Rob MM T2 Legacy(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingBiLSTMWindowMMT2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingBiLSTMWindowRobMMT2Legacy(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -181,7 +181,7 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 5
+		backcandles = 8  # 10
 
 		# to save decision and predictions
 		y_predictions = []
@@ -189,22 +189,27 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		# days to predict
 		test_days = step_out
 
+		# scale data with robust
+		scaler_r = RobustScaler()
+		data_set_scaled = scaler_r.fit_transform(res)
 		# scale data
-		scaler = MinMaxScaler()
-		data_set_scaled = scaler.fit_transform(res)
+		scaler_m = MinMaxScaler()
+		data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 24 #
-		batch_size = 4
+		epochs = 36  #
+		batch_size = 2
 		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
 		# inverse scaling
-		y_pred = inverse_scaling(res, y_pred_scale, scaler)
+		y_pred_scale = inverse_scaling(res, y_pred_scale, scaler_m)
+
+		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
 		# bounds, mean -> further I only use mean
 		lower, y_mean, upper = calculate_bounds(y_pred)
@@ -226,7 +231,7 @@ class InvestorBiLSTMWindowMinMaxT2 (Investor):
 		else:
 			return -1
 
-class InvestorBiLSTMWindowMinMaxT1 (Investor):
+class InvestorBiLSTMWindowRobustMinMaxT1Legacy (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -234,9 +239,9 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestBiLSTMWindowMinMaxT1': moneyInvestedToday,
-			 'investedMoneyBiLSTMWindowMinMaxT1': self.investedMoney,
-			 'nonInvestedMoneyBiLSTMWindowMinMaxT1': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestBiLSTMWindowRobustMinMaxT1Legacy': moneyInvestedToday,
+			 'investedMoneyBiLSTMWindowRobustMinMaxT1Legacy': self.investedMoney,
+			 'nonInvestedMoneyBiLSTMWindowRobustMinMaxT1Legacy': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		res = self.calculatePrediction(data['df'])
@@ -272,11 +277,11 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using BiLSTM Window MM T1(" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using BiLSTM Window Rob MM T1 Legacy(" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioBiLSTMWindowMMT1(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioBiLSTMWindowRobMMT1Legacy(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -293,9 +298,9 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under BiLSTM Window MM T1(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under BiLSTM Window Rob MM T1 Legacy(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingBiLSTMWindowMMT1(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingBiLSTMWindowRobMMT1Legacy(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -388,7 +393,7 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 5
+		backcandles = 8  # 10
 
 		# to save decision and predictions
 		y_predictions = []
@@ -396,22 +401,27 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		# days to predict
 		test_days = step_out
 
+		# scale data with robust
+		scaler_r = RobustScaler()
+		data_set_scaled = scaler_r.fit_transform(res)
 		# scale data
-		scaler = MinMaxScaler()
-		data_set_scaled = scaler.fit_transform(res)
+		scaler_m = MinMaxScaler()
+		data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 24 #
-		batch_size = 4
-		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
+		epochs = 36  #
+		batch_size = 2
+		ensemble, y_pred_scale = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
 		# inverse scaling
-		y_pred = inverse_scaling(res, y_pred_scale, scaler)
+		y_pred_scale = inverse_scaling(res, y_pred_scale, scaler_m)
+
+		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
 		# bounds, mean -> further I only use mean
 		lower, y_mean, upper = calculate_bounds(y_pred)
@@ -433,7 +443,7 @@ class InvestorBiLSTMWindowMinMaxT1 (Investor):
 		else:
 			return -1
 
-class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
+class InvestorBiLSTMWindowRobustMinMaxT1T2Legacy (Investor):
 
 	def __init__(self, initialInvestment=10000, n_members=10):
 		super().__init__(initialInvestment)
@@ -441,9 +451,9 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 
 	def returnBrokerUpdate(self, moneyInvestedToday, data) -> pd.DataFrame:
 		return pd.DataFrame(
-			{'moneyToInvestBiLSTMWindowMinMaxT1T2': moneyInvestedToday,
-			 'investedMoneyBiLSTMWindowMinMaxT1T2': self.investedMoney,
-			 'nonInvestedMoneyBiLSTMWindowMinMaxT1T2': self.nonInvestedMoney}, index=[0])
+			{'moneyToInvestBiLSTMWindowRobustMinMaxT1T2Legacy': moneyInvestedToday,
+			 'investedMoneyBiLSTMWindowRobustMinMaxT1T2Legacy': self.investedMoney,
+			 'nonInvestedMoneyBiLSTMWindowRobustMinMaxT1T2Legacy': self.nonInvestedMoney}, index=[0])
 
 	def possiblyInvestMorning(self, data):
 		self.perToInvest = self.calculatePrediction(data['df'])
@@ -468,11 +478,11 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 								 stackgroup="one"))
 		fig.add_trace(go.Scatter(name="Total Value", x=self.record.index, y=self.record["totalValue"]))
 		fig.update_layout(
-			title="Evolution of Porfolio using BiLSTM Window MM T1T2(" + self.record.index[0].strftime(
+			title="Evolution of Porfolio using BiLSTM Window Rob MM T1T2 Legacy(" + self.record.index[0].strftime(
 				"%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", xaxis_title="Date",
 			yaxis_title="Value [$]", hovermode='x unified')
-		fig.write_image("images/EvolutionPorfolioBiLSTMWindowMMT1T2(" + self.record.index[0].strftime(
+		fig.write_image("images/EvolutionPorfolioBiLSTMWindowRobMMT1T2Legacy(" + self.record.index[0].strftime(
 			"%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 		# fig.show()
@@ -489,9 +499,9 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 		fig.update_xaxes(title_text="Date", row=1, col=1)
 		fig.update_xaxes(title_text="Date", row=2, col=1)
 		fig.update_layout(
-			title="Decision making under BiLSTM Window MM T1T2(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
+			title="Decision making under BiLSTM Window Rob MM T1T2 Legacy(" + self.record.index[0].strftime("%d/%m/%Y") + "-" +
 				  self.record.index[-1].strftime("%d/%m/%Y") + ")", hovermode='x unified')
-		fig.write_image("images/DecisionMakingBiLSTMWindowMMT1T2(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
+		fig.write_image("images/DecisionMakingBiLSTMWindowRobMMT1T2Legacy(" + self.record.index[0].strftime("%d_%m_%Y") + "-" +
 						self.record.index[-1].strftime("%d_%m_%Y") + ").png", scale=6, width=1080, height=1080)
 
 	# fig.show()
@@ -584,7 +594,7 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 		step_out = 3
 
 		# how many last days i include in my prediction
-		backcandles = 5
+		backcandles = 8  # 10
 
 		# to save decision and predictions
 		y_predictions = []
@@ -592,22 +602,27 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 		# days to predict
 		test_days = step_out
 
+		# scale data with robust
+		scaler_r = RobustScaler()
+		data_set_scaled = scaler_r.fit_transform(res)
 		# scale data
-		scaler = MinMaxScaler()
-		data_set_scaled = scaler.fit_transform(res)
+		scaler_m = MinMaxScaler()
+		data_set_scaled = scaler_m.fit_transform(data_set_scaled)
 
 		# prepare data for lstm
 		data_set_scaled = np.vstack([data_set_scaled, np.zeros((test_days, data_set_scaled.shape[1]))])
 		X_train, X_test, y_train, y_test = prepare_multidata(data_set_scaled, backcandles, pred_days, test_days)
 
 		n_members = self.n_members
-		epochs = 24 #
-		batch_size = 4
-		ensemble, y_pred_scale, = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
+		epochs = 36  #
+		batch_size = 2
+		ensemble, y_pred_scale = fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs,
 											   batch_size)
 
 		# inverse scaling
-		y_pred = inverse_scaling(res, y_pred_scale, scaler)
+		y_pred_scale = inverse_scaling(res, y_pred_scale, scaler_m)
+
+		y_pred = inverse_scaling(res, y_pred_scale, scaler_r)
 
 		# bounds, mean -> further I only use mean
 		lower, y_mean, upper = calculate_bounds(y_pred)
@@ -638,12 +653,12 @@ class InvestorBiLSTMWindowMinMaxT1T2 (Investor):
 			return -1
 
 def build_model(n_inputs, n_features, n_outputs):
-	opt = Adam(learning_rate=0.001)
+	opt = Adam(learning_rate=0.000224)
 	model = Sequential()
-	model.add(Bidirectional(LSTM(units=200, return_sequences=True,  bias_initializer=initializers.Constant(0.01),
+	model.add(Bidirectional(LSTM(units=150, return_sequences=True,  bias_initializer=initializers.Constant(0.01),
 				   kernel_initializer='he_uniform', input_shape=(n_inputs, n_features))))
 	model.add(Dropout(0.1))
-	model.add(Bidirectional(LSTM(units=200)))
+	model.add(Bidirectional(LSTM(units=100)))
 	model.add(Dropout(0.1))
 	# model.add(Dense(32, kernel_initializer="uniform", activation='relu'))
 	model.add(Dense(units=n_outputs, activation='linear'))

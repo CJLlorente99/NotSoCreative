@@ -132,7 +132,7 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 		res['Diff_open'] = data.Open - data.Open.shift()
 
 		# Diff_outra
-		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+		res['Diff_outra'] = data.Open - data.Close
 
 		# rsi_w44
 		params = RSIInvestorParams(None, None, 44)
@@ -151,7 +151,7 @@ class InvestorLSTMWindowRobustMinMaxT2 (Investor):
 		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
 
 		# Return_intra
-		res['Diff_intra'] = data.Close - data.Open.shift()
+		res['Return_intra'] = np.log(data.Close) - np.log(data.Open.shift())
 
 		# macd_difffW12_sW44_signal3
 		params = MACDInvestorParams(None, None, 12, 44, 3)
@@ -344,7 +344,7 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 		res['Diff_open'] = data.Open - data.Open.shift()
 
 		# Diff_outra
-		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+		res['Diff_outra'] = data.Open - data.Close
 
 		# rsi_w44
 		params = RSIInvestorParams(None, None, 44)
@@ -363,7 +363,7 @@ class InvestorLSTMWindowRobustMinMaxT1 (Investor):
 		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
 
 		# Return_intra
-		res['Diff_intra'] = data.Close - data.Open.shift()
+		res['Return_intra'] = np.log(data.Close) - np.log(data.Open.shift())
 
 		# macd_difffW12_sW44_signal3
 		params = MACDInvestorParams(None, None, 12, 44, 3)
@@ -545,7 +545,7 @@ class InvestorLSTMWindowRobustMinMaxT1T2 (Investor):
 		res['Diff_open'] = data.Open - data.Open.shift()
 
 		# Diff_outra
-		res['Return_outra'] = np.log(data.Open) - np.log(data.Close)
+		res['Diff_outra'] = data.Open - data.Close
 
 		# rsi_w44
 		params = RSIInvestorParams(None, None, 44)
@@ -564,7 +564,7 @@ class InvestorLSTMWindowRobustMinMaxT1T2 (Investor):
 		res['adx_w50'] = averageDirectionalMovementIndex(data.High, data.Low, data.Close, params)['adx']
 
 		# Return_intra
-		res['Diff_intra'] = data.Close - data.Open.shift()
+		res['Return_intra'] = np.log(data.Close) - np.log(data.Open.shift())
 
 		# macd_difffW12_sW44_signal3
 		params = MACDInvestorParams(None, None, 12, 44, 3)
