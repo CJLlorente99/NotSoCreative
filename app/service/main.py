@@ -374,6 +374,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			if i not in strategy.getListDfNameInputs():
 				aux.append(i)
 
+		print(f'strategy {strategy.name}, inputsData {inputsData.colums}, list inputs {aux+strategy.getListDfNameInputs()}')
+
 		inputsData = inputsDf[aux + strategy.getListDfNameInputs()]
 
 		aux = pd.DataFrame()
