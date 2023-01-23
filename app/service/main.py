@@ -202,7 +202,10 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 
 	data = pd.DataFrame()
 
+	print(f' calculated inputs {inputs}')
+
 	for inp in inputs:
+		print(f' calculated inputs {inp.name}')
 		name = inp.name
 		dfName = inp.dfName
 		key = inp.keyName
