@@ -18,7 +18,7 @@ class BiLSTMWindowRobMMT1T2(DailyStrategy):
 
 	def calculatePrediction(self, data):
 		# data is already shifted when it comes here
-		res = data[data.columns].drop([['Open', 'Close', 'High', 'Low']], axis=1)
+		res = data[data.columns]
 
 		df_log = np.sqrt(np.log(data.Open))
 		df_log_diff = df_log - df_log.shift()
