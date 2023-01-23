@@ -202,7 +202,10 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 
 	data = pd.DataFrame()
 
+	print(f' calculated inputs {inputs}')
+
 	for inp in inputs:
+		print(f' calculated inputs {inp.name}')
 		name = inp.name
 		dfName = inp.dfName
 		key = inp.keyName
@@ -373,6 +376,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		for i in ['Open', 'Close', 'High', 'Low', 'Volume']:
 			if i not in strategy.getListDfNameInputs():
 				aux.append(i)
+
+		print(f'strategy {strategy.name}, inputsData {inputsDf.columns}, list inputs {aux+strategy.getListDfNameInputs()}')
 
 		inputsData = inputsDf[aux + strategy.getListDfNameInputs()]
 

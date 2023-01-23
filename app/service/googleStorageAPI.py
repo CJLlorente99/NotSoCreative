@@ -9,7 +9,8 @@ projectName = 'datascienceii'
 bucketName = 'datascienceii'
 objectNameDf = 'myData.csv'
 objectNameJson = 'strategies.json'
-credentials = './application_default_credentials.json'
+credentials = '/home/carlosllocor/NotSoCreative/app/service/application_default_credentials.json'
+# credentials = './application_default_credentials.json'
 
 
 def readBlobDf():
@@ -46,6 +47,22 @@ def updateBlobJson(jsonData):
 	blob = bucket.blob(objectNameJson)
 	blob.upload_from_string(jsonData)
 
+def calculateOperation(value: str):
+	if value.endswith('09:30:00'):
+		return 0
+	elif value.endswith('16:00:00'):
+		return 1
+	else:
+		return 2  # never
+
 if __name__ == '__main__':
 	df = readBlobDf()
-	print(df)
+
+	aux = df[df['investorStrategy'] == 'ca']
+
+	aux['operation'] = aux['Date'].map(calculateOperation)
+
+	# only morning data
+	print(aux['operation'] == 0)
+	# only afternoon data
+	print(aux['operation'] == 1)
