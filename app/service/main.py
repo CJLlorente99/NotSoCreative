@@ -154,6 +154,7 @@ def retrieveStockData(todayDate: datetime.date, operation) -> pd.DataFrame():
 	while len(data) == 0 and numRetries < retryTime/intervalRetry:
 		time.sleep(intervalRetry)
 		numRetries += 1
+		logManager.writeLog('INFO', 'Try number ' + str(numRetries) + ' to retrieve Stock Data')
 		data = yf.download('^GSPC', start=startDate, end=todayDate + CDay(calendar=USFederalHolidayCalendar()))
 
 	res = checkStockOpened(data, todayDate)
@@ -203,7 +204,6 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 	data = pd.DataFrame()
 
 	for inp in inputs:
-		print(f' calculated inputs {inp.name}, df name {inp.dfName}, key {inp.keyName}')
 		name = inp.name
 		dfName = inp.dfName
 		key = inp.keyName
@@ -272,7 +272,6 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 					window = param.value
 
 			data[dfName] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], window)[key]
-			print(averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], window)[key])
 		elif name == 'aroon':
 			for param in parameters:
 				if param.name == 'Window':
@@ -328,14 +327,14 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 
 			data[dfName] = stochasticRSI(df['Close'], window, smooth1, smooth2)[key]
 
+		logManager.writeLog('INFO', name + ' input calculated')
+
 	# Close and Open should ALWAYS be in
 	data['Open'] = df['Open']
 	data['Close'] = df['Close']
 	data['High'] = df['High']
 	data['Low'] = df['Low']
 	data['Volume'] = df['Volume']
-
-	print(f'df names {data.columns}')
 
 	status = True
 	errMsg = 'calculateInputs OK'
@@ -378,8 +377,6 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			if i not in strategy.getListDfNameInputs():
 				aux.append(i)
 
-		print(f'strategy {strategy.name}, inputsData {inputsDf.columns}, list inputs {aux+strategy.getListDfNameInputs()}')
-
 		inputsData = inputsDf[aux + strategy.getListDfNameInputs()]
 
 		aux = pd.DataFrame()
@@ -414,6 +411,8 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux.set_index('Date', inplace=True)
 
 		entry = pd.concat([entry, aux])
+
+		logManager.writeLog('INFO', name + ' calculated')
 
 	status = True
 	errMsg = 'runStrategies OK'
