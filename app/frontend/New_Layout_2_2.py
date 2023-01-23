@@ -14,7 +14,7 @@ from datetime import datetime
 from matplotlib.pyplot import figure
 from matplotlib.figure import Figure
 from PIL import Image
-
+from datetime import datetime
 
 
 ########## Functions #########
@@ -26,6 +26,40 @@ from PIL import Image
 consider_date = 3
 
 date_test = "2023-01-03"
+
+def donut_plot(data,a,f):
+
+    #widgets = important_Values_frame.grid_slaves(row=0,column=0)
+    #widgets[0].destroy()
+
+    colors=['#FFA500', '#0000FF']
+    labels=['Cash'+'\n'+'{}$'.format(str(data[0])),'Stocks'+'\n'+'{}$'.format(str(data[0]))]
+    slaves = important_Values_frame.grid_slaves(row=0,column=0)
+
+    a.clear()
+
+    if ctk.get_appearance_mode() == 'Dark':
+
+
+        a.set_title( r"$\bf{Portfolio}$",color='white',fontsize=18, )
+        plt.rcParams['text.color'] = 'white'
+        f.patch.set_facecolor('#2B2B2B')
+        a.pie(data, radius=1, wedgeprops=dict(width=0.5), colors=colors, labels=labels)
+
+
+    else:
+
+        f = Figure(figsize=(4,4))
+        a = f.add_subplot(111)
+        a.set_title(r"$\bf{Portfolio}$", color='black', fontsize=18, )
+        a.set_title('Portfolio')
+        f.patch.set_facecolor('#DBDBDB')
+        plt.rcParams['text.color'] = 'black'
+        a.pie(data, radius=1, wedgeprops=dict(width=0.5), colors=colors, labels=labels)
+
+    return f
+
+
 
 
 def show_metrics(data_n, var, date_test):
@@ -234,20 +268,9 @@ def openNewWindow():
     # sets the geometry of toplevel
     newWindow.geometry("300x300")
     # A Label widget to show in toplevel
-    #Label(newWindow,
-          #).pack()
 
 
-# changes dappearance mode
-def change_appearance_mode_event(new_appearance_mode: str):
-    ctk.set_appearance_mode(new_appearance_mode)
-    ctk.get_appearance_mode()
 
-
-# changes scaliing
-def change_scaling_event(new_scaling: str):
-    new_scaling_float = int(new_scaling.replace("%", "")) / 100
-    ctk.set_widget_scaling(new_scaling_float)
 
 ########## Main Frontend#########
 
@@ -256,7 +279,7 @@ ctk.set_default_color_theme("blue")
 
 # Main Window
 root = ctk.CTk()
-root.geometry('8000x600')
+root.geometry('800x600')
 root.title("Stock Market Prediction Engine")
 
 # configure the grid
@@ -267,6 +290,7 @@ root.grid_rowconfigure((0, 1, 2), weight=1)
 switch_var = ctk.StringVar(value="off")
 
 
+
 ####### UPDATE START##########
 def update():
 
@@ -275,13 +299,24 @@ def update():
     ctk.set_widget_scaling(new_scaling_float)
 
     df = pd.read_csv("NewData.csv")
-    investorStrategy = 'ca'
+    investorStrategy = 'random'
     MoneyInvestedToday = getCurrentValue(df, investorStrategy, 'MoneyInvestedToday')
 
     # Not actual open price but start value of new day
     NewDayValue = df.iloc[11::22, :]
 
+    cash = round(getCurrentValue(df, investorStrategy, 'MoneyNotInvested'), 2)
+    stocks = round(getCurrentValue(df, investorStrategy, 'TotalPortfolioValue') - getCurrentValue(df, investorStrategy,'MoneyNotInvested'),2)
 
+    if stocks > 0:
+        stocks = stocks
+    else:
+        stocks = 0
+
+    pf = [cash, stocks]
+
+    pfv = FigureCanvasTkAgg(donut_plot(pf,a,f), important_Values_frame)
+    pfv.get_tk_widget().grid(row=0, column=0, padx=20,pady=(10, 0))
 
     sidebar_label_2.configure(text=str(round(getCurrentValue(df, investorStrategy, 'TotalPortfolioValue'),2)))
     sidebar_label_4.configure(text=str(round(getCurrentValue(df, investorStrategy, 'perGain'), 2)))
@@ -307,6 +342,15 @@ def update():
 
     df_investorStrategy =df.loc[df['investorStrategy'] == investorStrategy]
 
+
+    lastDates=[]
+
+    for dates in df_investorStrategy.Date:
+        dates = dates[:-9]
+        lastDates.append(dates)
+
+
+
     lastDecisions = []
     for (columnName, columnData) in df_investorStrategy["MoneyInvestedToday"].items():
         if columnData > 0:
@@ -325,20 +369,23 @@ def update():
         labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
 
     elif len(lastDecisions) == 2:
-        labelLRecommend1.configure(text=lastDecisions[-2], font=ctk.CTkFont(size=16))
+        labelLRecommend1.configure(text=str(lastDates[-2]) + ':    '+lastDecisions[-2], font=ctk.CTkFont(size=16))
 
     elif len(lastDecisions) == 3:
-        labelLRecommend1.configure(text=lastDecisions[-2], font=ctk.CTkFont(size=16))
-        labelLRecommend2.configure(text=lastDecisions[-3], font=ctk.CTkFont(size=16))
+        labelLRecommend1.configure(text=str(lastDates[-2]) + ':    '+ lastDecisions[-2], font=ctk.CTkFont(size=16))
+        labelLRecommend2.configure(text=str(lastDates[-4]) + ':    '+lastDecisions[-3], font=ctk.CTkFont(size=16))
     elif len(lastDecisions) > 3:
-        labelLRecommend1.configure(text=lastDecisions[-2], font=ctk.CTkFont(size=16))
-        labelLRecommend2.configure(text=lastDecisions[-3], font=ctk.CTkFont(size=16))
-        labelLRecommend3.configure(text=lastDecisions[-4], font=ctk.CTkFont(size=16))
+        labelLRecommend1.configure(text=str(lastDates[-2]) + ':    '+ lastDecisions[-2], font=ctk.CTkFont(size=16))
+        labelLRecommend2.configure(text=str(lastDates[-3]) + ':    '+lastDecisions[-3], font=ctk.CTkFont(size=16))
+        labelLRecommend3.configure(text=str(lastDates[-4]) + ':    '+ lastDecisions[-4], font=ctk.CTkFont(size=16))
 
     labelL2.configure(text=str(round(getCurrentValue(df, investorStrategy, 'MoneyInvested'), 2)))
     labelL4.configure(text=str(round(getCurrentValue(df, investorStrategy, 'MoneyNotInvested'), 2)))
     labelL6.configure(text=str(round(getCurrentValue(df, investorStrategy, 'StdPV'), 2)))
     labelL8.configure(text=str(round(getCurrentValue(df, investorStrategy, 'maxGain'), 2)))
+
+
+
 
     NewDayValue.columns
     # ,"TotalPortfolioValue", "MPV", "absGain","perGain", "MoneyInvestedToday"
@@ -364,7 +411,7 @@ def update():
     #####Update Candlesticks######
     # test
     line = FigureCanvasTkAgg(show_graph_test(NewDayValue, data_n, date_test), label_test)
-    line.get_tk_widget().place(width=600, height=350)
+    line.get_tk_widget().place(width=800, height=450)
     # Navigation bar
     toolbarFrame = Frame(master=label_test)
     toolbarFrame.place(x=0, y=450)
@@ -449,10 +496,9 @@ def color_mode():
     return color
 
 
-fig = mpf.figure()
 
 df = pd.read_csv("NewData.csv")
-investorStrategy = 'ca'
+investorStrategy = 'random'
 MoneyInvestedToday = getCurrentValue(df, investorStrategy, 'MoneyInvestedToday')
 
 # Not actual open price but start value of new day
@@ -506,51 +552,71 @@ apply_update_button.pack(side=TOP, padx=20, pady=(15, 15))
 
 
 
-# scaling_label.grid(row=10, column=0, padx=20, pady=(10, 0))
-
-
-
-
-
-
-
-
-
 ######################Value on left side (Middle)################
 
 # create recommendation frame
-recommendation_frame = ctk.CTkFrame(root)
-recommendation_frame.grid(row=0, column=1, padx=(20, 20), pady=(10, 5), sticky="nsew")
+important_Values_frame = ctk.CTkFrame(root)
+important_Values_frame.grid(row=0, column=1, padx=(20, 20), pady=(10, 5), sticky="nsew")
+important_Values_frame.grid_rowconfigure(3, weight=1)
+important_Values_frame.grid_columnconfigure(3,weight=1)
 
-sidebar_label_1 = ctk.CTkLabel(recommendation_frame, text='Portfolio Value ($):', font=ctk.CTkFont(size=16, weight='bold'))
-# sidebar_label_1.grid(row=1, column=0, padx=20,pady=(10,0))
-sidebar_label_1.pack(side=TOP, padx=20, pady=(50, 0))
-sidebar_label_2 = ctk.CTkLabel(recommendation_frame,
+cash = round(getCurrentValue(df,investorStrategy,'MoneyNotInvested'),2)
+stocks = round(getCurrentValue(df,investorStrategy,'TotalPortfolioValue')- getCurrentValue(df,investorStrategy,'MoneyNotInvested'),2)
+
+if stocks>0:
+    stocks =stocks
+else:
+    stocks=0
+
+pf =[cash,stocks]
+
+f = Figure(figsize=(4, 4), dpi=100)
+a = f.add_subplot(111)
+
+pfv = FigureCanvasTkAgg(donut_plot(pf,a,f),important_Values_frame)
+pfv.get_tk_widget().grid(row=0, column=0, padx=20,pady=(10, 0))
+
+
+sidebar_label_1 = ctk.CTkLabel(important_Values_frame, text='Portfolio Value ($):', font=ctk.CTkFont(size=16, weight='bold'))
+sidebar_label_1.grid(row=1, column=0, padx=20,pady=(10,0))
+#sidebar_label_1.pack(side=TOP, padx=20, pady=(50, 0))
+sidebar_label_2 = ctk.CTkLabel(important_Values_frame,
                                text=str(round(getCurrentValue(df, investorStrategy, 'TotalPortfolioValue'), 2)),
                                font=ctk.CTkFont(size=16))
-# sidebar_label_2.grid(row=2, column=0, padx=20)
-sidebar_label_2.pack(side=TOP, padx=20)
-sidebar_label_3 = ctk.CTkLabel(recommendation_frame, text=' Gain(%):', font=ctk.CTkFont(size=16, weight='bold'))
-# sidebar_label_3.grid(row=3, column=0, padx=20 ,pady=(10,0))
-sidebar_label_3.pack(side=TOP, padx=20, pady=(10, 0))
-sidebar_label_4 = ctk.CTkLabel(recommendation_frame, text=str(round(getCurrentValue(df, investorStrategy, 'perGain'), 2)),
+sidebar_label_2.grid(row=2, column=0, padx=20)
+#sidebar_label_2.pack(side=TOP, padx=20)
+
+sidebar_label_3 = ctk.CTkLabel(important_Values_frame, text=' Gain(%):', font=ctk.CTkFont(size=16, weight='bold'))
+sidebar_label_3.grid(row=1, column=1, padx=20 ,pady=(10,0))
+#sidebar_label_3.pack(side=TOP, padx=20, pady=(10, 0))
+sidebar_label_4 = ctk.CTkLabel(important_Values_frame, text=str(round(getCurrentValue(df, investorStrategy, 'perGain'), 2)),
                                font=ctk.CTkFont(size=16))
-# sidebar_label_4.grid(row=4, column=0, padx=20)
-sidebar_label_4.pack(side=TOP, padx=20)
-sidebar_label_5 = ctk.CTkLabel(recommendation_frame, text='Mean Portfolio Value ($):',
+sidebar_label_4.grid(row=2, column=1, padx=20)
+#sidebar_label_4.pack(side=TOP, padx=20)
+sidebar_label_5 = ctk.CTkLabel(important_Values_frame, text='Mean Portfolio Value ($):',
                                font=ctk.CTkFont(size=16, weight='bold'))
-# sidebar_label_5.grid(row=5, column=0, padx=20,pady=(10,0))
-sidebar_label_5.pack(side=TOP, padx=20, pady=(10, 0))
-sidebar_label_6 = ctk.CTkLabel(recommendation_frame, text=str(round(getCurrentValue(df, investorStrategy, 'MPV'), 2)),
+sidebar_label_5.grid(row=1, column=2, padx=20,pady=(10,0))
+#sidebar_label_5.pack(side=TOP, padx=20, pady=(10, 0))
+sidebar_label_6 = ctk.CTkLabel(important_Values_frame, text=str(round(getCurrentValue(df, investorStrategy, 'MPV'), 2)),
                                font=ctk.CTkFont(size=16))
-# sidebar_label_6.grid(row=6, column=0, padx=20)
-sidebar_label_6.pack(side=TOP, padx=20)
+sidebar_label_6.grid(row=2, column=2, padx=20)
+#sidebar_label_6.pack(side=TOP, padx=20)
+
+
+
+
+recommendation_frame = ctk.CTkFrame(root)
+recommendation_frame.grid(row=1, column=1, padx=(20, 20), pady=(10, 5), sticky="nsew")
+recommendation_frame.grid_rowconfigure(4, weight=1)
+recommendation_frame.grid_columnconfigure(2,weight=1)
 
 labelrecommend = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=22, weight="bold"))
-labelrecommend.pack(side=TOP, padx=10, pady=(40, 5))
+labelrecommend.grid(row=0,column=0,padx=(20,10), pady=(20, 5))
+#labelrecommend.pack(side=TOP, padx=10, pady=(40, 5))
 labelcurrentRecommend = ctk.CTkLabel(recommendation_frame, text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
                        text_color=get_Color_Buy_Up())
-labelcurrentRecommend.pack(side=TOP, pady=(5,0), padx=20)
+labelcurrentRecommend.grid(row=1,column=0,pady=(5,5), padx=(20,10))
+#labelcurrentRecommend.pack(side=TOP, pady=(5,0), padx=20)
 
 if MoneyInvestedToday > 0:
     labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
@@ -572,13 +638,17 @@ lastDecisions.append(decision)
 # print last 3 decsions depending on the amounts of available taken decisions
 labelLastRecommend = ctk.CTkLabel(recommendation_frame, text='Last 3 Recommendations', font=ctk.CTkFont(size=18, weight="bold"))
 # labelL3.grid(row=2, column=1, pady=10, padx=20, sticky="n")
-labelLastRecommend.pack(side=TOP, pady=(10, 5), padx=20)
+#labelLastRecommend.pack(side=TOP, pady=(10, 5), padx=20)
+labelLastRecommend.grid(row=0,column=1,pady=(20, 5), padx=(100,20))
 labelLRecommend1 = ctk.CTkLabel(recommendation_frame, text='No Last Recommendation', font=ctk.CTkFont(size=16))
-labelLRecommend1.pack(side=TOP, pady=10, padx=20)
+#labelLRecommend1.pack(side=TOP, pady=10, padx=20)
+labelLRecommend1.grid(row=1,column=1,pady=5, padx=(100,20))
 labelLRecommend2 = ctk.CTkLabel(recommendation_frame,text="",font=ctk.CTkFont(size=16))
-labelLRecommend2.pack(side=TOP, pady=10, padx=20)
+labelLRecommend2.grid(row=2,column=1,pady=5, padx=(100,20))
+#labelLRecommend2.pack(side=TOP, pady=10, padx=20)
 labelLRecommend3 = ctk.CTkLabel(recommendation_frame,text='', font=ctk.CTkFont(size=16))
-labelLRecommend3.pack(side=TOP, pady=10, padx=20)
+labelLRecommend3.grid(row=3,column=1,pady=5, padx=(100,20))
+#labelLRecommend3.pack(side=TOP, pady=10, padx=20)
 
 if len(lastDecisions) <= 1:
     labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
@@ -596,7 +666,7 @@ elif len(lastDecisions) > 3:
 
 # create value frame
 values_frame = ctk.CTkFrame(root)
-values_frame.grid(row=1, column=1, rowspan=2, padx=(20, 20), pady=(5, 10), sticky="nsew")
+values_frame.grid(row=2, column=1, rowspan=2, padx=(20, 20), pady=(5, 10), sticky="nsew")
 
 labelL1 = ctk.CTkLabel(values_frame, text='Invested Money ($):', font=ctk.CTkFont(size=16, weight="bold"))
 # labelL1.grid(row=1, column=1, pady=10, padx=20, sticky="n")
