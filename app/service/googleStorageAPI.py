@@ -20,7 +20,7 @@ def readBlobDf():
 	blob = bucket.blob(objectNameDf)
 	try:
 		contents = StringIO(blob.download_as_string().decode('utf-8'))
-		df = pd.read_csv(contents)
+		df = pd.read_csv(contents, index_col=['Date'])
 	except:
 		df = pd.DataFrame()
 	return df
