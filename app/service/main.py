@@ -203,7 +203,7 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 	data = pd.DataFrame()
 
 	for inp in inputs:
-		print(f' calculated inputs {inp.name}, df name {inp.dfName}')
+		print(f' calculated inputs {inp.name}, df name {inp.dfName}, key {inp.key}')
 		name = inp.name
 		dfName = inp.dfName
 		key = inp.keyName
@@ -272,6 +272,7 @@ def calculateInputs(df: pd.DataFrame, inputs: [StrategyInput], operation):
 					window = param.value
 
 			data[dfName] = averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], window)[key]
+			print(averageDirectionalMovementIndex(df['High'], df['Low'], df['Close'], window)[key])
 		elif name == 'aroon':
 			for param in parameters:
 				if param.name == 'Window':
