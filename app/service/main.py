@@ -15,6 +15,9 @@ from strategies.idle import Idle
 from strategies.bilstmWindowRobMMT1T2 import BiLSTMWindowRobMMT1T2
 from strategies.bilstmWindowRobMMT1 import BiLSTMWindowRobMMT1
 from strategies.bilstmWindowRobMMT2 import BiLSTMWindowRobMMT2
+from strategies.lstmWindowRobustMMT2 import LSTMWindowRobMMT2
+from strategies.bilstmWindowRobustMMT1Legacy import BiLSTMWindowRobMMT1Legacy
+from strategies.bilstmWindowRobustMMT1T2Legacy import BiLSTMWindowRobMMT1T2Legacy
 from logManager.logManager import LogManager
 from jsonManagement.inversionStrategyJSONAPI import *
 from taAPI import *
@@ -392,12 +395,18 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 			aux = Random(strategyInfo, strategy).broker(operation, inputsData)
 		elif name.startswith('idle'):
 			aux = Idle(strategyInfo, strategy).broker(operation, inputsData)
-		elif name.startswith('lstmWindowRobMMT1T2'):
+		elif name.startswith('bilstmWindowRobMMT1T2'):
 			aux = BiLSTMWindowRobMMT1T2(strategyInfo, strategy).broker(operation, inputsData)
-		elif name.startswith('lstmWindowRobMMT1'):
+		elif name.startswith('bilstmWindowRobMMT1'):
 			aux = BiLSTMWindowRobMMT1(strategyInfo, strategy).broker(operation, inputsData)
-		elif name.startswith('lstmWindowRobMMT2'):
+		elif name.startswith('bilstmWindowRobMMT2'):
 			aux = BiLSTMWindowRobMMT2(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('lstmWindowRobMMT2'):
+			aux = LSTMWindowRobMMT2(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('bilstmWindowRobMMT1Legacy'):
+			aux = BiLSTMWindowRobMMT1Legacy(strategyInfo, strategy).broker(operation, inputsData)
+		elif name.startswith('bilstmWindowRobMMT1T2Legacy'):
+			aux = BiLSTMWindowRobMMT1T2Legacy(strategyInfo, strategy).broker(operation, inputsData)
 
 		if name in ['wia', 'bia'] and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
