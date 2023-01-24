@@ -22,10 +22,10 @@ from classes.experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2021-01-01', '2021-01-30')
+    dataGetter = DataGetter('2022-12-01', '2022-12-30')
 
     # Run various experiments
-    numExperiments = 20
+    numExperiments = 4
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -38,43 +38,6 @@ def main():
         initDate = pd.DatetimeIndex([dataGetter.today])
         # Load data
         df = dataGetter.getPastData()
-
-        # """
-        # BiLSTM MinMax
-        # """
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorBiLSTMWindowMMT1 = InvestorBiLSTMWindowMinMaxT1(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT1, "bilstmWindowMMT1",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+3)
-        # investorBiLSTMWindowMMT2 = InvestorBiLSTMWindowMinMaxT2(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT2, "bilstmWindowMMT2",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorBiLSTMWindowMMT1T2 = InvestorBiLSTMWindowMinMaxT1T2(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT1T2, "bilstmWindowMMT1T2",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # """
-        # BiLSTM MinMax Legacy
-        # """
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorBiLSTMWindowMMT1Legacy = InvestorBiLSTMWindowMinMaxT1Legacy(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT1Legacy, "bilstmWindowMMT1Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+3)
-        # investorBiLSTMWindowMMT2Legacy = InvestorBiLSTMWindowMinMaxT2Legacy(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT2Legacy, "bilstmWindowMMT2Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorBiLSTMWindowMMT1T2Legacy = InvestorBiLSTMWindowMinMaxT1T2Legacy(10000, 5)
-        # experimentManager.addStrategy(investorBiLSTMWindowMMT1T2Legacy, "bilstmWindowMMT1T2Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
 
         """
         BiLSTM RobMinMax
@@ -112,63 +75,6 @@ def main():
         # Create investor based on window forecasting (open_t - open_t+2)
         investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 1)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1T2Legacy, "bilstmWindowRobMMT1T2Legacy",
-                                      [experimentManager.createTIInput("df")], True)
-
-        # """
-        # LSTM MinMax
-        # """
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorLSTMWindowMMT1 = InvestorLSTMWindowMinMaxT1(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT1, "lstmWindowMMT1",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+3)
-        # investorLSTMWindowMMT2 = InvestorLSTMWindowMinMaxT2(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT2, "lstmWindowMMT2",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorLSTMWindowMMT1T2 = InvestorLSTMWindowMinMaxT1T2(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT1T2, "lstmWindowMMT1T2",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # """
-        # LSTM MinMax Legacy
-        # """
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorLSTMWindowMMT1Legacy = InvestorLSTMWindowMinMaxT1Legacy(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT1Legacy, "lstmWindowMMT1Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+3)
-        # investorLSTMWindowMMT2Legacy = InvestorLSTMWindowMinMaxT2Legacy(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT2Legacy, "lstmWindowMMT2Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
-        #
-        # # Create investor based on window forecasting (open_t - open_t+2)
-        # investorLSTMWindowMMT1T2Legacy = InvestorLSTMWindowMinMaxT1T2Legacy(10000, 5)
-        # experimentManager.addStrategy(investorLSTMWindowMMT1T2Legacy, "lstmWindowMMT1T2Legacy",
-        #                               [experimentManager.createTIInput("df")], True)
-
-        """
-        LSTM RobMinMax
-        """
-
-        # Create investor based on window forecasting (open_t - open_t+2)
-        investorLSTMWindowRobMMT1 = InvestorLSTMWindowRobustMinMaxT1(10000, 1)
-        experimentManager.addStrategy(investorLSTMWindowRobMMT1, "lstmWindowRobMMT1",
-                                      [experimentManager.createTIInput("df")], True)
-
-        # Create investor based on window forecasting (open_t - open_t+3)
-        investorLSTMWindowRobMMT2 = InvestorLSTMWindowRobustMinMaxT2(10000, 1)
-        experimentManager.addStrategy(investorLSTMWindowRobMMT2, "lstmWindowRobMMT2",
-                                      [experimentManager.createTIInput("df")], True)
-
-        # Create investor based on window forecasting (open_t - open_t+2)
-        investorLSTMWindowRobMMT1T2 = InvestorLSTMWindowRobustMinMaxT1T2(10000, 1)
-        experimentManager.addStrategy(investorLSTMWindowRobMMT1T2, "lstmWindowRobMMT1T2",
                                       [experimentManager.createTIInput("df")], True)
 
         """
@@ -254,7 +160,7 @@ def main():
         # To compensate the last goNextDay()
         lastDate = pd.DatetimeIndex([(dataGetter.today - CDay(calendar=USFederalHolidayCalendar()))])
         # Prepare next first day
-        dataGetter.today += CDay(5, calendar=USFederalHolidayCalendar())
+        dataGetter.today += CDay(0, calendar=USFederalHolidayCalendar())
 
         # Deal with experiment data
         aux = pd.concat([auxLoop, experimentManager.returnExpData()], axis=1)
