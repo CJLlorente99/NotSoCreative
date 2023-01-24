@@ -87,6 +87,7 @@ class BiLSTMWindowRobMMT1T2Legacy(DailyStrategy):
 
 		y_predictions.append(np.asarray(y_mean))
 		y_mean = np.asarray(y_mean).flatten()
+		print(f'BiLSTMWindowRobMMT1T2Legacy {y_mean}')
 
 		# build decision rule
 		if data.Open.values[-1] < y_mean[1] < y_mean[2]:
