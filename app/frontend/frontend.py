@@ -4,7 +4,7 @@ from tkinter import ttk
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime as dt
+from datetime import timedelta
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import *
@@ -21,8 +21,8 @@ from googleStorageAPI import readBlobDf
 
 # Constants
 yfStartDate = '2021-01-01'
-date_test = '2023-01-16'
-strategyName = 'bilstmWindowRobMMT1T2Legacy_23_1_2023'
+date_test = '2023-01-17'
+strategyName = 'random_10_1_2022'
 
 # Globals
 global metrics
@@ -57,8 +57,8 @@ def decision(value):
 		return 0
 
 def refreshDataSP500():
-	end = date.today()
-	stock_data = yf.download('^GSPC', start=yfStartDate, end= end)
+	end = date.today() + timedelta(days=1)
+	stock_data = yf.download('^GSPC', start=yfStartDate, end=end)
 	stock_data = stock_data.reset_index()
 	stock_data.set_index(pd.DatetimeIndex(stock_data['Date']), inplace=True)
 	stock_data.drop(['Date'], axis=1, inplace=True)
@@ -68,45 +68,32 @@ def refreshDataSP500():
 def refreshDataStrategy():
 
 	# strategy data
-	df = readBlobDf()
-	df['operation'] = df['Date'].map(calculateOperation)
-	df['shortenedDate'] = df['Date'].map(shortenedDate)
+	df_morning = readBlobDf()
 
-	# let's get rid of all afternoon operations
-
-	df_morning = df.copy()
-	df_morning = df_morning[df_morning['operation'] == 0]
-
-	# get rid of old strategies that are not updated anymore
-	# note latest date in the data frame, which strategies were alive then?
+	# just get "active" strategies
 	latestDate = df_morning['Date'].unique()[-1]
 	strategiesAlive = df_morning[df_morning['Date'] == latestDate]['investorStrategy'].values
 
 	df_morning = df_morning[df_morning['investorStrategy'].isin(strategiesAlive)]
+
+	df_morning['operation'] = df_morning['Date'].map(calculateOperation)
+	df_morning['shortenedDate'] = df_morning['Date'].map(shortenedDate)
+
+	# let's get rid of all afternoon operations
+	df_morning = df_morning[df_morning['operation'] == 0]
 
 	# change format of index
 	df_morning.set_index(pd.DatetimeIndex(df_morning["shortenedDate"]), inplace=True)
 	df_morning.drop(["Date", 'shortenedDate'], axis=1, inplace=True)
 	df_morning.index.name = "Date"
 
-	# ,"TotalPortfolioValue", "MPV", "absGain","perGain", "MoneyInvestedToday"
-	# Preparing data for candlesticks: Necessary data for candlesticks: "Date","Open","High","Low","Close","Volume"
-	df_morning = df_morning[
-		["Open", "High", "Low", "Close", "Volume", "TotalPortfolioValue",
-		 "MoneyInvestedToday","MoneyNotInvested","MoneyInvested", 'investorStrategy']]
-
-	# group each strategy info into a dict entry
-	strategyDatas = {}
-	for strategy in strategiesAlive:
-		strategyDatas[strategy] = df_morning[df_morning["investorStrategy"] == strategy]
-
-	return strategyDatas[strategyName]
+	return df_morning[df_morning["investorStrategy"] == strategyName]
 
 def getCurrentValue_metric(stock_data, strategyData):
 
 	res = {}
 	# Date info
-	res['Date'] = stock_data.index.values
+	res['Date'] = np.append(stock_data.index.values, stock_data.index.values[-1])
 
 	# PortfolioValues
 	actualPortfolioValue = strategyData['MoneyInvested'].values[-1] * stock_data['Close'].values[-1] / \
@@ -118,28 +105,28 @@ def getCurrentValue_metric(stock_data, strategyData):
 
 	# MPV
 	x = np.array([])
-	for i in range(len(strategyData)):
-		np.append(x, aux[:i].mean())
+	for i in range(len(aux)):
+		x = np.append(x, aux[:i+1].mean())
 	res['MPV'] = x
 
 	# Gain (%)
 	initialPV = strategyData['TotalPortfolioValue'][0]
 	x = np.array([])
-	for i in range(len(strategyData)):
-		np.append(x, (aux[i] - initialPV)/initialPV*100)
+	for i in range(len(aux)):
+		x = np.append(x, (aux[i] - initialPV)/initialPV*100)
 	res['PerGain'] = x
 
 	# Gain (absolute)
 	initialPV = strategyData['TotalPortfolioValue'][0]
 	x = np.array([])
-	for i in range(len(strategyData)):
-		np.append(x, aux[i] - initialPV)
+	for i in range(len(aux)):
+		x = np.append(x, aux[i] - initialPV)
 	res['AbsGain'] = x
 
 	# StdV
 	x = np.array([])
-	for i in range(len(strategyData)):
-		np.append(x, aux[:i].std())
+	for i in range(len(aux)):
+		x = np.append(x, aux[:i+1].std())
 	res['StdPV'] = x
 
 	# MoneyInvested
@@ -150,47 +137,18 @@ def getCurrentValue_metric(stock_data, strategyData):
 	# Money Not Invested
 	res['MoneyNotInvested'] = np.append(strategyData['MoneyNotInvested'].values, strategyData['MoneyNotInvested'].values[-1])
 
+	# Money Invested Today
+	res['MoneyInvestedToday'] = np.append(strategyData['MoneyInvestedToday'].values, strategyData['MoneyInvestedToday'].values[-1])
+
 	# Max Gain
 	x = np.array([0])
-	for i in range(len(strategyData)-1):
-		x = np.append(x, np.diff(aux[:i+1]).max())
-	res['maxGain'] = x
+	for i in range(len(aux)-1):
+		x = np.append(x, np.diff(aux[:i+2]).max())
+	res['MaxGain'] = x
 
 	return res
 
 # -------------------------------------------
-
-def donut_plot(data,a,f):
-
-	#widgets = important_Values_frame.grid_slaves(row=0,column=0)
-	#widgets[0].destroy()
-
-	colors=['#FFA500', '#0000FF']
-	labels=['Cash'+'\n'+'{}$'.format(str(data[0])),'Stocks'+'\n'+'{}$'.format(str(data[0]))]
-	slaves = important_Values_frame.grid_slaves(row=0,column=0)
-
-	a.clear()
-
-	if ctk.get_appearance_mode() == 'Dark':
-
-
-		a.set_title( r"$\bf{Portfolio}$",color='white',fontsize=18, )
-		plt.rcParams['text.color'] = 'white'
-		f.patch.set_facecolor('#2B2B2B')
-		a.pie(data, radius=1, wedgeprops=dict(width=0.5), colors=colors, labels=labels)
-
-
-	else:
-
-		f = Figure(figsize=(4,4))
-		a = f.add_subplot(111)
-		a.set_title(r"$\bf{Portfolio}$", color='black', fontsize=18, )
-		a.set_title('Portfolio')
-		f.patch.set_facecolor('#DBDBDB')
-		plt.rcParams['text.color'] = 'black'
-		a.pie(data, radius=1, wedgeprops=dict(width=0.5), colors=colors, labels=labels)
-
-	return f
 
 def show_metrics(var):
 
@@ -281,10 +239,10 @@ def show_graph_test(data_csv, stock_data):
 	colors_apd = [get_Color_Buy_Up() if v == 1 else get_Color_Hold() if v == 0 else get_Color_Sell_Down() for v in
 				  data_csv['Decision'].values]
 
-	apd = mpf.make_addplot(stock_data["Decision"], type='scatter', marker='^', markersize=200, color=colors_apd)
+	apd = mpf.make_addplot(data_csv["Decision"], type='scatter', marker='^', markersize=200, color=colors_apd)
 
 
-	# plot candelsticks
+	# plot candlesticks
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apd,
 						figsize=(8, 5))
@@ -314,7 +272,7 @@ def get_Color_Sell_Down():
 		color = "#E60400"
 	return color
 
-# get newest decison
+# get newest decision
 def getDecision(MoneyInvestedToday):
 	if MoneyInvestedToday > 0:
 		decision = 'Buy'
@@ -325,7 +283,7 @@ def getDecision(MoneyInvestedToday):
 	return decision
 
 
-# open new window for Informations
+# open new window for Information
 def openNewWindow():
 	# Toplevel object which will
 	# be treated as a new window
@@ -348,13 +306,13 @@ def openNewWindow():
 	#).pack()
 
 
-# changes dappearance mode
+# changes appearance mode
 def change_appearance_mode_event(new_appearance_mode: str):
 	ctk.set_appearance_mode(new_appearance_mode)
 	ctk.get_appearance_mode()
 
 
-# changes scaliing
+# changes scaling
 def change_scaling_event(new_scaling: str):
 	new_scaling_float = int(new_scaling.replace("%", "")) / 100
 	ctk.set_widget_scaling(new_scaling_float)
@@ -384,8 +342,8 @@ stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):]
 
 global metrics
 metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
-strategyDataTest['StrDecision'] = strategyDataTest['PerToInvest'].map(strDecision)
-strategyDataTest['Decision'] = strategyDataTest['PerToInvest'].map(decision)
+strategyDataTest['StrDecision'] = strategyDataTest['MoneyInvestedToday'].map(strDecision)
+strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decision)
 
 
 ####### UPDATE START##########
@@ -402,11 +360,11 @@ def update():
 
 	global metrics
 	metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
-	strategyDataTest['StrDecision'] = strategyDataTest['PerToInvest'].map(strDecision)
-	strategyDataTest['Decision'] = strategyDataTest['PerToInvest'].map(decision)
+	strategyDataTest['StrDecision'] = strategyDataTest['MoneyInvestedToday'].map(strDecision)
+	strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decision)
 
 	# nur letzter Wert
-	sidebar_label_2.configure(text=str(round(metrics['PV'][-1],2))+' $')
+	sidebar_label_2.configure(text=str(round(metrics['PortfolioValue'][-1],2))+' $')
 	sidebar_label_4.configure(text=str(round(metrics['PerGain'][-1], 2))+' %')
 	sidebar_label_6.configure(text=str(round(metrics['MPV'][-1], 2))+' $')
 
@@ -438,7 +396,7 @@ def update():
 
 	# nur letzter Wert
 	labelL6.configure(text=str(round(metrics['StdPV'][-1], 2))+' $')
-	labelL8.configure(text=str(round(metrics['maxGain'][-1], 2))+' %')
+	labelL8.configure(text=str(round(metrics['MaxGain'][-1], 2))+' %')
 
 	#####Update Candlesticks######
 	# test
@@ -447,14 +405,14 @@ def update():
 	# Navigation bar
 	toolbarFrame = Frame(master=label_test)
 	toolbarFrame.place(x=0, y=450)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 	# 1M
 	line = FigureCanvasTkAgg(show_graph(stockData, 18), label_1m)
 	line.get_tk_widget().place(width=800, height=500)
 	# Navigation bar
 	toolbarFrame = Frame(master=label_1m)
 	toolbarFrame.place(x=0, y=450)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# 6M
 	line = FigureCanvasTkAgg(show_graph(stockData, 123), label_6m)
@@ -462,7 +420,7 @@ def update():
 	# Navigation bar
 	toolbarFrame = Frame(master=label_6m)
 	toolbarFrame.place(x=0, y=450)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# 1Y
 	line = FigureCanvasTkAgg(show_graph(stockData, 250), label_1y)
@@ -470,7 +428,7 @@ def update():
 	# Navigation bar
 	toolbarFrame = Frame(master=label_1y)
 	toolbarFrame.place(x=0, y=450)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	###Update Value Graphs####
 	# Mean PV
@@ -479,31 +437,31 @@ def update():
 	# Navigation bar
 	toolbarFrame = Frame(master=label_v_1)
 	toolbarFrame.place(x=0, y=400)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# TotalPortfolioValue
-	line = FigureCanvasTkAgg(show_metrics("PV"), label_v_2)
+	line = FigureCanvasTkAgg(show_metrics("PortfolioValue"), label_v_2)
 	line.get_tk_widget().place(width=800, height=500)
 	# Navigation bar
 	toolbarFrame = Frame(master=label_v_2)
 	toolbarFrame.place(x=0, y=400)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (absolute)
-	line = FigureCanvasTkAgg(show_metrics("absGain"), label_v_3)
+	line = FigureCanvasTkAgg(show_metrics("AbsGain"), label_v_3)
 	line.get_tk_widget().place(width=800, height=500)
 	# Navigation bar
 	toolbarFrame = Frame(master=label_v_3)
 	toolbarFrame.place(x=0, y=400)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (percentage)
-	line = FigureCanvasTkAgg(show_metrics("perGain"), label_v_4)
+	line = FigureCanvasTkAgg(show_metrics("PerGain"), label_v_4)
 	line.get_tk_widget().place(width=800, height=500)
 	# Navigation bar
 	toolbarFrame = Frame(master=label_v_4)
 	toolbarFrame.place(x=0, y=400)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Money Invested Today
 	line = FigureCanvasTkAgg(show_metrics("MoneyInvestedToday"), label_v_5)
@@ -511,7 +469,7 @@ def update():
 	# Navigation bar
 	toolbarFrame = Frame(master=label_v_5)
 	toolbarFrame.place(x=0, y=400)
-	toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 
 ########## Update END#######
@@ -526,13 +484,11 @@ def color_mode():
 		color = 1
 	return color
 
-
 fig = mpf.figure()
 
 # Not actual open price but start value of new day
 
 ########### Start Widgets########
-
 
 ###############Left side##################
 
@@ -575,9 +531,6 @@ scaling_optionmenu.pack(side=TOP, padx=20, pady=(0, 10))
 apply_update_button= ctk.CTkButton(sidebar_frame, text="Apply Changes", command=update)
 apply_update_button.pack(side=TOP, padx=20, pady=(15, 15))
 
-
-
-
 ########### Value Frames################
 important_Values_frame = ctk.CTkFrame(root, height=300)
 important_Values_frame.grid(row=0, column=1, padx=(20, 20), pady=(10, 0), sticky="nsew")
@@ -591,7 +544,7 @@ sidebar_label_1 = ctk.CTkLabel(important_Values_frame, text='Portfolio Value:', 
 sidebar_label_1.pack( padx=20, pady=(0, 0))
 # nur letzter Wert
 sidebar_label_2 = ctk.CTkLabel(important_Values_frame,
-							   text=str(round(metrics["PV"], 2))+' $',
+							   text=str(round(metrics["PortfolioValue"][-1], 2))+' $',
 							   font=ctk.CTkFont(size=16))
 #sidebar_label_2.grid(row=2, column=0, padx=20)
 sidebar_label_2.pack( padx=20, pady=(0,0))
@@ -600,7 +553,7 @@ sidebar_label_2.pack( padx=20, pady=(0,0))
 sidebar_label_3 = ctk.CTkLabel(important_Values_frame, text=' Gain(%):', font=ctk.CTkFont(size=16, weight='bold'))
 #sidebar_label_3.grid(row=1, column=1, padx=20 ,pady=(10,0))
 sidebar_label_3.pack( padx=20, pady=(10, 0))
-sidebar_label_4 = ctk.CTkLabel(important_Values_frame, text=str(round(metrics['PerGain'], 2))+' %',
+sidebar_label_4 = ctk.CTkLabel(important_Values_frame, text=str(round(metrics['PerGain'][-1], 2))+' %',
 							   font=ctk.CTkFont(size=16))
 #sidebar_label_4.grid(row=2, column=1, padx=20)
 sidebar_label_4.pack(padx=20)
@@ -609,13 +562,10 @@ sidebar_label_5 = ctk.CTkLabel(important_Values_frame, text='Mean Portfolio Valu
 							   font=ctk.CTkFont(size=16, weight='bold'))
 #sidebar_label_5.grid(row=1, column=2, padx=20,pady=(10,0))
 sidebar_label_5.pack( padx=20, pady=(10, 0))
-sidebar_label_6 = ctk.CTkLabel(important_Values_frame, text=str(round(metrics['MPV'], 2))+' $',
+sidebar_label_6 = ctk.CTkLabel(important_Values_frame, text=str(round(metrics['MPV'][-1], 2))+' $',
 							   font=ctk.CTkFont(size=16))
 #sidebar_label_6.grid(row=2, column=2, padx=20)
 sidebar_label_6.pack( padx=20)
-
-
-
 
 recommendation_frame = ctk.CTkFrame(root,height=300)
 recommendation_frame.grid(row=1,rowspan=2, column=1, padx=(20, 20), pady=(10, 0), sticky="nsew")
@@ -684,14 +634,14 @@ labelL0.pack(pady=(20, 20), padx=20)
 labelL1 = ctk.CTkLabel(values_frame, text='Invested Money:', font=ctk.CTkFont(size=16, weight="bold"))
 # labelL1.grid(row=1, column=1, pady=10, padx=20, sticky="n")
 labelL1.pack( pady=(10, 0), padx=20)
-labelL2 = ctk.CTkLabel(values_frame, text=str(round(stockDataTest["MoneyInvested"][-1], 2))+' $',
+labelL2 = ctk.CTkLabel(values_frame, text=str(round(strategyData["MoneyInvested"][-1], 2))+' $',
 					   font=ctk.CTkFont(size=16))
 # labelL2.grid(row=2, column=1, pady=10, padx=20, sticky="n")
 labelL2.pack( pady=(0, 0), padx=20)
 labelL3 = ctk.CTkLabel(values_frame, text='Money Not Invested:', font=ctk.CTkFont(size=16, weight="bold"))
 # labelL3.grid(row=3, column=1, pady=10, padx=20, sticky="n")
 labelL3.pack( pady=(0, 0), padx=20)
-labelL4 = ctk.CTkLabel(values_frame, text=str(round(stockDataTest['MoneyNotInvested'][-1], 2))+' $',
+labelL4 = ctk.CTkLabel(values_frame, text=str(round(strategyData['MoneyNotInvested'][-1], 2))+' $',
 					   font=ctk.CTkFont(size=16))
 # labelL4.grid(row=4, column=1, pady=10, padx=20, sticky="n")
 labelL4.pack( pady=(0, 0), padx=20)
@@ -707,7 +657,7 @@ labelL7 = ctk.CTkLabel(values_frame, text='Max Gain per Day:', font=ctk.CTkFont(
 # labelL7.grid(row=7, column=1, pady=10, padx=20, sticky="n")
 labelL7.pack(pady=(0, 0), padx=20)
 # nur letzter Wert
-labelL8 = ctk.CTkLabel(values_frame, text=str(round(metrics['MaxGains'][-1], 2))+' %',
+labelL8 = ctk.CTkLabel(values_frame, text=str(round(metrics['MaxGain'][-1], 2))+' %',
 					   font=ctk.CTkFont(size=16))
 # labelL8.grid(row=8, column=1, pady=10, padx=20, sticky="n")
 labelL8.pack(pady=(0, 10), padx=20)
@@ -715,8 +665,6 @@ labelL8.pack(pady=(0, 10), padx=20)
 ################Plot left side#######################
 
 #########Graph########
-
-
 
 # Plot candlesticks
 
@@ -815,46 +763,43 @@ label_v_5 = ctk.CTkFrame(tabview.tab("Money Invested Today"), width=800, height=
 label_v_5.grid(row=0, column=1)
 
 # Mean PV
-line = FigureCanvasTkAgg(metrics['MPV'][-1], label_v_1)
+line = FigureCanvasTkAgg(show_metrics('MPV'), label_v_1)
 line.get_tk_widget().place(width=800, height=400)
 # Navigation bar
 toolbarFrame = Frame(master=label_v_1)
 toolbarFrame.place(x=0, y=400)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+NavigationToolbar2Tk(line, toolbarFrame)
 
 # TotalPortfolioValue
-line = FigureCanvasTkAgg(metrics['PV'][-1], label_v_2)
+line = FigureCanvasTkAgg(show_metrics('PortfolioValue'), label_v_2)
 line.get_tk_widget().place(width=800, height=400)
 # Navigation bar
 toolbarFrame = Frame(master=label_v_2)
 toolbarFrame.place(x=0, y=400)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+NavigationToolbar2Tk(line, toolbarFrame)
 
 # Gain (absolute)
-line = FigureCanvasTkAgg(metrics['absGain'][-1], label_v_3)
+line = FigureCanvasTkAgg(show_metrics('AbsGain'), label_v_3)
 line.get_tk_widget().place(width=800, height=400)
 # Navigation bar
 toolbarFrame = Frame(master=label_v_3)
 toolbarFrame.place(x=0, y=400)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+NavigationToolbar2Tk(line, toolbarFrame)
 
 # Gain (percentage)
-line = FigureCanvasTkAgg(metrics['PerGain'][-1], label_v_4)
+line = FigureCanvasTkAgg(show_metrics('PerGain'), label_v_4)
 line.get_tk_widget().place(width=800, height=400)
 # Navigation bar
 toolbarFrame = Frame(master=label_v_4)
 toolbarFrame.place(x=0, y=400)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
-
+NavigationToolbar2Tk(line, toolbarFrame)
 
 # Money Invested Today
-line = FigureCanvasTkAgg(strategyDataTest['MoneyInvestedToday'][-1], label_v_5)
+line = FigureCanvasTkAgg(show_metrics('MoneyInvestedToday'), label_v_5)
 line.get_tk_widget().place(width=800, height=400)
 # Navigation bar
 toolbarFrame = Frame(master=label_v_5)
 toolbarFrame.place(x=0, y=400)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
-
-
+NavigationToolbar2Tk(line, toolbarFrame)
 
 root.mainloop()
