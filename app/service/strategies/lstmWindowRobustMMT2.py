@@ -12,6 +12,7 @@ from keras import initializers
 class LSTMWindowRobMMT2(DailyStrategy):
 	def possiblyOperationMorning(self, data):
 		res = self.calculatePrediction(data)
+		print(f'LSTMWindowRobMMT2 res {res}')
 		if self.nonInvestedMoney == 0:
 			x = 0
 		else:
@@ -130,6 +131,7 @@ def fit_ensemble(n_members, X_train, X_test, y_train, y_test, epochs, batch_size
 
 		# evaluate model on the test set
 		yhat = model.predict(X_test, verbose=2)
+		print(f'LSTMWindowRobMMT2 yhat {yhat}, member {i}')
 		mae = mean_absolute_error(y_test, yhat)
 		# store the model and prediction
 		ensemble.append(model)
