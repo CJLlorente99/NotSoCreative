@@ -72,7 +72,7 @@ df['operation'] = df['Date'].map(calculateOperation)
 df_morning = df.copy()
 df_morning = df_morning[df_morning['operation'] == 0]
 
-df=df_morning[df_morning["investorStrategy"]=="ca"]
+df=df_morning[df_morning["investorStrategy"]=="bilstmWindowRobMMT1T2Legacy_25_1_2023"]
 
 
 
