@@ -74,52 +74,6 @@ df_morning = df_morning[df_morning['operation'] == 0]
 
 df=df_morning[df_morning["investorStrategy"]=="ca"]
 
-# for every investor in the df, let's calculate the mpv (only considering morning values)
-mpvs = {}
-for strategy in df_morning['investorStrategy'].unique():
-	mpvs[strategy] = df_morning[df_morning['investorStrategy'] == strategy]['TotalPortfolioValue'].values.mean()
-
-# for every indicator, let's calculate the gain
-gains = {}
-for strategy in df_morning['investorStrategy'].unique():
-	aux = df_morning[df_morning['investorStrategy'] == strategy]['TotalPortfolioValue'].values
-	gains[strategy] = (aux[-1] - aux[0])/aux[0]
-
-# get rid of old strategies that are not updated anymore
-# note latest date in the data frame, which strategies were alive then?
-latestDate = df_morning['Date'].unique()[-1]
-strategiesAlive = df_morning[df_morning['Date'] == latestDate]['investorStrategy'].values
-
-df_morning = df_morning[df_morning['investorStrategy'].isin(strategiesAlive)]
-
-# what if we have a new entry from s&p500
-
-todayData = yf.download('^GSPC', '2023-01-23', '2023-01-24')
-print(todayData)
-
-# calculate updated MPV
-
-updatedmpvs = {}
-for strategy in df_morning['investorStrategy'].unique():
-	aux = df_morning[df_morning['investorStrategy'] == strategy]['TotalPortfolioValue'].values
-	lastMoneyInvested = df_morning[df_morning['investorStrategy'] == strategy]['MoneyInvested'].values[-1]
-	updatedmpvs[strategy] = np.append(aux, todayData['Close'].values[-1]/todayData['Open'].values[-1] * lastMoneyInvested).mean()
-	print(f'{strategy} updatedMPV {updatedmpvs[strategy]}')
-print()
-
-# calculate updated gain
-
-updatedgains = {}
-for strategy in df_morning['investorStrategy'].unique():
-	aux = df_morning[df_morning['investorStrategy'] == strategy]['TotalPortfolioValue'].values
-	updatedMoneyInvested = todayData['Close'].values[-1]/todayData['Open'].values[-1] * df_morning[df_morning['investorStrategy'] == strategy]['MoneyInvested'].values[-1]
-	updatedPortfolioValue = df_morning[df_morning['investorStrategy'] == strategy]['MoneyNotInvested'].values[-1] + updatedMoneyInvested
-	updatedgains[strategy] = (updatedPortfolioValue - aux[0])/aux[0]
-	print(f'{strategy} updatedGain {updatedgains[strategy]}')
-
-
-
-
 
 
 date_test = "2023-01-04"
@@ -215,6 +169,7 @@ def getCurrentValue_metric(stock_data, data_csv, df_matrix, i_var, k):
     #df_matrix.iloc[i, i_pergain] = ((Capital_start - df_matrix.iloc[i,i_pv] )/Capital_start) * 100
 
 
+
     for i in range(len(df_matrix)):
 
         # Calculate PV = MoneyNotInvested + Amount * Current_Close_Price
@@ -231,7 +186,8 @@ def getCurrentValue_metric(stock_data, data_csv, df_matrix, i_var, k):
         df_matrix.iloc[i, i_MPV] = (df_matrix.iloc[:(i+1), i_pv].sum())/(len(df_matrix.iloc[:(i+1), i_pv]))
 
         # STDV
-        #df_matrix.iloc[i, i_i_StdV] =
+        df_matrix.iloc[i, i_StdV] = df_matrix.iloc[:(i+1), i_pv].std()
+
         # Max. Gain
         df_matrix.iloc[i, i_max_gain] = df_matrix.iloc[:(i+1), i_pergain].max()
 
