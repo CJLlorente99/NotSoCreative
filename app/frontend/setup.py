@@ -1,6 +1,6 @@
 from setuptools import setup
 
-APP=['Layout_2_4.py']
+APP=['frontend.py']
 OPTIONS = {
     'argv_emulation':True,
 }
