@@ -44,17 +44,17 @@ def main():
         """
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorBiLSTMWindowRobMMT1 = InvestorBiLSTMWindowRobustMinMaxT1(10000, 1)
+        investorBiLSTMWindowRobMMT1 = InvestorBiLSTMWindowRobustMinMaxT1(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1, "bilstmWindowRobMMT1",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+3)
-        investorBiLSTMWindowRobMMT2 = InvestorBiLSTMWindowRobustMinMaxT2(10000, 1)
+        investorBiLSTMWindowRobMMT2 = InvestorBiLSTMWindowRobustMinMaxT2(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT2, "bilstmWindowRobMMT2",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorBiLSTMWindowRobMMT1T2 = InvestorBiLSTMWindowRobustMinMaxT1T2(10000, 1)
+        investorBiLSTMWindowRobMMT1T2 = InvestorBiLSTMWindowRobustMinMaxT1T2(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1T2, "bilstmWindowRobMMT1T2",
                                       [experimentManager.createTIInput("df")], True)
 
@@ -63,17 +63,17 @@ def main():
         """
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorBiLSTMWindowRobMMT1Legacy = InvestorBiLSTMWindowRobustMinMaxT1Legacy(10000, 1)
+        investorBiLSTMWindowRobMMT1Legacy = InvestorBiLSTMWindowRobustMinMaxT1Legacy(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1Legacy, "bilstmWindowRobMMT1Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+3)
-        investorBiLSTMWindowRobMMT2Legacy = InvestorBiLSTMWindowRobustMinMaxT2Legacy(10000, 1)
+        investorBiLSTMWindowRobMMT2Legacy = InvestorBiLSTMWindowRobustMinMaxT2Legacy(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT2Legacy, "bilstmWindowRobMMT2Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 1)
+        investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1T2Legacy, "bilstmWindowRobMMT1T2Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
@@ -82,17 +82,17 @@ def main():
         """
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorLSTMWindowRobMMT1Legacy = InvestorLSTMWindowRobustMinMaxT1Legacy(10000, 1)
+        investorLSTMWindowRobMMT1Legacy = InvestorLSTMWindowRobustMinMaxT1Legacy(10000, 5)
         experimentManager.addStrategy(investorLSTMWindowRobMMT1Legacy, "lstmWindowRobMMT1Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+3)
-        investorLSTMWindowRobMMT2Legacy = InvestorLSTMWindowRobustMinMaxT2Legacy(10000, 1)
+        investorLSTMWindowRobMMT2Legacy = InvestorLSTMWindowRobustMinMaxT2Legacy(10000, 5)
         experimentManager.addStrategy(investorLSTMWindowRobMMT2Legacy, "lstmWindowRobMMT2Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorLSTMWindowRobMMT1T2Legacy = InvestorLSTMWindowRobustMinMaxT1T2Legacy(10000, 1)
+        investorLSTMWindowRobMMT1T2Legacy = InvestorLSTMWindowRobustMinMaxT1T2Legacy(10000, 5)
         experimentManager.addStrategy(investorLSTMWindowRobMMT1T2Legacy, "lstmWindowRobMMT1T2Legacy",
                                       [experimentManager.createTIInput("df")], True)
 
