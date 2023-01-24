@@ -22,3 +22,4 @@ def readBlobDf():
 	except:
 		df = pd.DataFrame()
 	return df
+

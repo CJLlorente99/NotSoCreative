@@ -15,10 +15,9 @@ from matplotlib.pyplot import figure
 from matplotlib.figure import Figure
 from PIL import Image
 import yfinance as yf
-from googleStorageAPI import readBlobDf
 import yfinance as yf
 import numpy as np
-
+from googleStorageAPI import readBlobDf
 ########## Functions #########
 
 # Define the dates that we want to consider for our candlestick graph (test) & our Finance metrics
@@ -73,6 +72,8 @@ df['operation'] = df['Date'].map(calculateOperation)
 df_morning = df.copy()
 df_morning = df_morning[df_morning['operation'] == 0]
 
+df=df_morning[df_morning["investorStrategy"]=="ca"]
+
 # for every investor in the df, let's calculate the mpv (only considering morning values)
 mpvs = {}
 for strategy in df_morning['investorStrategy'].unique():
@@ -117,15 +118,16 @@ for strategy in df_morning['investorStrategy'].unique():
 	print(f'{strategy} updatedGain {updatedgains[strategy]}')
 
 
-df = pd.read_csv("NewData.csv")
-NewDayValue = df.iloc[::22, :]
 
-date_test = "2023-01-03"
+
+
+
+date_test = "2023-01-04"
 
 
 # ,"TotalPortfolioValue", "MPV", "absGain","perGain", "MoneyInvestedToday"
 # Preparing data for candlesticks: Necessary data for candlesticks: "Date","Open","High","Low","Close","Volume"
-data_csv = NewDayValue[
+data_csv = df[
     ["Date", "Open", "High", "Low", "Close", "Volume", "TotalPortfolioValue", "MPV", "absGain", "perGain",
      "MoneyInvestedToday","MoneyNotInvested","MoneyInvested"]]
 
@@ -143,6 +145,7 @@ data_csv.index.name = "Date"
 data_csv = data_csv.drop(["New Date"], axis=1)
 data_csv.index
 
+
 #--------------------------------------------------------------
 
 # Data preparation for finance metrics
@@ -153,12 +156,11 @@ d_1 = data_csv.index.get_loc(date_test)
 d_2 = stock_data.index.get_loc(date_test)
 x = data_csv.index[d_1:]
 x
-NewDayValue.columns
+
 list = []
 for i in range(len(x)):
     list.append(x[i])
 
-list
 
 df_matrix.index=list
 
@@ -520,7 +522,7 @@ def update():
     new_scaling_float = int(scaling_optionmenu.get().replace("%", "")) / 100
     ctk.set_widget_scaling(new_scaling_float)
 
-    data_csv = NewDayValue[
+    data_csv = df[
         ["Date", "Open", "High", "Low", "Close", "Volume", "TotalPortfolioValue", "MPV", "absGain", "perGain",
          "MoneyInvestedToday", "MoneyNotInvested", "MoneyInvested"]]
 
@@ -620,7 +622,7 @@ def update():
 
     # ,"TotalPortfolioValue", "MPV", "absGain","perGain", "MoneyInvestedToday"
     # Preparing data for candlesticks: Necessary data for candlesticks: "Date","Open","High","Low","Close","Volume"
-    data_csv = NewDayValue[
+    data_csv = df[
         ["Date", "Open", "High", "Low", "Close", "Volume", "TotalPortfolioValue", "MPV", "absGain", "perGain",
          "MoneyInvestedToday", "MoneyNotInvested", "MoneyInvested"]]
     # maybe we should add this to the beinning (Data Prperation)
@@ -728,12 +730,11 @@ def color_mode():
 
 fig = mpf.figure()
 
-df = pd.read_csv("NewData.csv")
-investorStrategy = 'ca'
+
 MoneyInvestedToday = getCurrentValue(data_csv, "MoneyInvestedToday")
 
 # Not actual open price but start value of new day
-NewDayValue = df.iloc[11::22, :]
+
 
 
 ########### Start Widgets########
