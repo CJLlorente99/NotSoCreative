@@ -179,7 +179,7 @@ def show_graph(stock_data, i):
 										  edge="inherit", volume="in")
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True,
-						figsize=(3.5, 5))
+						figsize=(10, 10))
 	return fig
 
 
@@ -205,7 +205,7 @@ def show_graph_test(data_csv, stock_data):
 	# plot candlesticks
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apd,
-						figsize=(8, 5))
+						figsize=(10, 10))
 
 	return fig
 
@@ -374,77 +374,8 @@ def update():
 	labelL8.configure(text=str(round(metrics['MaxGain'][-1], 2))+' %')
 
 	#####Update Candlesticks######
-	# test
-	line = FigureCanvasTkAgg(show_graph_test(strategyDataTest, stockDataTest), label_test)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_test)
-	toolbarFrame.place(x=0, y=450)
-	NavigationToolbar2Tk(line, toolbarFrame)
-	# 1M
-	line = FigureCanvasTkAgg(show_graph(stockData, 18), label_1m)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_1m)
-	toolbarFrame.place(x=0, y=450)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# 6M
-	line = FigureCanvasTkAgg(show_graph(stockData, 123), label_6m)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_6m)
-	toolbarFrame.place(x=0, y=450)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# 1Y
-	line = FigureCanvasTkAgg(show_graph(stockData, 250), label_1y)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_1y)
-	toolbarFrame.place(x=0, y=450)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	###Update Value Graphs####
-	# Mean PV
-	line = FigureCanvasTkAgg(show_metrics("MPV"), label_v_1)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_v_1)
-	toolbarFrame.place(x=0, y=400)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# TotalPortfolioValue
-	line = FigureCanvasTkAgg(show_metrics("PortfolioValue"), label_v_2)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_v_2)
-	toolbarFrame.place(x=0, y=400)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# Gain (absolute)
-	line = FigureCanvasTkAgg(show_metrics("AbsGain"), label_v_3)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_v_3)
-	toolbarFrame.place(x=0, y=400)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# Gain (percentage)
-	line = FigureCanvasTkAgg(show_metrics("PerGain"), label_v_4)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_v_4)
-	toolbarFrame.place(x=0, y=400)
-	NavigationToolbar2Tk(line, toolbarFrame)
-
-	# Money Invested Today
-	line = FigureCanvasTkAgg(show_metrics("MoneyInvestedToday"), label_v_5)
-	line.get_tk_widget().place(width=800, height=500)
-	# Navigation bar
-	toolbarFrame = Frame(master=label_v_5)
-	toolbarFrame.place(x=0, y=400)
-	NavigationToolbar2Tk(line, toolbarFrame)
+	updateCandlesticks()
+	updateMetrics()
 
 
 ########## Update END#######
@@ -654,138 +585,136 @@ labelL8.pack(pady=(0, 10), padx=20)
 
 tabview = ctk.CTkTabview(root)
 tabview.grid(row=0, column=2, columnspan=2,rowspan=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
-tabview.add("2 Weeks")
-tabview.add("1M")
-tabview.add("6M")
-tabview.add("1Y")
+tab2W = tabview.add("2 Weeks")
+tab1M = tabview.add("1M")
+tab6M = tabview.add("6M")
+tab1Y = tabview.add("1Y")
 tabview.tab("2 Weeks")
 tabview.tab("1M")
 tabview.tab("6M")
 tabview.tab("1Y")
 
-# frame inside tab "test"
+def updateCandlesticks():
+	for obj in tab2W.winfo_children():
+		obj.destroy()
+	for obj in tab1M.winfo_children():
+		obj.destroy()
+	for obj in tab6M.winfo_children():
+		obj.destroy()
+	for obj in tab1Y.winfo_children():
+		obj.destroy()
 
-label_test = ctk.CTkFrame(tabview.tab("2 Weeks"), width=800, height=500)
-label_test.grid(row=0, column=1)
+	# test
+	line = FigureCanvasTkAgg(show_graph_test(strategyDataTest, stockDataTest), tab2W)
+	line.draw()
+	line.get_tk_widget().pack(fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=tab2W)
+	# toolbarFrame.place(x=0, y=450)
+	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab "1M"
-label_1m = ctk.CTkFrame(tabview.tab("1M"), width=800, height=500)
-label_1m.grid(row=0, column=1)
+	# 1M
+	line = FigureCanvasTkAgg(show_graph(stockData, 18), tab1M)
+	line.draw()
+	line.get_tk_widget().pack(fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_1m)
+	# toolbarFrame.place(x=0, y=450)
+	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab "6M"
-label_6m = ctk.CTkFrame(tabview.tab("6M"), width=800, height=500)
-label_6m.grid(row=0, column=1)
+	# 6M
+	line = FigureCanvasTkAgg(show_graph(stockData, 123), tab6M)
+	line.draw()
+	line.get_tk_widget().pack(fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_6m)
+	# toolbarFrame.place(x=0, y=450)
+	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab "1Y"
-label_1y = ctk.CTkFrame(tabview.tab("1Y"), width=800, height=500)
-label_1y.grid(row=0, column=1)
-
-# test
-line = FigureCanvasTkAgg(show_graph_test(strategyDataTest, stockDataTest), label_test)
-line.get_tk_widget().place(width=800, height=500)
-# Navigation bar
-toolbarFrame = Frame(master=label_test)
-toolbarFrame.place(x=0, y=450)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
-
-# 1M
-line = FigureCanvasTkAgg(show_graph(stockData, 18), label_1m)
-line.get_tk_widget().place(width=800, height=500)
-# Navigation bar
-toolbarFrame = Frame(master=label_1m)
-toolbarFrame.place(x=0, y=450)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
-
-# 6M
-line = FigureCanvasTkAgg(show_graph(stockData, 123), label_6m)
-line.get_tk_widget().place(width=800, height=500)
-# Navigation bar
-toolbarFrame = Frame(master=label_6m)
-toolbarFrame.place(x=0, y=450)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
-
-# 1Y
-line = FigureCanvasTkAgg(show_graph(stockData, 250), label_1y)
-line.get_tk_widget().place(width=800, height=500)
-# Navigation bar
-toolbarFrame = Frame(master=label_1y)
-toolbarFrame.place(x=0, y=450)
-toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	# 1Y
+	line = FigureCanvasTkAgg(show_graph(stockData, 250), tab1Y)
+	line.draw()
+	line.get_tk_widget().pack(fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_1y)
+	# toolbarFrame.place(x=0, y=450)
+	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
 
 # Visualization for important numbers
 tabview = ctk.CTkTabview(root)
 tabview.grid(row=2, column=2, columnspan=2,rowspan=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
-tabview.add("Mean_PV")
-tabview.add("TotalPortfolioValue")
-tabview.add("Gain (absolute)")
-tabview.add("Gain (percentage)")
-tabview.add("Money Invested Today")
+tabMPV = tabview.add("Mean_PV")
+tabTPV = tabview.add("TotalPortfolioValue")
+tabAbsGain = tabview.add("Gain (absolute)")
+tabPerGain = tabview.add("Gain (percentage)")
+tabMIT = tabview.add("Money Invested Today")
 tabview.tab("Mean_PV")
 tabview.tab("TotalPortfolioValue")
 tabview.tab("Gain (absolute)")
 tabview.tab("Gain (percentage)")
 tabview.tab("Money Invested Today")
 
-# frame inside tab mean PV
-label_v_1 = ctk.CTkFrame(tabview.tab("Mean_PV"), width=800, height=450)
-label_v_1.grid(row=0, column=1)
+def updateMetrics():
+	for obj in tabMPV.winfo_children():
+		obj.destroy()
+	for obj in tabMIT.winfo_children():
+		obj.destroy()
+	for obj in tabTPV.winfo_children():
+		obj.destroy()
+	for obj in tabPerGain.winfo_children():
+		obj.destroy()
+	for obj in tabAbsGain.winfo_children():
+		obj.destroy()
 
-# frame inside tab TotalPortfolioValue
-label_v_2 = ctk.CTkFrame(tabview.tab("TotalPortfolioValue"), width=800, height=450)
-label_v_2.grid(row=0, column=1)
+	# Mean PV
+	line = FigureCanvasTkAgg(show_metrics('MPV'), tabMPV)
+	line.draw()
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_v_1)
+	# toolbarFrame.place(x=0, y=400)
+	# NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab Gain (absolute)
-label_v_3 = ctk.CTkFrame(tabview.tab("Gain (absolute)"), width=800, height=450)
-label_v_3.grid(row=0, column=1)
+	# TotalPortfolioValue
+	line = FigureCanvasTkAgg(show_metrics('PortfolioValue'), tabTPV)
+	line.draw()
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_v_2)
+	# toolbarFrame.place(x=0, y=400)
+	# NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab Gain (percentage)
-label_v_4 = ctk.CTkFrame(tabview.tab("Gain (percentage)"), width=800, height=450)
-label_v_4.grid(row=0, column=1)
+	# Gain (absolute)
+	line = FigureCanvasTkAgg(show_metrics('AbsGain'), tabAbsGain)
+	line.draw()
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_v_3)
+	# toolbarFrame.place(x=0, y=400)
+	# NavigationToolbar2Tk(line, toolbarFrame)
 
-# frame inside tab Money Invested Today
-label_v_5 = ctk.CTkFrame(tabview.tab("Money Invested Today"), width=800, height=450)
-label_v_5.grid(row=0, column=1)
+	# Gain (percentage)
+	line = FigureCanvasTkAgg(show_metrics('PerGain'), tabPerGain)
+	line.draw()
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_v_4)
+	# toolbarFrame.place(x=0, y=400)
+	# NavigationToolbar2Tk(line, toolbarFrame)
 
-# Mean PV
-line = FigureCanvasTkAgg(show_metrics('MPV'), label_v_1)
-line.get_tk_widget().place(width=800, height=400)
-# Navigation bar
-toolbarFrame = Frame(master=label_v_1)
-toolbarFrame.place(x=0, y=400)
-NavigationToolbar2Tk(line, toolbarFrame)
+	# Money Invested Today
+	line = FigureCanvasTkAgg(show_metrics('MoneyInvestedToday'), tabMIT)
+	line.draw()
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 
-# TotalPortfolioValue
-line = FigureCanvasTkAgg(show_metrics('PortfolioValue'), label_v_2)
-line.get_tk_widget().place(width=800, height=400)
-# Navigation bar
-toolbarFrame = Frame(master=label_v_2)
-toolbarFrame.place(x=0, y=400)
-NavigationToolbar2Tk(line, toolbarFrame)
 
-# Gain (absolute)
-line = FigureCanvasTkAgg(show_metrics('AbsGain'), label_v_3)
-line.get_tk_widget().place(width=800, height=400)
-# Navigation bar
-toolbarFrame = Frame(master=label_v_3)
-toolbarFrame.place(x=0, y=400)
-NavigationToolbar2Tk(line, toolbarFrame)
-
-# Gain (percentage)
-line = FigureCanvasTkAgg(show_metrics('PerGain'), label_v_4)
-line.get_tk_widget().place(width=800, height=400)
-# Navigation bar
-toolbarFrame = Frame(master=label_v_4)
-toolbarFrame.place(x=0, y=400)
-NavigationToolbar2Tk(line, toolbarFrame)
-
-# Money Invested Today
-line = FigureCanvasTkAgg(show_metrics('MoneyInvestedToday'), label_v_5)
-line.get_tk_widget().place(width=800, height=400)
-# Navigation bar
-toolbarFrame = Frame(master=label_v_5)
-toolbarFrame.place(x=0, y=400)
-NavigationToolbar2Tk(line, toolbarFrame)
+	# Navigation bar
+	# toolbarFrame = Frame(master=label_v_5)
+	# toolbarFrame.place(x=0, y=400)
+	# NavigationToolbar2Tk(line, toolbarFrame)
 
 root.protocol("WM_DELETE_WINDOW", _quit)
+updateMetrics()
+updateCandlesticks()
 # update()
 root.mainloop()
