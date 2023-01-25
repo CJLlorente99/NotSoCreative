@@ -606,36 +606,36 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	line.draw()
 	line.get_tk_widget().pack(fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=tab2W)
-	# toolbarFrame.place(x=0, y=450)
-	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tab2W)
+	toolbarFrame.place(relx=0, rely=0.94)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# 1M
 	line = FigureCanvasTkAgg(show_graph(stockData, 18), tab1M)
 	line.draw()
 	line.get_tk_widget().pack(fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_1m)
-	# toolbarFrame.place(x=0, y=450)
-	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tab1M)
+	toolbarFrame.place(relx=0, rely=0.94)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# 6M
 	line = FigureCanvasTkAgg(show_graph(stockData, 123), tab6M)
 	line.draw()
 	line.get_tk_widget().pack(fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_6m)
-	# toolbarFrame.place(x=0, y=450)
-	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tab6M)
+	toolbarFrame.place(relx=0, rely=0.94)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# 1Y
 	line = FigureCanvasTkAgg(show_graph(stockData, 250), tab1Y)
 	line.draw()
 	line.get_tk_widget().pack(fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_1y)
-	# toolbarFrame.place(x=0, y=450)
-	# toolbar = NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tab1Y)
+	toolbarFrame.place(relx=0, rely=0.94)
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 # Visualization for important numbers
 tabview = ctk.CTkTabview(root)
@@ -669,7 +669,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMPV)
-	toolbarFrame.pack(anchor='s', side='left')
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# TotalPortfolioValue
@@ -678,7 +678,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabTPV)
-	toolbarFrame.pack(anchor='s', side='left')
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (absolute)
@@ -687,7 +687,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabAbsGain)
-	toolbarFrame.pack(anchor='s', side='left')
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (percentage)
@@ -696,7 +696,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabPerGain)
-	toolbarFrame.pack(anchor='s', side='left')
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Money Invested Today
@@ -705,7 +705,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMIT)
-	toolbarFrame.pack(anchor='s', side='left')
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 root.protocol("WM_DELETE_WINDOW", _quit)
