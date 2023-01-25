@@ -2,6 +2,8 @@ import customtkinter as ctk
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import timedelta
+
+import pytz
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import *
@@ -15,8 +17,8 @@ from googleStorageAPI import readBlobDf
 
 # Constants
 yfStartDate = '2021-01-01'
-date_test = '2023-01-17'
-strategyName = 'random_10_1_2022'
+date_test = '2023-01-24'
+strategyName = 'bilstmWindowRobMMT1T2Legacy_24_1_2023'
 
 # Globals
 global metrics
@@ -55,7 +57,6 @@ def refreshDataSP500():
 	stock_data = yf.download('^GSPC', start=yfStartDate, end=end)
 	stock_data = stock_data.reset_index()
 	stock_data.set_index(pd.DatetimeIndex(stock_data['Date']), inplace=True)
-	stock_data.drop(['Date'], axis=1, inplace=True)
 
 	return stock_data
 
@@ -78,7 +79,7 @@ def refreshDataStrategy():
 
 	# change format of index
 	df_morning.set_index(pd.DatetimeIndex(df_morning["shortenedDate"]), inplace=True)
-	df_morning.drop(["Date", 'shortenedDate'], axis=1, inplace=True)
+	df_morning.drop(['shortenedDate'], axis=1, inplace=True)
 	df_morning.index.name = "Date"
 
 	return df_morning[df_morning["investorStrategy"] == strategyName]
@@ -87,7 +88,8 @@ def getCurrentValue_metric(stock_data, strategyData):
 
 	res = {}
 	# Date info
-	res['Date'] = np.append(stock_data.index.values, stock_data.index.values[-1])
+	now = datetime.now(pytz.timezone('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+	res['Date'] = np.append(strategyData['Date'], now)
 
 	# PortfolioValues
 	actualPortfolioValue = strategyData['MoneyInvested'].values[-1] * stock_data['Close'].values[-1] / \
@@ -150,19 +152,6 @@ def show_metrics(var):
 	x = metrics['Date']
 	y = metrics[var]
 
-	for widgets in label_v_5.winfo_children():
-		for widgets in label_v_1.winfo_children():
-			widgets.destroy()
-		for widgets in label_v_2.winfo_children():
-			widgets.destroy()
-		for widgets in label_v_3.winfo_children():
-			widgets.destroy()
-		for widgets in label_v_4.winfo_children():
-			widgets.destroy()
-		for widgets in label_v_5.winfo_children():
-			widgets.destroy()
-
-
 	if ctk.get_appearance_mode() == 'Dark':
 		f = Figure(figsize=(10, 10), dpi=100)
 		a = f.add_subplot(111)
@@ -180,17 +169,6 @@ def show_metrics(var):
 
 def show_graph(stock_data, i):
 
-	#! Be caureful with i here
-	for widgets in label_1y.winfo_children():
-		for widgets in label_1m.winfo_children():
-			widgets.destroy()
-		for widgets in label_6m.winfo_children():
-			widgets.destroy()
-		for widgets in label_1y.winfo_children():
-			widgets.destroy()
-		for widgets in label_test.winfo_children():
-			widgets.destroy()
-
 	if ctk.get_appearance_mode() == 'Dark':
 		mode ='nightclouds'
 	else:
@@ -207,16 +185,6 @@ def show_graph(stock_data, i):
 
 # specifically for our test time window
 def show_graph_test(data_csv, stock_data):
-
-	for widgets in label_1y.winfo_children():
-		for widgets in label_1m.winfo_children():
-			widgets.destroy()
-		for widgets in label_6m.winfo_children():
-			widgets.destroy()
-		for widgets in label_1y.winfo_children():
-			widgets.destroy()
-		for widgets in label_test.winfo_children():
-			widgets.destroy()
 
 	if ctk.get_appearance_mode() == 'Dark':
 		mode ='nightclouds'
@@ -314,16 +282,20 @@ root.title("Stock Market Prediction Engine")
 
 # configure the grid
 root.grid_columnconfigure(1, weight=1)
-root.grid_columnconfigure((2, 3), weight=0)
-root.grid_rowconfigure((0, 1, 2), weight=1)
+root.grid_columnconfigure(2, weight=1)
+root.grid_columnconfigure(3, weight=3)
+root.grid_rowconfigure(0, weight=1)
+root.grid_rowconfigure(1, weight=1)
+root.grid_rowconfigure(2, weight=1)
 
 switch_var = ctk.StringVar(value="off")
 
 # initialize some things
 strategyData = refreshDataStrategy()
 strategyDataTest = strategyData.iloc[strategyData.index.get_loc(date_test):]
+lastDataTest = strategyDataTest.index[-1]
 stockData = refreshDataSP500()
-stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):]
+stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):stockData.index.get_loc(lastDataTest)+1]
 
 metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
 strategyDataTest['StrDecision'] = strategyDataTest['MoneyInvestedToday'].map(strDecision)
@@ -339,8 +311,9 @@ def update():
 
 	strategyData = refreshDataStrategy()
 	strategyDataTest = strategyData.iloc[strategyData.index.get_loc(date_test):]
+	lastDataTest = strategyDataTest.index[-1]
 	stockData = refreshDataSP500()
-	stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):]
+	stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):stockData.index.get_loc(lastDataTest)+1]
 
 	global metrics
 	metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
