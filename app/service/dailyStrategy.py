@@ -140,10 +140,10 @@ class DailyStrategy(ABC):
 			perGain = (pvs[-1] - pvs[0]) / pvs[0] * 100
 
 			# Max gain
-			maxGain = (pvs[1:] - pvs[:-1]).max()
+			maxGain = 0
 
 			# Min gain
-			minGain = (pvs[1:] - pvs[:-1]).min()
+			minGain = 0
 
 			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
 								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
@@ -199,10 +199,10 @@ class DailyStrategy(ABC):
 			perGain = (pvs[-1] - pvs[0]) / pvs[0] * 100
 
 			# Max gain
-			maxGain = (pvs[1:] - pvs[:-1]).max()
+			maxGain = 0
 
 			# Min gain
-			minGain = (pvs[1:] - pvs[:-1]).min()
+			minGain = 0
 
 			return pd.DataFrame({'MPV': mpv, 'StdPV': std, 'maxPV': maxPV, 'minPV': minPV, 'absGain': absGain,
 								 'perGain': perGain, 'maxGain': maxGain, 'minGain': minGain}, index=[0])
