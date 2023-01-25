@@ -20,9 +20,6 @@ yfStartDate = '2021-01-01'
 date_test = '2023-01-24'
 strategyName = 'bilstmWindowRobMMT1T2Legacy_24_1_2023'
 
-# Globals
-global metrics
-
 ########## Functions #########
 
 def calculateOperation(value: str):
@@ -147,7 +144,7 @@ def getCurrentValue_metric(stock_data, strategyData):
 
 # -------------------------------------------
 
-def show_metrics(var):
+def show_metrics(metrics, var):
 
 	x = metrics['Date']
 	y = metrics[var]
@@ -374,8 +371,8 @@ def update():
 	labelL8.configure(text=str(round(metrics['MaxGain'][-1], 2))+' %')
 
 	#####Update Candlesticks######
-	updateCandlesticks()
-	updateMetrics()
+	updateCandlesticks(stockData, strategyDataTest, stockDataTest)
+	updateMetrics(metrics)
 
 
 ########## Update END#######
@@ -594,7 +591,7 @@ tabview.tab("1M")
 tabview.tab("6M")
 tabview.tab("1Y")
 
-def updateCandlesticks():
+def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	for obj in tab2W.winfo_children():
 		obj.destroy()
 	for obj in tab1M.winfo_children():
@@ -654,7 +651,7 @@ tabview.tab("Gain (absolute)")
 tabview.tab("Gain (percentage)")
 tabview.tab("Money Invested Today")
 
-def updateMetrics():
+def updateMetrics(metrics):
 	for obj in tabMPV.winfo_children():
 		obj.destroy()
 	for obj in tabMIT.winfo_children():
@@ -667,54 +664,50 @@ def updateMetrics():
 		obj.destroy()
 
 	# Mean PV
-	line = FigureCanvasTkAgg(show_metrics('MPV'), tabMPV)
+	line = FigureCanvasTkAgg(show_metrics(metrics, 'MPV'), tabMPV)
 	line.draw()
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_v_1)
-	# toolbarFrame.place(x=0, y=400)
-	# NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tabMPV)
+	toolbarFrame.pack(anchor='s', side='left')
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# TotalPortfolioValue
-	line = FigureCanvasTkAgg(show_metrics('PortfolioValue'), tabTPV)
+	line = FigureCanvasTkAgg(show_metrics(metrics, 'PortfolioValue'), tabTPV)
 	line.draw()
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_v_2)
-	# toolbarFrame.place(x=0, y=400)
-	# NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tabTPV)
+	toolbarFrame.pack(anchor='s', side='left')
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (absolute)
-	line = FigureCanvasTkAgg(show_metrics('AbsGain'), tabAbsGain)
+	line = FigureCanvasTkAgg(show_metrics(metrics, 'AbsGain'), tabAbsGain)
 	line.draw()
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_v_3)
-	# toolbarFrame.place(x=0, y=400)
-	# NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tabAbsGain)
+	toolbarFrame.pack(anchor='s', side='left')
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Gain (percentage)
-	line = FigureCanvasTkAgg(show_metrics('PerGain'), tabPerGain)
+	line = FigureCanvasTkAgg(show_metrics(metrics, 'PerGain'), tabPerGain)
 	line.draw()
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_v_4)
-	# toolbarFrame.place(x=0, y=400)
-	# NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tabPerGain)
+	toolbarFrame.pack(anchor='s', side='left')
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Money Invested Today
-	line = FigureCanvasTkAgg(show_metrics('MoneyInvestedToday'), tabMIT)
+	line = FigureCanvasTkAgg(show_metrics(metrics, 'MoneyInvestedToday'), tabMIT)
 	line.draw()
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
-
-
 	# Navigation bar
-	# toolbarFrame = Frame(master=label_v_5)
-	# toolbarFrame.place(x=0, y=400)
-	# NavigationToolbar2Tk(line, toolbarFrame)
+	toolbarFrame = Frame(master=tabMIT)
+	toolbarFrame.pack(anchor='s', side='left')
+	NavigationToolbar2Tk(line, toolbarFrame)
 
 root.protocol("WM_DELETE_WINDOW", _quit)
-updateMetrics()
-updateCandlesticks()
-# update()
+update()
 root.mainloop()
