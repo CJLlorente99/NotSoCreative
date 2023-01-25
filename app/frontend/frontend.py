@@ -1,20 +1,14 @@
 import customtkinter as ctk
-import tkinter as tk
-from tkinter import ttk
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import timedelta
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import *
-import plotly.graph_objects as go
 import mplfinance as mpf
 from datetime import datetime, date
-from matplotlib.pyplot import figure
 from matplotlib.figure import Figure
 from PIL import Image
-import yfinance as yf
 import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
@@ -48,7 +42,7 @@ def strDecision(value):
 	else:
 		return 'Hold'
 
-def decision(value):
+def decisionFunction(value):
 	if value > 0:
 		return 1
 	elif value < 0:
@@ -143,7 +137,8 @@ def getCurrentValue_metric(stock_data, strategyData):
 	# Max Gain
 	x = np.array([0])
 	for i in range(len(aux)-1):
-		x = np.append(x, np.diff(aux[:i+2]).max())
+		perGainsPerDay = ((aux - np.roll(aux, 1))[1:]/aux[:-1])*100
+		x = np.append(x, perGainsPerDay[:i+1].max())
 	res['MaxGain'] = x
 
 	return res
@@ -169,13 +164,13 @@ def show_metrics(var):
 
 
 	if ctk.get_appearance_mode() == 'Dark':
-		f = Figure(figsize=(2, 3))
+		f = Figure(figsize=(10, 10), dpi=100)
 		a = f.add_subplot(111)
 
 		plt.style.use('dark_background')
 		a.plot(x, y)
 	else:
-		f = Figure(figsize=(2, 3))
+		f = Figure(figsize=(10, 10), dpi=100)
 		plt.style.use('default')
 		a = f.add_subplot(111)
 		a.plot(x, y)
@@ -187,7 +182,6 @@ def show_graph(stock_data, i):
 
 	#! Be caureful with i here
 	for widgets in label_1y.winfo_children():
-
 		for widgets in label_1m.winfo_children():
 			widgets.destroy()
 		for widgets in label_6m.winfo_children():
@@ -213,8 +207,6 @@ def show_graph(stock_data, i):
 
 # specifically for our test time window
 def show_graph_test(data_csv, stock_data):
-	# Plot candlesticks
-	# Create list filled with buy/hold/sell actions
 
 	for widgets in label_1y.winfo_children():
 		for widgets in label_1m.winfo_children():
@@ -249,6 +241,10 @@ def show_graph_test(data_csv, stock_data):
 
 	return fig
 
+def _quit():
+	root.quit()
+	root.destroy()
+
 def get_Color_Buy_Up():
 	if color_mode() == 0:
 		color = "#00ff00"
@@ -271,16 +267,6 @@ def get_Color_Sell_Down():
 	elif color_mode() == 1:
 		color = "#E60400"
 	return color
-
-# get newest decision
-def getDecision(MoneyInvestedToday):
-	if MoneyInvestedToday > 0:
-		decision = 'Buy'
-	elif MoneyInvestedToday < 0:
-		decision = 'Sell'
-	else:
-		decision = 'Hold'
-	return decision
 
 
 # open new window for Information
@@ -311,7 +297,6 @@ def change_appearance_mode_event(new_appearance_mode: str):
 	ctk.set_appearance_mode(new_appearance_mode)
 	ctk.get_appearance_mode()
 
-
 # changes scaling
 def change_scaling_event(new_scaling: str):
 	new_scaling_float = int(new_scaling.replace("%", "")) / 100
@@ -340,10 +325,9 @@ strategyDataTest = strategyData.iloc[strategyData.index.get_loc(date_test):]
 stockData = refreshDataSP500()
 stockDataTest = stockData.iloc[stockData.index.get_loc(date_test):]
 
-global metrics
 metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
 strategyDataTest['StrDecision'] = strategyDataTest['MoneyInvestedToday'].map(strDecision)
-strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decision)
+strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decisionFunction)
 
 
 ####### UPDATE START##########
@@ -361,7 +345,7 @@ def update():
 	global metrics
 	metrics = getCurrentValue_metric(stockDataTest, strategyDataTest)
 	strategyDataTest['StrDecision'] = strategyDataTest['MoneyInvestedToday'].map(strDecision)
-	strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decision)
+	strategyDataTest['Decision'] = strategyDataTest['MoneyInvestedToday'].map(decisionFunction)
 
 	# nur letzter Wert
 	sidebar_label_2.configure(text=str(round(metrics['PortfolioValue'][-1],2))+' $')
@@ -381,15 +365,33 @@ def update():
 	# print last 3 decisions depending on the amounts of available taken decisions
 	if len(strategyDataTest) < 1:
 		labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
-	elif len(strategyDataTest) == 1:
-		labelLRecommend1.configure(text=str(strategyDataTest.index.values[-1]) + ':    '+strategyDataTest['StrDecision'][-1], font=ctk.CTkFont(size=16))
 	elif len(strategyDataTest) == 2:
-		labelLRecommend1.configure(text=str(strategyDataTest.index.values[-1]) + ':    '+strategyDataTest['StrDecision'][-1], font=ctk.CTkFont(size=16))
-		labelLRecommend2.configure(text=str(strategyDataTest.index.values[-2]) + ':    '+strategyDataTest['StrDecision'][-2], font=ctk.CTkFont(size=16))
-	elif len(strategyDataTest) >= 3:
-		labelLRecommend1.configure(text=str(strategyDataTest.index.values[-1]) + ':    '+strategyDataTest['StrDecision'][-1], font=ctk.CTkFont(size=16))
-		labelLRecommend2.configure(text=str(strategyDataTest.index.values[-2]) + ':    '+strategyDataTest['StrDecision'][-2], font=ctk.CTkFont(size=16))
-		labelLRecommend3.configure(text=str(strategyDataTest.index.values[-3]) + ':    '+strategyDataTest['StrDecision'][-3], font=ctk.CTkFont(size=16))
+		labelLRecommend1.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -2], font=ctk.CTkFont(size=16))
+	elif len(strategyDataTest) == 3:
+		labelLRecommend1.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -2], font=ctk.CTkFont(size=16))
+		labelLRecommend2.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -3], font=ctk.CTkFont(size=16))
+	elif len(strategyDataTest) > 3:
+		labelLRecommend1.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -2], font=ctk.CTkFont(size=16))
+		labelLRecommend2.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -3], font=ctk.CTkFont(size=16))
+		labelLRecommend3.configure(
+			text=str(pd.to_datetime(strategyDataTest.index.values[-4]).date()) + ':    ' +
+				 strategyDataTest['StrDecision'][
+					 -4], font=ctk.CTkFont(size=16))
 
 	labelL2.configure(text=str(round(metrics['MoneyInvested'][-1], 2))+' $')
 	labelL4.configure(text=str(round(metrics['MoneyNotInvested'][-1], 2))+' $')
@@ -583,19 +585,12 @@ labelcurrentRecommend.pack( pady=(5,0), padx=20)
 if strategyDataTest['MoneyInvestedToday'][-1] > 0:
 	labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
 									text_color=get_Color_Buy_Up())
-	decision = 'Buy'
 elif strategyDataTest['MoneyInvestedToday'][-1] < 0:
 	labelcurrentRecommend.configure(text='Sell', font=ctk.CTkFont(size=20, weight='bold'),
 									text_color=get_Color_Sell_Down())
-	decision = 'sell'
 else:
 	labelcurrentRecommend.configure(text='Hold', font=ctk.CTkFont(size=20, weight='bold'),
 									text_color=get_Color_Hold())
-	decision = 'hold'
-
-	# list to save last descions
-lastDecisions = []
-lastDecisions.append(decision)
 
 # print last 3 decsions depending on the amounts of available taken decisions
 labelLastRecommend = ctk.CTkLabel(recommendation_frame, text='Last Recommendations', font=ctk.CTkFont(size=17, weight="bold"))
@@ -611,19 +606,35 @@ labelLRecommend3 = ctk.CTkLabel(recommendation_frame,text='', font=ctk.CTkFont(s
 #labelLRecommend3.grid(row=3,column=1,pady=5, padx=(100,20))
 labelLRecommend3.pack( pady=5, padx=20)
 
-if len(lastDecisions) <= 1:
+if len(strategyDataTest) < 1:
 	labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
-
-elif len(lastDecisions) == 2:
-	labelLRecommend1.configure(text=lastDecisions[-1], font=ctk.CTkFont(size=16))
-
-elif len(lastDecisions) == 3:
-	labelLRecommend1.configure(text=lastDecisions[-1], font=ctk.CTkFont(size=16))
-	labelLRecommend2.configure(text=lastDecisions[-2], font=ctk.CTkFont(size=16))
-elif len(lastDecisions) > 3:
-	labelLRecommend1.configure(text=lastDecisions[-1], font=ctk.CTkFont(size=16))
-	labelLRecommend2.configure(text=lastDecisions[-2], font=ctk.CTkFont(size=16))
-	labelLRecommend3.configure(text=lastDecisions[-3], font=ctk.CTkFont(size=16))
+elif len(strategyDataTest) == 2:
+	labelLRecommend1.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -2], font=ctk.CTkFont(size=16))
+elif len(strategyDataTest) == 3:
+	labelLRecommend1.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -2], font=ctk.CTkFont(size=16))
+	labelLRecommend2.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -3], font=ctk.CTkFont(size=16))
+elif len(strategyDataTest) > 3:
+	labelLRecommend1.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -2], font=ctk.CTkFont(size=16))
+	labelLRecommend2.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -3], font=ctk.CTkFont(size=16))
+	labelLRecommend3.configure(
+		text=str(pd.to_datetime(strategyDataTest.index.values[-4]).date()) + ':    ' +
+			 strategyDataTest['StrDecision'][
+				 -4], font=ctk.CTkFont(size=16))
 
 # create value frame
 values_frame = ctk.CTkFrame(root,height=300)
@@ -802,4 +813,6 @@ toolbarFrame = Frame(master=label_v_5)
 toolbarFrame.place(x=0, y=400)
 NavigationToolbar2Tk(line, toolbarFrame)
 
+root.protocol("WM_DELETE_WINDOW", _quit)
+# update()
 root.mainloop()
