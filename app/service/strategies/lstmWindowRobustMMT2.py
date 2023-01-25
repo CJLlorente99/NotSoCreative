@@ -87,7 +87,7 @@ class LSTMWindowRobMMT2(DailyStrategy):
 
 		y_predictions.append(np.asarray(y_mean))
 		y_mean = np.asarray(y_mean).flatten()
-		print(f'lstmWindowRobustMMT2 {y_mean}')
+		print(f'lstmWindowRobustMMT2 {y_mean}, open {data.Open.values[-1]}')
 
 		# build decision rule
 		if data.Open.values[-1] < y_mean[2]:
