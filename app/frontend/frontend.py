@@ -49,6 +49,24 @@ def decisionFunction(value):
 	else:
 		return 0
 
+def holdDecision(value):
+	if value == 0:
+		return 0
+	else:
+		return np.nan
+
+def sellDecision(value):
+	if value == -1:
+		return -1
+	else:
+		return np.nan
+
+def buyDecision(value):
+	if value == 1:
+		return 1
+	else:
+		return np.nan
+
 def refreshDataSP500():
 	end = date.today() + timedelta(days=1)
 	stock_data = yf.download('^GSPC', start=yfStartDate, end=end)
@@ -190,15 +208,27 @@ def show_graph_test(data_csv, stock_data):
 										  edge="inherit", volume="in")
 
 	# Color of Investment Actions (Triangles)
-	colors_apd = [get_Color_Buy_Up() if v == 1 else get_Color_Hold() if v == 0 else get_Color_Sell_Down() for v in
-				  data_csv['Decision'].values]
+	# colors_apd = [get_Color_Buy_Up() if v == 1 else get_Color_Hold() if v == 0 else get_Color_Sell_Down() for v in
+	# 			  data_csv['Decision'].values]
+	#
+	# apd = mpf.make_addplot(data_csv["Decision"], type='scatter', marker='^', markersize=200, color=colors_apd)
+	aux = pd.DataFrame()
+	aux['Hold'] = data_csv['Decision'].map(holdDecision)
+	aux['Sell'] = data_csv['Decision'].map(sellDecision)
+	aux['Buy'] = data_csv['Decision'].map(buyDecision)
 
-	apd = mpf.make_addplot(data_csv["Decision"], type='scatter', marker='^', markersize=200, color=colors_apd)
+	apds = []
+	if not aux['Hold'].isnull().all():
+		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=400, color=get_Color_Hold()))
+	if not aux['Buy'].isnull().all():
+		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=400, color=get_Color_Buy_Up()))
+	if not aux['Sell'].isnull().all():
+		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=400, color=get_Color_Sell_Down()))
 
 
 	# plot candlesticks
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
-	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apd,
+	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds,
 						figsize=(10, 10))
 
 	return fig
