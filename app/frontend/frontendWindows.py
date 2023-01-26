@@ -248,13 +248,18 @@ def show_graph_test(data_csv, stock_data):
 	aux['Sell'] = stock_data['Decision'].map(sellDecision) + stock_data['Close'] + 5
 	aux['Buy'] = stock_data['Decision'].map(buyDecision)  + stock_data['Open'] - 5
 
+	if len(data_csv) > 5:
+		markerSizeToday = 200
+	else:
+		markerSizeToday = 500
+
 	apds = []
 	if not aux['Hold'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=400, color=get_Color_Hold_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=markerSizeToday, color=get_Color_Hold_Decision(), secondary_y=False))
 	if not aux['Buy'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=400, color=get_Color_Buy_Up_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=markerSizeToday, color=get_Color_Buy_Up_Decision(), secondary_y=False))
 	if not aux['Sell'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=400, color=get_Color_Sell_Down_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=markerSizeToday, color=get_Color_Sell_Down_Decision(), secondary_y=False))
 
 
 	# plot candlesticks
