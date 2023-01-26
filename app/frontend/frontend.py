@@ -183,7 +183,9 @@ def show_metrics(metrics, var):
 	if ctk.get_appearance_mode() == 'Dark':
 		plt.style.use('dark_background')
 	else:
-		plt.style.use('default')
+		# plt.style.use('default')
+		pass
+	plt.grid(visible=True, axis='both')
 	a.plot(x, y)
 	return f
 
@@ -328,8 +330,6 @@ root.grid_columnconfigure(1, weight=1)
 root.grid_columnconfigure(2, weight=1)
 root.grid_columnconfigure(3, weight=3)
 root.grid_rowconfigure(0, weight=1)
-root.grid_rowconfigure(1, weight=1)
-root.grid_rowconfigure(2, weight=1)
 
 switch_var = ctk.StringVar(value="off")
 
@@ -393,10 +393,7 @@ fig = mpf.figure()
 
 # create left sidebar frame with widgets
 sidebar_frame = ctk.CTkFrame(root, width=140, corner_radius=0)
-sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
-sidebar_frame.grid_rowconfigure(4, weight=1)
-
-#img = ImageTk.PhotoImage(Image.open("png.png"))
+sidebar_frame.grid(row=0, column=1, sticky="nsew")
 
 img = ctk.CTkImage( light_image=Image.open('png.png'),dark_image=Image.open("png.png"),size=(200,200))
 
@@ -410,20 +407,26 @@ logo_label.pack(side=TOP, padx=20, pady=(10, 40))
 ######Ottion Menu########
 option_label = ctk.CTkLabel(sidebar_frame, text='Options:', font=ctk.CTkFont(size=16))
 option_label.pack(side=TOP, padx=20, pady=(0, 0))
+
 data_update_button= ctk.CTkButton(sidebar_frame, text="Update Data", command=update)
 data_update_button.pack(side=TOP, padx=20, pady=(15, 15))
+
 sidebar_button = ctk.CTkButton(sidebar_frame, text="Info/Help", command=openNewWindow)
 sidebar_button.pack(side=TOP, padx=20, pady=(15, 15))
+
 switch_1 = ctk.CTkSwitch(sidebar_frame, text="Color", variable=switch_var, command=color_mode(), onvalue="on",
 						 offvalue="off")
 switch_1.pack(side=TOP, padx=20, pady=(5, 0))
+
 appearance_mode_label = ctk.CTkLabel(sidebar_frame, text="Appearance Mode:", anchor="w")
 appearance_mode_label.pack(side=TOP, padx=20, pady=(5, 0))
 
 appearance_mode_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["Light", "Dark", "System"])
 appearance_mode_optionmenu.pack(side=TOP, padx=20, pady=(0, 0))
+
 scaling_label = ctk.CTkLabel(sidebar_frame, text="UI Scaling:", anchor="w")
 scaling_label.pack(side=TOP, padx=20, pady=(10, 0))
+
 scaling_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"])
 scaling_optionmenu.pack(side=TOP, padx=20, pady=(0, 10))
 
@@ -431,60 +434,75 @@ apply_update_button= ctk.CTkButton(sidebar_frame, text="Apply Changes", command=
 apply_update_button.pack(side=TOP, padx=20, pady=(15, 15))
 
 ########### Value Frames################
-important_Values_frame = ctk.CTkFrame(root, height=300)
-important_Values_frame.grid(row=0, column=1, padx=(20, 20), pady=(10, 0), sticky="nsew")
-important_Values_frame.grid_rowconfigure(3, weight=1)
-important_Values_frame.grid_columnconfigure(3,weight=1)
+important_Values_frame = ctk.CTkFrame(root)
+important_Values_frame.grid(row=0, column=2, padx=(20, 20), pady=(10, 0), sticky="nsew")
+important_Values_frame.grid_columnconfigure(0, weight=1)
+important_Values_frame.grid_rowconfigure(0, weight=1)
+important_Values_frame.grid_rowconfigure(1, weight=1)
+important_Values_frame.grid_rowconfigure(2, weight=1)
 
-sidebar_label_0=ctk.CTkLabel(important_Values_frame, text='Portfolio', font=ctk.CTkFont(size=22, weight='bold'))
+important_Values_frame1 = ctk.CTkFrame(important_Values_frame, height=300)
+important_Values_frame1.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+sidebar_label_0=ctk.CTkLabel(important_Values_frame1, text='Portfolio', font=ctk.CTkFont(size=22, weight='bold'))
 sidebar_label_0.pack(padx=20, pady=(20, 20))
-sidebar_label_1 = ctk.CTkLabel(important_Values_frame, text='Portfolio Value:', font=ctk.CTkFont(size=16, weight='bold'))
+
+sidebar_label_1 = ctk.CTkLabel(important_Values_frame1, text='Portfolio Value:', font=ctk.CTkFont(size=16, weight='bold'))
 sidebar_label_1.pack( padx=20, pady=(0, 0))
 # nur letzter Wert
-sidebar_label_2 = ctk.CTkLabel(important_Values_frame,
+sidebar_label_2 = ctk.CTkLabel(important_Values_frame1,
 							   text=str(0)+' $',
 							   font=ctk.CTkFont(size=16))
 sidebar_label_2.pack( padx=20, pady=(0,0))
 
 # nur letzter Wert
-sidebar_label_3 = ctk.CTkLabel(important_Values_frame, text=' Gain(%):', font=ctk.CTkFont(size=16, weight='bold'))
+sidebar_label_3 = ctk.CTkLabel(important_Values_frame1, text=' Gain(%):', font=ctk.CTkFont(size=16, weight='bold'))
 sidebar_label_3.pack( padx=20, pady=(10, 0))
-sidebar_label_4 = ctk.CTkLabel(important_Values_frame, text=str(0)+' %',
+
+sidebar_label_4 = ctk.CTkLabel(important_Values_frame1, text=str(0)+' %',
 							   font=ctk.CTkFont(size=16))
 sidebar_label_4.pack(padx=20)
 # nur letzter Wert
-sidebar_label_5 = ctk.CTkLabel(important_Values_frame, text='Mean Portfolio Value:',
+sidebar_label_5 = ctk.CTkLabel(important_Values_frame1, text='Mean Portfolio Value:',
 							   font=ctk.CTkFont(size=16, weight='bold'))
 sidebar_label_5.pack( padx=20, pady=(10, 0))
-sidebar_label_6 = ctk.CTkLabel(important_Values_frame, text=str(0)+' $',
+
+sidebar_label_6 = ctk.CTkLabel(important_Values_frame1, text=str(0)+' $',
 							   font=ctk.CTkFont(size=16))
 sidebar_label_6.pack( padx=20)
 
 # create value frame
-values_frame = ctk.CTkFrame(root,height=300)
-values_frame.grid(row=3, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+values_frame = ctk.CTkFrame(important_Values_frame,height=300)
+values_frame.grid(row=2, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 labelL0=ctk.CTkLabel(values_frame, text='Other Metrics', font=ctk.CTkFont(size=22, weight='bold'),underline=0)
 labelL0.pack(pady=(20, 20), padx=20)
+
 labelL1 = ctk.CTkLabel(values_frame, text='Invested Money:', font=ctk.CTkFont(size=16, weight="bold"))
 labelL1.pack( pady=(10, 0), padx=20)
+
 labelL2 = ctk.CTkLabel(values_frame, text=str(0)+' $',
 					   font=ctk.CTkFont(size=16))
 labelL2.pack( pady=(0, 0), padx=20)
+
 labelL3 = ctk.CTkLabel(values_frame, text='Money Not Invested:', font=ctk.CTkFont(size=16, weight="bold"))
 labelL3.pack( pady=(0, 0), padx=20)
+
 labelL4 = ctk.CTkLabel(values_frame, text=str(0)+' $',
 					   font=ctk.CTkFont(size=16))
 labelL4.pack( pady=(0, 0), padx=20)
+
 labelL5 = ctk.CTkLabel(values_frame, text='Standard Deviation:', font=ctk.CTkFont(size=16, weight="bold"))
 labelL5.pack(side=TOP, pady=(0, 0), padx=20)
 # nur letzter Wert
 labelL6 = ctk.CTkLabel(values_frame, text=str(0)+' $',
 					   font=ctk.CTkFont(size=16))
 labelL6.pack( pady=(0, 0), padx=20)
+
 labelL7 = ctk.CTkLabel(values_frame, text='Max Gain per Day:', font=ctk.CTkFont(size=16, weight="bold"))
 labelL7.pack(pady=(0, 0), padx=20)
 # nur letzter Wert
+
 labelL8 = ctk.CTkLabel(values_frame, text=str(0)+' %',
 					   font=ctk.CTkFont(size=16))
 labelL8.pack(pady=(0, 10), padx=20)
@@ -493,10 +511,16 @@ labelL8.pack(pady=(0, 10), padx=20)
 
 #########Graph########
 
+framePlots = ctk.CTkFrame(root)
+framePlots.grid(row=0, column=3, padx=(20, 20), sticky="nsew")
+framePlots.grid_rowconfigure(0, weight=1)
+framePlots.grid_rowconfigure(1, weight=1)
+framePlots.grid_columnconfigure(0, weight=1)
+
 # Plot candlesticks
 
-tabview = ctk.CTkTabview(root)
-tabview.grid(row=0, column=2, columnspan=2,rowspan=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
+tabview = ctk.CTkTabview(framePlots)
+tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
 tab2W = tabview.add("2 Weeks")
 tab1M = tabview.add("1M")
 tab6M = tabview.add("6M")
@@ -519,7 +543,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	# test
 	line = FigureCanvasTkAgg(show_graph_test(strategyDataTest, stockDataTest), tab2W)
 	line.draw()
-	line.get_tk_widget().pack(fill='both', expand=True)
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab2W)
 	toolbarFrame.place(relx=0, rely=0.94)
@@ -528,7 +552,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	# 1M
 	line = FigureCanvasTkAgg(show_graph(stockData, 18), tab1M)
 	line.draw()
-	line.get_tk_widget().pack(fill='both', expand=True)
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab1M)
 	toolbarFrame.place(relx=0, rely=0.94)
@@ -537,7 +561,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	# 6M
 	line = FigureCanvasTkAgg(show_graph(stockData, 123), tab6M)
 	line.draw()
-	line.get_tk_widget().pack(fill='both', expand=True)
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab6M)
 	toolbarFrame.place(relx=0, rely=0.94)
@@ -546,15 +570,15 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	# 1Y
 	line = FigureCanvasTkAgg(show_graph(stockData, 250), tab1Y)
 	line.draw()
-	line.get_tk_widget().pack(fill='both', expand=True)
+	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab1Y)
 	toolbarFrame.place(relx=0, rely=0.94)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 # Visualization for important numbers
-tabview = ctk.CTkTabview(root)
-tabview.grid(row=2, column=2, columnspan=2,rowspan=2, padx=(20, 20), pady=(20, 0), sticky="nsew")
+tabview = ctk.CTkTabview(framePlots)
+tabview.grid(row=1, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
 tabMPV = tabview.add("Mean_PV")
 tabTPV = tabview.add("TotalPortfolioValue")
 tabAbsGain = tabview.add("Gain (absolute)")
@@ -626,23 +650,25 @@ def updateMetrics(metrics):
 # Last Recommendations and current recommendation
 
 # print last 3 decsions depending on the amounts of available taken decisions
-recommendation_frame = ctk.CTkFrame(root,height=300)
-recommendation_frame.grid(row=1,rowspan=2, column=1, padx=(20, 20), pady=(10, 0), sticky="nsew")
-recommendation_frame.grid_rowconfigure(4, weight=1)
-recommendation_frame.grid_columnconfigure(2,weight=1)
+recommendation_frame = ctk.CTkFrame(important_Values_frame, height=300)
+recommendation_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
 labelrecommend = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=22, weight="bold"))
 labelrecommend.pack( padx=10, pady=(40, 5))
+
 labelcurrentRecommend = ctk.CTkLabel(recommendation_frame, text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
 									 text_color=get_Color_Buy_Up_Decision())
 labelcurrentRecommend.pack( pady=(5,0), padx=20)
 
 labelLastRecommend = ctk.CTkLabel(recommendation_frame, text='Last Recommendations', font=ctk.CTkFont(size=17, weight="bold"))
 labelLastRecommend.pack( pady=(10, 5), padx=20)
+
 labelLRecommend1 = ctk.CTkLabel(recommendation_frame, text='No Last Recommendation', font=ctk.CTkFont(size=16))
 labelLRecommend1.pack( pady=5, padx=20)
+
 labelLRecommend2 = ctk.CTkLabel(recommendation_frame,text="",font=ctk.CTkFont(size=16))
 labelLRecommend2.pack( pady=5, padx=20)
+
 labelLRecommend3 = ctk.CTkLabel(recommendation_frame,text='', font=ctk.CTkFont(size=16))
 labelLRecommend3.pack( pady=5, padx=20)
 
