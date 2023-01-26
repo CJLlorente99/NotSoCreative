@@ -22,6 +22,3 @@ def readBlobDf():
 	except:
 		df = pd.DataFrame()
 	return df
-
-readBlobDf().to_csv('data.csv', index_label=['Date'])
-pass

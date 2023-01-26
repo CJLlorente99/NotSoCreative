@@ -1,14 +1,12 @@
 import customtkinter as ctk
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import timedelta
-
 import pytz
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import *
 import mplfinance as mpf
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from matplotlib.figure import Figure
 from PIL import Image
 import yfinance as yf
