@@ -15,6 +15,8 @@ import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
 
+# Basic structure of the window
+
 # Constants
 yfStartDate = '2021-01-01'
 date_test = '2023-01-24'
@@ -322,6 +324,7 @@ ctk.set_default_color_theme("blue")
 # Main Window
 root = ctk.CTk()
 root.geometry('1500x900')
+root.minsize(1200, 720)
 root.title("Stock Market Prediction Engine")
 root.protocol("WM_DELETE_WINDOW", _quit)
 
