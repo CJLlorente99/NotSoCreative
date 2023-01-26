@@ -17,8 +17,8 @@ from googleStorageAPI import readBlobDf
 
 # Constants
 yfStartDate = '2021-01-01'
-date_test = '2023-01-24'
-strategyName = 'bilstmWindowRobMMT1T2Legacy_24_1_2023'
+date_test = '2023-01-25'
+strategyName = 'bilstmWindowRobMMT1T2Legacy_25_1_2023'
 
 ########## Functions #########
 
