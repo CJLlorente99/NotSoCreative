@@ -17,8 +17,8 @@ from googleStorageAPI import readBlobDf
 
 # Constants
 yfStartDate = '2021-01-01'
-date_test = '2023-01-25'
-strategyName = 'bilstmWindowRobMMT1T2Legacy_25_1_2023'
+date_test = '2023-01-24'
+strategyName = 'bilstmWindowRobMMT1T2Legacy_24_1_2023'
 
 ########## Functions #########
 
@@ -103,7 +103,17 @@ def getCurrentValue_metric(stock_data, strategyData):
 
 	res = {}
 	# Date info
-	now = datetime.now(pytz.timezone('America/New_York')).strftime('%Y-%m-%d %H:%M:%S')
+
+	nowStockData = stock_data.index[-1].to_pydatetime()
+	now = datetime.now(pytz.timezone('America/New_York'))
+	if nowStockData.day < now.day:  # Either we're in a holiday or the market has not opened yet
+		now = nowStockData.replace(hour=16, minute=0, second=0)
+	else: # nowStockData.day == now.day
+		if now > now.replace(hour=16, minute=0, second=0): # the market has already closed (16.00 - 24.00)
+			now = now.replace(hour=16, minute=0, second=0)
+		elif now < now.replace(hour=9, minute=30, second=0): # the market has not opened yet (00.00 - 9.30)
+			now = now.replace(day=now.day-1,hour=9, minute=30, second=0)
+	now = now.strftime('%Y-%m-%d %H:%M:%S')
 	res['Date'] = np.append(strategyData['Date'], now)
 
 	# PortfolioValues
@@ -187,7 +197,7 @@ def show_graph(stock_data, i):
 		mode='default'
 
 	# plot candelsticks
-	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up(), down=get_Color_Sell_Down(), wick="inherit",
+	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up_Candlesticks(), down=get_Color_Sell_Down_Candlesticks(), wick="inherit",
 										  edge="inherit", volume="in")
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True,
@@ -204,21 +214,21 @@ def show_graph_test(data_csv, stock_data):
 		mode='default'
 
 	# Color of candlesticks
-	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up(), down=get_Color_Sell_Down(), wick="inherit",
+	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up_Candlesticks(), down=get_Color_Sell_Down_Candlesticks(), wick="inherit",
 										  edge="inherit", volume="in")
 
 	aux = pd.DataFrame()
-	aux['Hold'] = data_csv['Decision'].map(holdDecision)
-	aux['Sell'] = data_csv['Decision'].map(sellDecision)
-	aux['Buy'] = data_csv['Decision'].map(buyDecision)
+	aux['Hold'] = data_csv['Decision'].map(holdDecision) + (stock_data['Close'] + stock_data['Open'])/2
+	aux['Sell'] = data_csv['Decision'].map(sellDecision) + stock_data['Close'] + 5
+	aux['Buy'] = data_csv['Decision'].map(buyDecision)  + stock_data['Open'] - 5
 
 	apds = []
 	if not aux['Hold'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=400, color=get_Color_Hold()))
+		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=400, color=get_Color_Hold_Decision(), secondary_y=False))
 	if not aux['Buy'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=400, color=get_Color_Buy_Up()))
+		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=400, color=get_Color_Buy_Up_Decision(), secondary_y=False))
 	if not aux['Sell'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=400, color=get_Color_Sell_Down()))
+		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=400, color=get_Color_Sell_Down_Decision(), secondary_y=False))
 
 
 	# plot candlesticks
@@ -231,15 +241,29 @@ def _quit():
 	root.quit()
 	root.destroy()
 
-def get_Color_Buy_Up():
+def get_Color_Buy_Up_Candlesticks():
 	if color_mode() == 0:
-		color = "#00ff00"
+		color = "#A3FF87"
+	elif color_mode() == 1:
+		color = "#5D02FF"
+	return color
+
+def get_Color_Sell_Down_Candlesticks():
+	if color_mode() == 0:
+		color = "#FF8A8A"
+	elif color_mode() == 1:
+		color = "#E60400"
+	return color
+
+def get_Color_Buy_Up_Decision():
+	if color_mode() == 0:
+		color = "#00FF00"
 	elif color_mode() == 1:
 		color = "#5D02FF"
 	return color
 
 
-def get_Color_Hold():
+def get_Color_Hold_Decision():
 	if color_mode() == 0:
 		color = "#FFA500"
 	elif color_mode() == 1:
@@ -247,7 +271,7 @@ def get_Color_Hold():
 	return color
 
 
-def get_Color_Sell_Down():
+def get_Color_Sell_Down_Decision():
 	if color_mode() == 0:
 		color = "#ff0000"
 	elif color_mode() == 1:
@@ -330,16 +354,6 @@ def update():
 	sidebar_label_2.configure(text=str(round(metrics['PortfolioValue'][-1],2))+' $')
 	sidebar_label_4.configure(text=str(round(metrics['PerGain'][-1], 2))+' %')
 	sidebar_label_6.configure(text=str(round(metrics['MPV'][-1], 2))+' $')
-
-	if strategyData['MoneyInvestedToday'][-1] > 0:
-		labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Buy_Up())
-	elif strategyData['MoneyInvestedToday'][-1] < 0:
-		labelcurrentRecommend.configure(text='Sell', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Sell_Down())
-	else:
-		labelcurrentRecommend.configure(text='Hold', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Hold())
 
 	# print last 3 decisions depending on the amounts of available taken decisions
 	updateLastDecisions(strategyDataTest)
@@ -620,7 +634,7 @@ recommendation_frame.grid_columnconfigure(2,weight=1)
 labelrecommend = ctk.CTkLabel(recommendation_frame, text='Recommendation', font=ctk.CTkFont(size=22, weight="bold"))
 labelrecommend.pack( padx=10, pady=(40, 5))
 labelcurrentRecommend = ctk.CTkLabel(recommendation_frame, text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
-									 text_color=get_Color_Buy_Up())
+									 text_color=get_Color_Buy_Up_Decision())
 labelcurrentRecommend.pack( pady=(5,0), padx=20)
 
 labelLastRecommend = ctk.CTkLabel(recommendation_frame, text='Last Recommendations', font=ctk.CTkFont(size=17, weight="bold"))
@@ -668,13 +682,13 @@ def updateLastDecisions(strategyDataTest):
 
 	if strategyDataTest['MoneyInvestedToday'][-1] > 0:
 		labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Buy_Up())
+										text_color=get_Color_Buy_Up_Decision())
 	elif strategyDataTest['MoneyInvestedToday'][-1] < 0:
 		labelcurrentRecommend.configure(text='Sell', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Sell_Down())
+										text_color=get_Color_Sell_Down_Decision())
 	else:
 		labelcurrentRecommend.configure(text='Hold', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Hold())
+										text_color=get_Color_Hold_Decision())
 
 update()
 root.mainloop()
