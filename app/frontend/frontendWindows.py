@@ -12,9 +12,7 @@ from PIL import Image
 import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
-import webbrowser
-
-# Basic structure of the window
+import sys # Basic structure of the window
 
 # Constants
 yfStartDate = '2021-01-01'
@@ -808,5 +806,7 @@ def updateMetrics(metrics):
 	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
+f = open('output.txt', 'w')
+sys.stdout = f
 update()
 root.mainloop()

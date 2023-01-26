@@ -12,7 +12,6 @@ from PIL import Image
 import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
-import webbrowser
 
 # Basic structure of the window
 

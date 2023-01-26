@@ -10,4 +10,4 @@ python ./installPackage.py yfinance
 python ./installPackage.py numpy
 python ./installPackage.py google-cloud-storage
 
-python ./frontend.py
+python ./frontend_mac.py
