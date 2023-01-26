@@ -400,11 +400,11 @@ def runStrategies(dateToday, operation, investorInfo: pd.DataFrame, inputsDf: pd
 		elif name.startswith('bilstmWindowRobMMT1T2Legacy'):
 			aux = BiLSTMWindowRobMMT1T2Legacy(strategyInfo, strategy).broker(operation, inputsData)
 
-		if name in ['wia', 'bia'] and lastDateTag:
+		if (name.startswith('wia') or name.startswith('bia')) and lastDateTag:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)
 			aux['Date'] = lastDateTag
 			aux.set_index('Date', inplace=True)
-		elif name in ['wia', 'bia']:
+		elif name.startswith('wia') or name.startswith('bia'):
 			continue
 		else:
 			aux = pd.concat([aux.reset_index(drop=True), inputsDf[-1:].reset_index(drop=True)], axis=1)

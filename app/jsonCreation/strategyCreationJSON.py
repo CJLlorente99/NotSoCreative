@@ -1,7 +1,7 @@
 from inversionStrategyJSONAPI import *
 
 
-jsonFile = '../ACHTUNGScriptData/strategies.json'
+jsonFile = './strategies.json'
 
 # json manager
 jsonmanager = JsonStrategyManager(jsonFile)
@@ -10,27 +10,51 @@ jsonmanager = JsonStrategyManager(jsonFile)
 jsonmanager.deleteFile()
 
 # BIA
-biaStrategy = Strategy('bia_10_1_2022', 'Best Invesment Approach for benchmark purposes', [])
+biaStrategy = Strategy('bia_24_1_2022', 'Best Invesment Approach for benchmark purposes', [])
 jsonmanager.addStrategy(biaStrategy)
 
 # WIA
-wiaStrategy = Strategy('wia_10_1_2022', 'Worst Invesment Approach for benchmark purposes', [])
+wiaStrategy = Strategy('wia_24_1_2022', 'Worst Invesment Approach for benchmark purposes', [])
 jsonmanager.addStrategy(wiaStrategy)
 
 # CA
-caStrategy = Strategy('ca_10_1_2022', 'Continuous Average strategy for benchmark purposes', [])
+caStrategy = Strategy('ca_24_1_2022', 'Continuous Average strategy for benchmark purposes', [])
 jsonmanager.addStrategy(caStrategy)
 
 # Idle
-idleStrategy = Strategy('idle_10_1_2022', 'Do Nothing strategy for benchmark purposes', [])
+idleStrategy = Strategy('idle_24_1_2022', 'Do Nothing strategy for benchmark purposes', [])
 jsonmanager.addStrategy(idleStrategy)
 
 # Random
-randomStrat = Strategy('random_10_1_2022', 'Random strategy for benchmark purposes', [])
+randomStrat = Strategy('random_24_1_2022', 'Random strategy for benchmark purposes', [])
 jsonmanager.addStrategy(randomStrat)
 
 # BaH
-bahStrategy = Strategy('bah_10_1_2022', 'Buy and Hold strategy for benchmark purposes', [])
+bahStrategy = Strategy('bah_24_1_2022', 'Buy and Hold strategy for benchmark purposes', [])
+jsonmanager.addStrategy(bahStrategy)
+
+# BIA
+biaStrategy = Strategy('bia_25_1_2022', 'Best Invesment Approach for benchmark purposes', [])
+jsonmanager.addStrategy(biaStrategy)
+
+# WIA
+wiaStrategy = Strategy('wia_25_1_2022', 'Worst Invesment Approach for benchmark purposes', [])
+jsonmanager.addStrategy(wiaStrategy)
+
+# CA
+caStrategy = Strategy('ca_25_1_2022', 'Continuous Average strategy for benchmark purposes', [])
+jsonmanager.addStrategy(caStrategy)
+
+# Idle
+idleStrategy = Strategy('idle_25_1_2022', 'Do Nothing strategy for benchmark purposes', [])
+jsonmanager.addStrategy(idleStrategy)
+
+# Random
+randomStrat = Strategy('random_25_1_2022', 'Random strategy for benchmark purposes', [])
+jsonmanager.addStrategy(randomStrat)
+
+# BaH
+bahStrategy = Strategy('bah_25_1_2022', 'Buy and Hold strategy for benchmark purposes', [])
 jsonmanager.addStrategy(bahStrategy)
 
 # LSTMWindowRobMMT2
