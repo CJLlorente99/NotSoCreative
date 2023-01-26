@@ -241,6 +241,7 @@ def show_graph_test(data_csv, stock_data):
 
 	aux = pd.DataFrame()
 	stock_data['Decision'] = data_csv['Decision']
+	stock_data['Decision'] = data_csv['Decision'].values
 	aux['Hold'] = stock_data['Decision'].map(holdDecision) + (stock_data['Close'] + stock_data['Open'])/2
 	aux['Sell'] = stock_data['Decision'].map(sellDecision) + stock_data['Close'] + 5
 	aux['Buy'] = stock_data['Decision'].map(buyDecision)  + stock_data['Open'] - 5
