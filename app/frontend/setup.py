@@ -1,6 +1,6 @@
 from setuptools import setup
 
-APP=['frontend.py']
+APP=['frontendWindows.py']
 OPTIONS = {
     'argv_emulation':True,
 }

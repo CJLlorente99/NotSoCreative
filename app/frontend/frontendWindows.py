@@ -12,13 +12,14 @@ from PIL import Image
 import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
+import webbrowser
 
 # Basic structure of the window
 
 # Constants
 yfStartDate = '2021-01-01'
-date_test = '2023-01-24'
-strategyName = 'bilstmWindowRobMMT1T2Legacy_24_1_2023'
+date_test = '2023-01-25'
+strategyName = 'bilstmWindowRobMMT1T2Legacy_25_1_2023'
 
 """
 AUX FUNCTIONS TO BE MAPPED TO DATAFRAMES IN ORDER TO GENERATE USEFUL COLUMNS
@@ -195,7 +196,7 @@ def show_metrics(metrics, var):
 	x = metrics['Date']
 	y = metrics[var]
 
-	f = Figure(figsize=(10, 10), dpi=100)
+	f = Figure(dpi=100)
 	a = f.add_subplot(111)
 
 	if ctk.get_appearance_mode() == 'Dark':
@@ -204,9 +205,9 @@ def show_metrics(metrics, var):
 	plt.grid(visible=True, axis='both')
 
 	if var == 'PerGain':
-		plt.ylabel('[%]')
+		a.set_ylabel('[%]')
 	else:
-		plt.ylabel('[$]')
+		a.set_ylabel('[$]')
 	a.plot(x, y)
 	return f
 
@@ -221,8 +222,10 @@ def show_graph(stock_data, i):
 	# plot candelsticks
 	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up_Candlesticks(), down=get_Color_Sell_Down_Candlesticks(), wick="inherit",
 										  edge="inherit", volume="in")
-	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
-	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True, figsize=(5,5))
+	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
+	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True,
+						datetime_format='%Y-%m-%d', xrotation=0)
+
 	return fig
 
 
@@ -255,8 +258,9 @@ def show_graph_test(data_csv, stock_data):
 
 
 	# plot candlesticks
-	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
-	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds, figsize=(5,5))
+	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
+	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds,
+						datetime_format='%Y-%m-%d', xrotation=0)
 	return fig
 
 """
@@ -349,11 +353,7 @@ def openNewWindow():
 	# sets the title of the
 	# Toplevel widget
 	newWindow.title("Information")
-	# sets the geometry of toplevel
 	newWindow.geometry("300x300")
-	# A Label widget to show in toplevel
-	#Label(newWindow,
-	#).pack()
 
 """
 APPEARANCE AND SCALING FUNCTIONS
@@ -426,7 +426,7 @@ root.protocol("WM_DELETE_WINDOW", _quit)
 # configure the grid
 root.grid_columnconfigure(1, weight=1)  # Will contain logo, appearance, info, update button and apply changes on appearance button
 root.grid_columnconfigure(2, weight=1)  # Will contain the main figures (MPV, AbsGain...)
-root.grid_columnconfigure(3, weight=3)  # Will contain the plots
+root.grid_columnconfigure(3, weight=6)  # Will contain the plots
 root.grid_rowconfigure(0, weight=1)  # Each column will contain a frame that will further divide the space or the widgets will be packed one on top of the other
 
 switch_var = ctk.StringVar(value="off")
@@ -435,7 +435,7 @@ switch_var = ctk.StringVar(value="off")
 FIRST COLUMN WIDGET CREATION
 """
 # Create frame that will contain everything
-sidebar_frame = ctk.CTkFrame(root, width=140, corner_radius=0)
+sidebar_frame = ctk.CTkFrame(root, corner_radius=0)
 sidebar_frame.grid(row=0, column=1, sticky="nsew")
 
 # Title and logo
@@ -501,7 +501,7 @@ important_Values_frame.grid_rowconfigure(2, weight=1)
 
 # FIRST ROW OF SECOND COLUMN
 # Create a frame to contain all the labels in the first row
-important_Values_frame1 = ctk.CTkFrame(important_Values_frame, height=300)
+important_Values_frame1 = ctk.CTkFrame(important_Values_frame)
 important_Values_frame1.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 # Portfolio label
@@ -539,7 +539,7 @@ sidebar_label_6.pack( padx=20)
 
 # SECOND ROW OF THE SECOND COLUMN
 # Create a frame to contain all labels in the second row
-recommendation_frame = ctk.CTkFrame(important_Values_frame, height=300)
+recommendation_frame = ctk.CTkFrame(important_Values_frame)
 recommendation_frame.grid(row=1, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
 # Recommend title label
@@ -601,6 +601,7 @@ def updateLastDecisions(strategyDataTest):
 					 -4], font=ctk.CTkFont(size=16))
 
 	# Current recommendation
+	labelrecommend.configure(text='Recommendation\n' + pd.to_datetime(strategyDataTest.index.values[-1]).strftime('%Y-%m-%d'))
 	if strategyDataTest['MoneyInvestedToday'][-1] > 0:
 		labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
 										text_color=get_Color_Buy_Up_Decision())
@@ -613,7 +614,7 @@ def updateLastDecisions(strategyDataTest):
 
 # THIRD ROW OF THE SECOND COLUMN
 # Create a frame to contain all labels in the third row
-values_frame = ctk.CTkFrame(important_Values_frame,height=300)
+values_frame = ctk.CTkFrame(important_Values_frame)
 values_frame.grid(row=2, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 # Other metrics title label
@@ -660,7 +661,7 @@ labelL8.pack(pady=(0, 10), padx=20)
 THIRD COLUMN WIDGET CREATION
 """
 # Create a frame that will contain the tabs of both "set" of plots
-framePlots = ctk.CTkFrame(root, height=800, width=900)
+framePlots = ctk.CTkFrame(root)
 framePlots.grid(row=0, column=3, padx=(20, 20), sticky="nsew")
 framePlots.grid_rowconfigure(0, weight=1)
 framePlots.grid_rowconfigure(1, weight=1)
@@ -668,7 +669,7 @@ framePlots.grid_columnconfigure(0, weight=1)
 
 # Tab creation for candlestick plots
 tabview = ctk.CTkTabview(framePlots)
-tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 20), sticky="nsew")
+tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 10), sticky="nsew")
 tab2W = tabview.add("2 Weeks")
 tab1M = tabview.add("1M")
 tab6M = tabview.add("6M")
@@ -714,7 +715,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab2W)
-	toolbarFrame.place(relx=0, rely=0.94)
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed 1M plot into tab
@@ -723,7 +724,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab1M)
-	toolbarFrame.place(relx=0, rely=0.94)
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed 6M plot into tab
@@ -732,7 +733,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab6M)
-	toolbarFrame.place(relx=0, rely=0.94)
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed 1Y plot into tab
@@ -741,7 +742,7 @@ def updateCandlesticks(stockData, strategyDataTest, stockDataTest):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tab1Y)
-	toolbarFrame.place(relx=0, rely=0.94)
+	toolbarFrame.place(relx=0, rely=0.95)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 def updateMetrics(metrics):
@@ -763,7 +764,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMPV)
-	toolbarFrame.place(relx=0, rely=0.95)
+	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed PV plot into tab
@@ -772,7 +773,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabTPV)
-	toolbarFrame.place(relx=0, rely=0.95)
+	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed AbsGain plot into tab
@@ -781,7 +782,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabAbsGain)
-	toolbarFrame.place(relx=0, rely=0.95)
+	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed PerGain plot into tab
@@ -790,7 +791,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabPerGain)
-	toolbarFrame.place(relx=0, rely=0.95)
+	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed MoneyInvestedToday plot into tab
@@ -799,7 +800,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMIT)
-	toolbarFrame.place(relx=0, rely=0.95)
+	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 update()
