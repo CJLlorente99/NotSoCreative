@@ -669,7 +669,7 @@ framePlots.grid_rowconfigure(1, weight=1)
 framePlots.grid_columnconfigure(0, weight=1)
 
 # Tab creation for candlestick plots
-tabview = ctk.CTkTabview(framePlots)
+tabview = ctk.CTkTabview(framePlots, height=400, width=900)
 tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
 tab2W = tabview.add("2 Weeks")
 tab1M = tabview.add("1M")
@@ -681,7 +681,7 @@ tabview.tab("6M")
 tabview.tab("1Y")
 
 # Tab creation for metric plots
-tabview = ctk.CTkTabview(framePlots)
+tabview = ctk.CTkTabview(framePlots, height=400, width=900)
 tabview.grid(row=1, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
 tabMPV = tabview.add("Mean_PV")
 tabTPV = tabview.add("TotalPortfolioValue")
