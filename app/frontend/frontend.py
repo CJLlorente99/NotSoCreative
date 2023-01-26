@@ -275,6 +275,8 @@ def color_mode():
 		color = 0
 	elif switch_var.get() == "on":
 		color = 1
+	else:
+		color = 0
 	return color
 
 def get_Color_Buy_Up_Candlesticks():
@@ -282,6 +284,8 @@ def get_Color_Buy_Up_Candlesticks():
 		color = "#A3FF87"
 	elif color_mode() == 1:
 		color = "#5D02FF"
+	else:
+		color = 0
 	return color
 
 def get_Color_Sell_Down_Candlesticks():
@@ -289,6 +293,8 @@ def get_Color_Sell_Down_Candlesticks():
 		color = "#FF8A8A"
 	elif color_mode() == 1:
 		color = "#E60400"
+	else:
+		color = 0
 	return color
 
 def get_Color_Buy_Up_Decision():
@@ -296,6 +302,8 @@ def get_Color_Buy_Up_Decision():
 		color = "#00FF00"
 	elif color_mode() == 1:
 		color = "#5D02FF"
+	else:
+		color = 0
 	return color
 
 
@@ -304,6 +312,8 @@ def get_Color_Hold_Decision():
 		color = "#FFA500"
 	elif color_mode() == 1:
 		color = "#FFA500"
+	else:
+		color = 0
 	return color
 
 
@@ -312,6 +322,8 @@ def get_Color_Sell_Down_Decision():
 		color = "#ff0000"
 	elif color_mode() == 1:
 		color = "#E60400"
+	else:
+		color = 0
 	return color
 
 
@@ -559,29 +571,29 @@ def updateLastDecisions(strategyDataTest):
 		labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
 	elif len(strategyDataTest) == 2:
 		labelLRecommend1.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -2], font=ctk.CTkFont(size=16))
 	elif len(strategyDataTest) == 3:
 		labelLRecommend1.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -2], font=ctk.CTkFont(size=16))
 		labelLRecommend2.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-3]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -3], font=ctk.CTkFont(size=16))
 	elif len(strategyDataTest) > 3:
 		labelLRecommend1.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-2]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -2], font=ctk.CTkFont(size=16))
 		labelLRecommend2.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-3]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-3]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -3], font=ctk.CTkFont(size=16))
 		labelLRecommend3.configure(
-			text=str(pd.to_datetime(strategyDataTest.index.values[-4]).date()) + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-4]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
 					 -4], font=ctk.CTkFont(size=16))
 
@@ -602,7 +614,7 @@ values_frame = ctk.CTkFrame(important_Values_frame,height=300)
 values_frame.grid(row=2, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
 # Other metrics title label
-labelL0=ctk.CTkLabel(values_frame, text='Other Metrics', font=ctk.CTkFont(size=22, weight='bold'),underline=0)
+labelL0=ctk.CTkLabel(values_frame, text='Other Metrics', font=ctk.CTkFont(size=22, weight='bold'))
 labelL0.pack(pady=(20, 20), padx=20)
 
 # Invested money title label
