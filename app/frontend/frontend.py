@@ -221,9 +221,8 @@ def show_graph(stock_data, i):
 	# plot candelsticks
 	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up_Candlesticks(), down=get_Color_Sell_Down_Candlesticks(), wick="inherit",
 										  edge="inherit", volume="in")
-	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
-	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True,
-						figsize=(10, 10))
+	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
+	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True, figsize=(5,5))
 	return fig
 
 
@@ -256,9 +255,8 @@ def show_graph_test(data_csv, stock_data):
 
 
 	# plot candlesticks
-	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
-	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds,
-						figsize=(10, 10))
+	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
+	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds, figsize=(5,5))
 	return fig
 
 """
@@ -662,15 +660,15 @@ labelL8.pack(pady=(0, 10), padx=20)
 THIRD COLUMN WIDGET CREATION
 """
 # Create a frame that will contain the tabs of both "set" of plots
-framePlots = ctk.CTkFrame(root)
+framePlots = ctk.CTkFrame(root, height=800, width=900)
 framePlots.grid(row=0, column=3, padx=(20, 20), sticky="nsew")
 framePlots.grid_rowconfigure(0, weight=1)
 framePlots.grid_rowconfigure(1, weight=1)
 framePlots.grid_columnconfigure(0, weight=1)
 
 # Tab creation for candlestick plots
-tabview = ctk.CTkTabview(framePlots, height=400, width=900)
-tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
+tabview = ctk.CTkTabview(framePlots)
+tabview.grid(row=0, column=0, padx=(5, 5), pady=(5, 20), sticky="nsew")
 tab2W = tabview.add("2 Weeks")
 tab1M = tabview.add("1M")
 tab6M = tabview.add("6M")
@@ -681,7 +679,7 @@ tabview.tab("6M")
 tabview.tab("1Y")
 
 # Tab creation for metric plots
-tabview = ctk.CTkTabview(framePlots, height=400, width=900)
+tabview = ctk.CTkTabview(framePlots)
 tabview.grid(row=1, column=0, padx=(5, 5), pady=(5, 0), sticky="nsew")
 tabMPV = tabview.add("Mean_PV")
 tabTPV = tabview.add("TotalPortfolioValue")
