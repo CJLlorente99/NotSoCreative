@@ -84,7 +84,6 @@ def refreshDataSP500():
 	stock_data = yf.download('^GSPC', start=yfStartDate, end=end)
 	stock_data = stock_data.reset_index()
 	stock_data.set_index(pd.DatetimeIndex(stock_data['Date']), inplace=True)
-	stock_data.tz_localize(None)
 
 	return stock_data
 
@@ -241,9 +240,10 @@ def show_graph_test(data_csv, stock_data):
 										  edge="inherit", volume="in")
 
 	aux = pd.DataFrame()
-	aux['Hold'] = data_csv['Decision'].map(holdDecision) + (stock_data['Close'] + stock_data['Open'])/2
-	aux['Sell'] = data_csv['Decision'].map(sellDecision) + stock_data['Close'] + 5
-	aux['Buy'] = data_csv['Decision'].map(buyDecision)  + stock_data['Open'] - 5
+	stock_data['Decision'] = data_csv['Decision']
+	aux['Hold'] = stock_data['Decision'].map(holdDecision) + (stock_data['Close'] + stock_data['Open'])/2
+	aux['Sell'] = stock_data['Decision'].map(sellDecision) + stock_data['Close'] + 5
+	aux['Buy'] = stock_data['Decision'].map(buyDecision)  + stock_data['Open'] - 5
 
 	apds = []
 	if not aux['Hold'].isnull().all():
