@@ -202,6 +202,11 @@ def show_metrics(metrics, var):
 		plt.style.use('dark_background')
 
 	plt.grid(visible=True, axis='both')
+
+	if var == 'PerGain':
+		plt.ylabel('[%]')
+	else:
+		plt.ylabel('[$]')
 	a.plot(x, y)
 	return f
 

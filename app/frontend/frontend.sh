@@ -8,5 +8,6 @@ python ./installPackage.py mplfinance
 python ./installPackage.py Pillow
 python ./installPackage.py yfinance
 python ./installPackage.py numpy
+python ./installPackage.py google-cloud-storage
 
 python ./frontend.py
