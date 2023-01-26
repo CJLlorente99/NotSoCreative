@@ -84,6 +84,7 @@ def refreshDataSP500():
 	stock_data = yf.download('^GSPC', start=yfStartDate, end=end)
 	stock_data = stock_data.reset_index()
 	stock_data.set_index(pd.DatetimeIndex(stock_data['Date']), inplace=True)
+	stock_data.tz_localize(None)
 
 	return stock_data
 
