@@ -828,7 +828,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMPV)
-	toolbarFrame.place(relx=0, rely=0.945)
+	toolbarFrame.place(relx=0, rely=0.935)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed PV plot into tab
@@ -837,7 +837,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabTPV)
-	toolbarFrame.place(relx=0, rely=0.945)
+	toolbarFrame.place(relx=0, rely=0.935)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed AbsGain plot into tab
@@ -846,7 +846,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabAbsGain)
-	toolbarFrame.place(relx=0, rely=0.945)
+	toolbarFrame.place(relx=0, rely=0.935)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed PerGain plot into tab
@@ -855,7 +855,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabPerGain)
-	toolbarFrame.place(relx=0, rely=0.945)
+	toolbarFrame.place(relx=0, rely=0.935)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 	# Embed MoneyInvestedToday plot into tab
@@ -864,7 +864,7 @@ def updateMetrics(metrics):
 	line.get_tk_widget().pack(side='top', fill='both', expand=True)
 	# Navigation bar
 	toolbarFrame = Frame(master=tabMIT)
-	toolbarFrame.place(relx=0, rely=0.945)
+	toolbarFrame.place(relx=0, rely=0.935)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
 f = open('output.txt', 'w')
