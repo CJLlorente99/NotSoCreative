@@ -44,7 +44,7 @@ def strDecision(value):
 	else:
 		return 'Hold'
 
-# Aux function to get a int according to the decision taken
+# Aux function to get an int according to the decision taken
 def decisionFunction(value):
 	if value > 0:
 		return 1
@@ -272,6 +272,7 @@ def show_graph_test(data_csv, stock_data):
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data, type='candle', volume=False, style=mpf_style, returnfig=True, addplot=apds,
 						datetime_format='%Y-%m-%d', xrotation=0)
+
 	return fig
 
 """

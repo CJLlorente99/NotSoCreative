@@ -12,8 +12,7 @@ from PIL import Image
 import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
-
-# Basic structure of the window
+import sys
 
 # Constants
 yfStartDate = '2021-01-01'
@@ -116,6 +115,8 @@ def refreshDataStrategy():
 def getCurrentValue_metric(stock_data, strategyData):
 
 	res = {}
+	offset = offset_var.get()
+	offset_val = strategyData['TotalPortfolioValue'][0]
 	# Date info
 
 	nowStockData = stock_data.index[-1].to_pydatetime()
@@ -136,13 +137,13 @@ def getCurrentValue_metric(stock_data, strategyData):
 	aux = np.append(strategyData['TotalPortfolioValue'].values, actualPortfolioValue)
 
 	# Calculate Portfoliovalue (day t)
-	res['PortfolioValue'] = aux
+	res['PortfolioValue'] = aux if not offset else aux - offset_val
 
 	# MPV
 	x = np.array([])
 	for i in range(len(aux)):
 		x = np.append(x, aux[:i+1].mean())
-	res['MPV'] = x
+	res['MPV'] = x if not offset else x - offset_val
 
 	# Gain (%)
 	initialPV = strategyData['TotalPortfolioValue'][0]
@@ -173,7 +174,7 @@ def getCurrentValue_metric(stock_data, strategyData):
 	res['MoneyNotInvested'] = np.append(strategyData['MoneyNotInvested'].values, strategyData['MoneyNotInvested'].values[-1])
 
 	# Money Invested Today
-	res['MoneyInvestedToday'] = np.append(strategyData['MoneyInvestedToday'].values, strategyData['MoneyInvestedToday'].values[-1])
+	res['MoneyInvestedToday'] = np.append(strategyData['MoneyInvestedToday'].values, 0)
 
 	# Max Gain
 	x = np.array([0])
@@ -192,11 +193,13 @@ PLOT GENERATING FUNCTIONS
 # Function to generate the plot containing the metric var
 def show_metrics(metrics, var):
 
+	bar = bar_var.get()
+
 	x = metrics['Date']
 	y = metrics[var]
 
-	f = Figure(dpi=100)
-	a = f.add_subplot(111)
+	fig = Figure(dpi=100)
+	a = fig.add_subplot(111)
 
 	if ctk.get_appearance_mode() == 'Dark':
 		plt.style.use('dark_background')
@@ -207,8 +210,12 @@ def show_metrics(metrics, var):
 		a.set_ylabel('[%]')
 	else:
 		a.set_ylabel('[$]')
-	a.plot(x, y)
-	return f
+
+	if bar:
+		a.bar(x, y)
+	elif not bar:
+		a.plot(x,y)
+	return fig
 
 # Function that generates the candlesticks plot
 def show_graph(stock_data, i):
@@ -222,13 +229,12 @@ def show_graph(stock_data, i):
 	color_candels = mpf.make_marketcolors(up=get_Color_Buy_Up_Candlesticks(), down=get_Color_Sell_Down_Candlesticks(), wick="inherit",
 										  edge="inherit", volume="in")
 
-	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
-	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True, figsize=(5,5),xrotation=0)
+	# mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels, rc={'font.size':5})
+	# fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True, figsize=(5,5),xrotation=0)
 
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
 	fig, axl = mpf.plot(stock_data.iloc[-i:, :], type='candle', volume=False, style=mpf_style, returnfig=True,
 						datetime_format='%Y-%m-%d', xrotation=0)
-
 
 	return fig
 
@@ -249,7 +255,7 @@ def show_graph_test(data_csv, stock_data):
 	stock_data['Decision'] = data_csv['Decision']
 	stock_data['Decision'] = data_csv['Decision'].values
 	aux['Hold'] = stock_data['Decision'].map(holdDecision) + (stock_data['Close'] + stock_data['Open'])/2
-	aux['Sell'] = stock_data['Decision'].map(sellDecision) + stock_data['Close'] + 5
+	aux['Sell'] = stock_data['Decision'].map(sellDecision) + stock_data['Open'] + 5
 	aux['Buy'] = stock_data['Decision'].map(buyDecision)  + stock_data['Open'] - 5
 
 	if len(data_csv) > 5:
@@ -259,12 +265,12 @@ def show_graph_test(data_csv, stock_data):
 
 	apds = []
 	if not aux['Hold'].isnull().all():
-
-		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=10, color=get_Color_Hold_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Hold"], type='scatter', marker='s', markersize=markerSizeToday, color=get_Color_Hold_Decision(), secondary_y=False))
 	if not aux['Buy'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=30, color=get_Color_Buy_Up_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Buy"], type='scatter', marker='^', markersize=markerSizeToday, color=get_Color_Buy_Up_Decision(), secondary_y=False))
 	if not aux['Sell'].isnull().all():
-		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=50, color=get_Color_Sell_Down_Decision(), secondary_y=False))
+		apds.append(mpf.make_addplot(aux["Sell"], type='scatter', marker='v', markersize=markerSizeToday, color=get_Color_Sell_Down_Decision(), secondary_y=False))
+
 
 	# plot candlesticks
 	mpf_style = mpf.make_mpf_style(base_mpf_style=mode, marketcolors=color_candels)
@@ -285,39 +291,28 @@ def _quit():
 COLOR FUNCTIONS
 """
 #color Mode for colorblind people
-def color_mode():
-	# returns 0 or 1 for differnet color modes
-	color = 0
-	if switch_var.get() == "off":
-		color = 0
-	elif switch_var.get() == "on":
-		color = 1
-	else:
-		color = 0
-	return color
-
 def get_Color_Buy_Up_Candlesticks():
-	if color_mode() == 0:
+	if color_var.get():
 		color = "#A3FF87"
-	elif color_mode() == 1:
+	elif not color_var.get():
 		color = "#5D02FF"
 	else:
 		color = 0
 	return color
 
 def get_Color_Sell_Down_Candlesticks():
-	if color_mode() == 0:
+	if color_var.get():
 		color = "#FF8A8A"
-	elif color_mode() == 1:
+	elif not color_var.get():
 		color = "#E60400"
 	else:
 		color = 0
 	return color
 
 def get_Color_Buy_Up_Decision():
-	if color_mode() == 0:
+	if color_var.get():
 		color = "#00FF00"
-	elif color_mode() == 1:
+	elif not color_var.get():
 		color = "#5D02FF"
 	else:
 		color = 0
@@ -325,9 +320,9 @@ def get_Color_Buy_Up_Decision():
 
 
 def get_Color_Hold_Decision():
-	if color_mode() == 0:
+	if color_var.get():
 		color = "#FFA500"
-	elif color_mode() == 1:
+	elif not color_var.get():
 		color = "#FFA500"
 	else:
 		color = 0
@@ -335,9 +330,18 @@ def get_Color_Hold_Decision():
 
 
 def get_Color_Sell_Down_Decision():
-	if color_mode() == 0:
+	if color_var.get():
 		color = "#ff0000"
-	elif color_mode() == 1:
+	elif not color_var.get():
+		color = "#E60400"
+	else:
+		color = 0
+	return color
+
+def get_Color_Market_Closed():
+	if color_var.get():
+		color = "#FF8A8A"
+	elif not color_var.get():
 		color = "#E60400"
 	else:
 		color = 0
@@ -381,7 +385,7 @@ def change_scaling_event(new_scaling: str):
 """
 UPDATE FUNCTION TO BE CALLED EVERY TIME DATA IS TO BE UPDATED
 """
-def update():
+def update(menuChoice=None):
 
 	# Check appearance and scaling
 	ctk.set_appearance_mode(appearance_mode_optionmenu.get())
@@ -418,6 +422,17 @@ def update():
 	updateCandlesticks(stockData, strategyDataTest, stockDataTest)
 	updateMetrics(metrics)
 
+	if switch_update.get():
+		dealWithTimer()
+
+# Function called from the update switch that updates every 5 min
+def dealWithTimer():
+	if switch_update.get():
+		global updateJob
+		updateJob = root.after(5*60*1000, update)
+	else:
+		root.after_cancel(updateJob)
+
 """
 MAIN WINDOW AND WIDGET INITIALIZATION
 """
@@ -439,7 +454,10 @@ root.grid_columnconfigure(2, weight=1)  # Will contain the main figures (MPV, Ab
 root.grid_columnconfigure(3, weight=6)  # Will contain the plots
 root.grid_rowconfigure(0, weight=1)  # Each column will contain a frame that will further divide the space or the widgets will be packed one on top of the other
 
-switch_var = ctk.StringVar(value="off")
+color_var = ctk.BooleanVar(value=True)
+bar_var = ctk.BooleanVar(value=False)
+offset_var = ctk.BooleanVar(value=False)
+update_var = ctk.BooleanVar(value=False)
 
 """
 FIRST COLUMN WIDGET CREATION
@@ -469,21 +487,36 @@ option_label.pack(side=TOP, padx=20, pady=(0, 0))
 data_update_button= ctk.CTkButton(sidebar_frame, text="Update Data", command=update)
 data_update_button.pack(side=TOP, padx=20, pady=(15, 15))
 
+# Automatic update button
+switch_update = ctk.CTkSwitch(sidebar_frame, text="Update Every 5 Min", variable=update_var, command=dealWithTimer, onvalue=True,
+						 offvalue=False)
+switch_update.pack(side=TOP, padx=20, pady=(5, 0))
+
 # Info button
 sidebar_button = ctk.CTkButton(sidebar_frame, text="Info/Help", command=openNewWindow)
 sidebar_button.pack(side=TOP, padx=20, pady=(15, 15))
 
 # Color switch
-switch_1 = ctk.CTkSwitch(sidebar_frame, text="Color", variable=switch_var, command=color_mode, onvalue="on",
-						 offvalue="off")
-switch_1.pack(side=TOP, padx=20, pady=(5, 0))
+switch_color = ctk.CTkSwitch(sidebar_frame, text="Colorblind Mode", variable=color_var, command=update, onvalue=False,
+						 offvalue=True)
+switch_color.pack(side=TOP, padx=20, pady=(5, 0))
+
+# Bar switch
+switch_bar = ctk.CTkSwitch(sidebar_frame, text="Plot Line/Bar", variable=bar_var, command=update, onvalue=True,
+						 offvalue=False)
+switch_bar.pack(side=TOP, padx=20, pady=(5, 0))
+
+# Offset switch
+switch_offset = ctk.CTkSwitch(sidebar_frame, text="Plot Offset", variable=offset_var, command=update, onvalue=True,
+						 offvalue=False)
+switch_offset.pack(side=TOP, padx=20, pady=(5, 0))
 
 # Appearance label
 appearance_mode_label = ctk.CTkLabel(sidebar_frame, text="Appearance Mode:", anchor="w")
 appearance_mode_label.pack(side=TOP, padx=20, pady=(5, 0))
 
 # Appearance menu
-appearance_mode_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["Light", "Dark", "System"])
+appearance_mode_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["Light", "Dark", "System"], command=update)
 appearance_mode_optionmenu.pack(side=TOP, padx=20, pady=(0, 0))
 
 # Scaling label
@@ -491,12 +524,8 @@ scaling_label = ctk.CTkLabel(sidebar_frame, text="UI Scaling:", anchor="w")
 scaling_label.pack(side=TOP, padx=20, pady=(10, 0))
 
 # Scaling menu
-scaling_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"])
+scaling_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["80%", "90%", "100%", "110%", "120%"], command=update)
 scaling_optionmenu.pack(side=TOP, padx=20, pady=(0, 10))
-
-# Apply changes button
-apply_update_button= ctk.CTkButton(sidebar_frame, text="Apply Changes", command=update)
-apply_update_button.pack(side=TOP, padx=20, pady=(15, 15))
 
 """
 SECOND COLUMN WIDGET CREATION
@@ -579,48 +608,59 @@ labelLRecommend3.pack( pady=5, padx=20)
 
 # Update function to be called on each update
 def updateLastDecisions(strategyDataTest):
+	# Check if there is a recommendation for today
+	offset = 0
+	now = datetime.now(pytz.timezone('America/New_York'))
+	if now > datetime.strptime(strategyDataTest['Date'][-1], '%Y-%m-%d %H:%M:%S').replace(hour=16, minute=0, second=0, tzinfo=pytz.timezone('America/New_York')):  #  No last recommendation should be shown
+		offset = 1
 	# Check how many last recommendation we have and update appropriately
-	if len(strategyDataTest) < 1:
+	if len(strategyDataTest)+offset < 1:
 		labelLRecommend1.configure(text='No Last Recommendation', font=ctk.CTkFont(size=16))
-	elif len(strategyDataTest) == 2:
+	elif len(strategyDataTest)+offset == 2:
 		labelLRecommend1.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -2], font=ctk.CTkFont(size=16))
-	elif len(strategyDataTest) == 3:
+					 -2+offset], font=ctk.CTkFont(size=16))
+	elif len(strategyDataTest)+offset == 3:
 		labelLRecommend1.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -2], font=ctk.CTkFont(size=16))
+					 -2+offset], font=ctk.CTkFont(size=16))
 		labelLRecommend2.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-3]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-3+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -3], font=ctk.CTkFont(size=16))
-	elif len(strategyDataTest) > 3:
+					 -3+offset], font=ctk.CTkFont(size=16))
+	elif len(strategyDataTest)+offset > 3:
 		labelLRecommend1.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-2]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-2+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -2], font=ctk.CTkFont(size=16))
+					 -2+offset], font=ctk.CTkFont(size=16))
 		labelLRecommend2.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-3]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-3+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -3], font=ctk.CTkFont(size=16))
+					 -3+offset], font=ctk.CTkFont(size=16))
 		labelLRecommend3.configure(
-			text=pd.to_datetime(strategyDataTest.index.values[-4]).strftime('%Y-%m-%d') + ':    ' +
+			text=pd.to_datetime(strategyDataTest.index.values[-4+offset]).strftime('%Y-%m-%d') + ':    ' +
 				 strategyDataTest['StrDecision'][
-					 -4], font=ctk.CTkFont(size=16))
+					 -4+offset], font=ctk.CTkFont(size=16))
 
 	# Current recommendation
-	labelrecommend.configure(text='Recommendation\n' + pd.to_datetime(strategyDataTest.index.values[-1]).strftime('%Y-%m-%d'))
-	if strategyDataTest['MoneyInvestedToday'][-1] > 0:
-		labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Buy_Up_Decision())
-	elif strategyDataTest['MoneyInvestedToday'][-1] < 0:
-		labelcurrentRecommend.configure(text='Sell', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Sell_Down_Decision())
+	if offset == 0:
+		labelrecommend.configure(text='Recommendation\n' + pd.to_datetime(strategyDataTest.index.values[-1]).strftime('%Y-%m-%d'))
+		if strategyDataTest['MoneyInvestedToday'][-1] > 0:
+			labelcurrentRecommend.configure(text='Buy', font=ctk.CTkFont(size=20, weight='bold'),
+											text_color=get_Color_Buy_Up_Decision())
+		elif strategyDataTest['MoneyInvestedToday'][-1] < 0:
+			labelcurrentRecommend.configure(text='Sell', font=ctk.CTkFont(size=20, weight='bold'),
+											text_color=get_Color_Sell_Down_Decision())
+		else:
+			labelcurrentRecommend.configure(text='Hold', font=ctk.CTkFont(size=20, weight='bold'),
+											text_color=get_Color_Hold_Decision())
 	else:
-		labelcurrentRecommend.configure(text='Hold', font=ctk.CTkFont(size=20, weight='bold'),
-										text_color=get_Color_Hold_Decision())
+		labelrecommend.configure(
+			text='Recommendation\n' + now.strftime('%Y-%m-%d'))
+		labelcurrentRecommend.configure(text='Market closed', font=ctk.CTkFont(size=20, weight='bold'),
+										text_color=get_Color_Market_Closed())
 
 # THIRD ROW OF THE SECOND COLUMN
 # Create a frame to contain all labels in the third row
@@ -813,5 +853,7 @@ def updateMetrics(metrics):
 	toolbarFrame.place(relx=0, rely=0.945)
 	NavigationToolbar2Tk(line, toolbarFrame)
 
+f = open('output.txt', 'w')
+sys.stdout = f
 update()
 root.mainloop()
