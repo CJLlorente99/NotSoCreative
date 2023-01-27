@@ -13,6 +13,7 @@ import yfinance as yf
 import numpy as np
 from googleStorageAPI import readBlobDf
 import sys
+import webbrowser
 
 # Constants
 yfStartDate = '2021-01-01'
@@ -87,7 +88,7 @@ def refreshDataSP500():
 	return stock_data
 
 # Function that return the updated strategy data
-def refreshDataStrategy(all=False):
+def refreshDataStrategy(allData=False):
 
 	# strategy data
 	df_morning = readBlobDf()
@@ -102,7 +103,7 @@ def refreshDataStrategy(all=False):
 	df_morning['shortenedDate'] = df_morning['Date'].map(shortenedDate)
 
 	# let's get rid of all afternoon operations
-	if not all:
+	if not allData:
 		df_morning = df_morning[df_morning['operation'] == 0]
 
 	# change format of index
@@ -368,16 +369,16 @@ def openNewWindow():
 	newWindow.maxsize(300, 300)
 	newWindow.minsize(300, 300)
 
-# # Function to save data into csv
-# def saveToCSV():
-# 	df = refreshDataStrategy(all=True)[['Date', 'MoneyInvested', 'MoneyNotInvested',
-#        'MoneyInvestedToday', 'PerInvestToday', 'TotalPortfolioValue', 'MPV',
-#        'StdPV', 'maxPV', 'minPV']]
-#
-# 	df.set_index(['Date'], inplace=True)
-#
-# 	now = datetime.now(pytz.timezone('America/New_York')).strftime('%Y_%m_%d_%H_%M_%S')
-# 	df.to_csv('dataUntil' + now + '.csv', index=['Date'])
+# Function to save data into csv
+def saveToCSV():
+	df = refreshDataStrategy(allData=True)[['Date', 'MoneyInvested', 'MoneyNotInvested',
+       'MoneyInvestedToday', 'PerInvestToday', 'TotalPortfolioValue', 'MPV',
+       'StdPV', 'maxPV', 'minPV']]
+
+	df.set_index(['Date'], inplace=True)
+
+	now = datetime.now(pytz.timezone('America/New_York')).strftime('%Y_%m_%d_%H_%M_%S')
+	df.to_csv('dataUntil' + now + '.csv', index=['Date'])
 
 """
 APPEARANCE AND SCALING FUNCTIONS
@@ -442,6 +443,9 @@ def dealWithTimer():
 		updateJob = root.after(5*60*1000, update)
 	else:
 		root.after_cancel(updateJob)
+
+def openEmail():
+	webbrowser.open('mailto:notSoCreative@dsii.tu-darmstadt.de', new=1)
 
 """
 MAIN WINDOW AND WIDGET INITIALIZATION
@@ -537,9 +541,13 @@ scaling_label.pack(side=TOP, padx=20, pady=(10, 0))
 scaling_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["80%", "90%"], command=update)
 scaling_optionmenu.pack(side=TOP, padx=20, pady=(0, 10))
 
-# # Save data button
-# data_save_button= ctk.CTkButton(sidebar_frame, text="Save Data", command=saveToCSV)
-# data_save_button.pack(side=TOP, padx=20, pady=(15, 15))
+# Save data button
+data_save_button= ctk.CTkButton(sidebar_frame, text="Save Data", command=saveToCSV)
+data_save_button.pack(side=TOP, padx=20, pady=(15, 15))
+
+# Send email button
+send_email_button= ctk.CTkButton(sidebar_frame, text="Send Email to NotSoCreative", command=openEmail, fg_color='#FFFDC2', text_color='black')
+send_email_button.pack(side=BOTTOM, padx=20, pady=(15, 15))
 
 """
 SECOND COLUMN WIDGET CREATION
