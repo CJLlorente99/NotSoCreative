@@ -87,7 +87,7 @@ def refreshDataSP500():
 	return stock_data
 
 # Function that return the updated strategy data
-def refreshDataStrategy():
+def refreshDataStrategy(all=False):
 
 	# strategy data
 	df_morning = readBlobDf()
@@ -102,7 +102,8 @@ def refreshDataStrategy():
 	df_morning['shortenedDate'] = df_morning['Date'].map(shortenedDate)
 
 	# let's get rid of all afternoon operations
-	df_morning = df_morning[df_morning['operation'] == 0]
+	if not all:
+		df_morning = df_morning[df_morning['operation'] == 0]
 
 	# change format of index
 	df_morning.set_index(pd.DatetimeIndex(df_morning["shortenedDate"]), inplace=True)
@@ -367,6 +368,17 @@ def openNewWindow():
 	newWindow.maxsize(300, 300)
 	newWindow.minsize(300, 300)
 
+# # Function to save data into csv
+# def saveToCSV():
+# 	df = refreshDataStrategy(all=True)[['Date', 'MoneyInvested', 'MoneyNotInvested',
+#        'MoneyInvestedToday', 'PerInvestToday', 'TotalPortfolioValue', 'MPV',
+#        'StdPV', 'maxPV', 'minPV']]
+#
+# 	df.set_index(['Date'], inplace=True)
+#
+# 	now = datetime.now(pytz.timezone('America/New_York')).strftime('%Y_%m_%d_%H_%M_%S')
+# 	df.to_csv('dataUntil' + now + '.csv', index=['Date'])
+
 """
 APPEARANCE AND SCALING FUNCTIONS
 """
@@ -524,6 +536,10 @@ scaling_label.pack(side=TOP, padx=20, pady=(10, 0))
 # Scaling menu
 scaling_optionmenu = ctk.CTkOptionMenu(sidebar_frame, values=["80%", "90%"], command=update)
 scaling_optionmenu.pack(side=TOP, padx=20, pady=(0, 10))
+
+# # Save data button
+# data_save_button= ctk.CTkButton(sidebar_frame, text="Save Data", command=saveToCSV)
+# data_save_button.pack(side=TOP, padx=20, pady=(15, 15))
 
 """
 SECOND COLUMN WIDGET CREATION
