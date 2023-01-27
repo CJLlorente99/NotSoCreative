@@ -364,6 +364,8 @@ def openNewWindow():
 	# Toplevel widget
 	newWindow.title("Information")
 	newWindow.geometry("300x300")
+	newWindow.maxsize(300, 300)
+	newWindow.minsize(300, 300)
 
 """
 APPEARANCE AND SCALING FUNCTIONS
