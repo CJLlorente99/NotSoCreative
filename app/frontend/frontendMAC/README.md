@@ -8,7 +8,7 @@ This documents informs about the steps that need to be followed in order to exec
 python3 --version
 ````
 3. Open a terminal in the same folder where _frontendMAC.py_, _frontendMACpython.sh_, 
-_googleStorageAPI_, _installPackage.py_ and _png.png_. Write the following command in the terminal.
+_googleStorageAPI_, _installPackage.py_, _png.png_ and _application_default_credentials.json_. Write the following command in the terminal.
 ````commandline
 sh ./frontendMACpython3.sh
 ````
