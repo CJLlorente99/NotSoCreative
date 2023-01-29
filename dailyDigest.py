@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 
 df = readBlobDf()
 df.to_csv('data.csv', index=False, index_label=['Date'])
-df.reset_index(inplace=True)
 df.set_index('Date', inplace=True)
 df = df[['MPV', 'investorStrategy', 'TotalPortfolioValue']]
 
