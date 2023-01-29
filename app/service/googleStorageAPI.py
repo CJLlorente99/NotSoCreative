@@ -13,7 +13,6 @@ credentials = '/home/carlosllocor/NotSoCreative/app/service/application_default_
 # credentials = './application_default_credentials.json'
 
 
-
 def readBlobDf():
 	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 	storageClient = Client(project=projectName)

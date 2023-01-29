@@ -490,7 +490,7 @@ sidebar_frame.grid(row=0, column=1, sticky="nsew")
 
 # Title and logo
 # Load image
-img = ctk.CTkImage( light_image=Image.open('png.png'),dark_image=Image.open("png.png"),size=(200,200))
+img = ctk.CTkImage(light_image=Image.open('png.png'), dark_image=Image.open("png.png"), size=(200, 200))
 logo_label =ctk.CTkLabel(sidebar_frame,text='', image=img)
 
 # Create label with the title
