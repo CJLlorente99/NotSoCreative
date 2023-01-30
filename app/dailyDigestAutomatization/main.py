@@ -31,7 +31,7 @@ def main():
 
 	# Stock opened today?
 	stockData = yf.download('^GSPC', (todayDate-timedelta(days=7)).strftime('%Y-%m-%d'), (todayDate+timedelta(days=1)).strftime('%Y-%m-%d'))
-	if todayDate.replace(hour=0, minute=0, second=0) > stockData.index[-1].to_pydatetime().replace(hour=0, minute=0, second=0, tzinfo=pytz.timezone('America/New_York')):
+	if stockData.index[-1].to_pydatetime().date() != todayDate.date():
 		return
 
 	# Strategy data already computed?
