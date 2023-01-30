@@ -28,6 +28,7 @@ class Renderer:
 		self.stockData = self.getYfData()
 		self.strategiesData = self.getStrategiesData(['ca_25_1_2022', 'random_25_1_2022', 'idle_25_1_2022',
 													  'bah_25_1_2022', 'bilstmWindowRobMMT1T2Legacy_25_1_2023'])
+		self.ourStrategy = 'bilstmWindowRobMMT1T2Legacy_25_1_2023'
 		self.env = Environment(loader=FileSystemLoader(searchpath='./htmlTemplates/'))
 
 	def getYfData(self) -> pd.DataFrame:
@@ -87,7 +88,41 @@ class Renderer:
 		This method should render the short daily digest template
 		:return: html string
 		"""
-		return ''
+		todayDecision = 'hold'
+		if self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].MoneyInvestedToday[-2] > 0:
+			todayDecision = 'buy'
+		elif self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].MoneyInvestedToday[-2] < 0:
+			todayDecision = 'sell'
+
+		graph_url_CompMPV = self.generateHTMLImageMPV()
+		graph_url_CompTPV = self.generateHTMLImageTPV()
+		graph_url_EvolTPV = self.generateHTMLImageTPVEvolution()
+		graph_url_EvolMIT = self.generateHTMLImageMoneyInvestedEvolution()
+
+		template = self.env.get_template(shortDailyDigestTemplatePath)
+		renderedHTML = template.render(name='Kim Erik',
+									   openPrice=self.stockData.Open[-1],
+									   closePrice=self.stockData.Close[-1],
+									   moneyInvestedToday=
+									   self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].MoneyInvestedToday[-2],
+									   totalPortfolioValueMorning=self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].TotalPortfolioValue[-2],
+									   totalPortfolioValueAfternoon=self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].TotalPortfolioValue[-1],
+									   meanPortfolioValue=self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].MPV[-2],
+									   caPortfolioValue=self.strategiesData['ca_25_1_2022'].TotalPortfolioValue[-2],
+									   caMeanPortfolioValue=self.strategiesData['ca_25_1_2022'].MPV[-2],
+									   bahPortfolioValue=self.strategiesData['bah_25_1_2022'].TotalPortfolioValue[-2],
+									   bahMeanPortfolioValue=self.strategiesData['bah_25_1_2022'].MPV[-2],
+									   randomPortfolioValue=self.strategiesData['random_25_1_2022'].TotalPortfolioValue[-2],
+									   randomMeanPortfolioValue=self.strategiesData['random_25_1_2022'].MPV[-2],
+									   idlePortfolioValue=self.strategiesData['idle_25_1_2022'].TotalPortfolioValue[-2],
+									   idleMeanPortfolioValue=self.strategiesData['idle_25_1_2022'].MPV[-2],
+									   todayDate=self.stockData.index[-1].to_pydatetime().strftime('%d-%m-%Y'),
+									   todayDecision=todayDecision,
+									   graph_url_CompMPV=graph_url_CompMPV,
+									   graph_url_CompTPV=graph_url_CompTPV,
+									   graph_url_EvolTPV=graph_url_EvolTPV,
+									   graph_url_EvolMIT=graph_url_EvolMIT)
+		return renderedHTML
 
 	def generateHTMLImageMPV(self) -> str:
 		latestMorning = self.strategiesData[list(self.strategiesData.keys())[0]].index[-2]
@@ -101,7 +136,40 @@ class Renderer:
 		fig = go.Figure()
 		fig.add_trace(go.Bar(x=df['investorStrategy'], y=df['MPV'] - 10000))
 		fig.update_layout(title='Mean Portfolio Value Comparison (10,000$ offset)')
-		url = py.plot(fig, filename='example', auto_open=False)
+		url = py.plot(fig, filename='compMPV', auto_open=False)
+		return url
+
+	def generateHTMLImageTPV(self) -> str:
+		latestMorning = self.strategiesData[list(self.strategiesData.keys())[0]].index[-2]
+		df = pd.DataFrame()
+
+		for key in self.strategiesData:
+			data = self.strategiesData[key]
+			data = data.query('index == @latestMorning')
+			df = pd.concat([df, data], ignore_index=True)
+
+		fig = go.Figure()
+		fig.add_trace(go.Bar(x=df['investorStrategy'], y=df['TotalPortfolioValue'] - 10000))
+		fig.update_layout(title='Total Portfolio Value Comparison (10,000$ offset)')
+		url = py.plot(fig, filename='compTPV', auto_open=False)
+		return url
+
+	def generateHTMLImageTPVEvolution(self) -> str:
+		data = self.strategiesData[self.ourStrategy]
+
+		fig = go.Figure()
+		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['TotalPortfolioValue'] - 10000))
+		fig.update_layout(title='Total Portfolio Value Evolution (10,000$ offset)')
+		url = py.plot(fig, filename='evolTPV', auto_open=False)
+		return url
+
+	def generateHTMLImageMoneyInvestedEvolution(self) -> str:
+		data = self.strategiesData[self.ourStrategy]
+
+		fig = go.Figure()
+		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['MoneyInvestedToday']))
+		fig.update_layout(title='Money Invested each Day Evolution')
+		url = py.plot(fig, filename='evolMIT', auto_open=False)
 		return url
 
 

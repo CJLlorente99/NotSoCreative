@@ -19,11 +19,20 @@ destinationEmail = 'paulleonardo.heller@stud.tu-darmstadt.de'
 def main():
 
 	"""
+	1) Perform checks (has stock market close already, has stock market opened today)
+	"""
+
+	"""
 	2) Instantiate a Renderer and render the two types of html strings (long and short)
 	"""
 	todayDate = datetime.now(pytz.timezone('America/New_York'))
 	rend = Renderer(todayDate)
-	renderedHTML = rend.renderShortDailyDigest()
+	renderedShortHTML = rend.renderShortDailyDigest()
+	renderedLongHTML = rend.renderLongDailyDigest()
+
+	"""
+	3) Load email information (emails and type of digest)
+	"""
 
 	"""
 	4) Send emails
@@ -33,7 +42,7 @@ def main():
 	msg['Subject'] = '[DataScienceII] Daily Digest ' + todayDate.strftime('%d/%m/%Y')
 	msg['From'] = notSoCreativeEmail
 	msg['To'] = destinationEmail
-	msg.attach(MIMEText(renderedHTML, 'html'))
+	msg.attach(MIMEText(renderedShortHTML, 'html'))
 
 	# Connect with SMTP gmail server and send the email through it
 	s = smtplib.SMTP('smtp.gmail.com', 587)

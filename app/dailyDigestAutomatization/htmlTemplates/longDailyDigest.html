@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="messagebody"><div class="message-htmlpart" id="message-htmlpart1"><!-- html ignored --><!-- head ignored --><!-- meta ignored --><div class="rcmBody" style="font-size: 10pt; font-family: Verdana,Geneva,sans-serif">
+    <p style="text-align: justify">Good night {{ name }},</p>
+    <br>
+    <p><div style="text-align: justify">In the morning, the open price of the S&amp;P500 has been<span> </span><strong>
+        {{ '%0.2f' | format(openPrice|float) }}.<span> </span></strong>At this price, our strategy has decided to<strong>
+        {{ todayDecision }}</strong>. Thus, the resulting <strong>money invested today </strong>has been<strong>
+        {{ '%0.2f' | format(moneyInvestedToday|float) }}$,</strong> while the total portfolio value in the morning was <strong>
+        {{ '%0.2f' | format(totalPortfolioValueMorning|float) }}</strong>.</div></p>
+    <br>
+    <p><div style="text-align: justify">Therefore, our<span> </span><strong>total portfolio value</strong><span>
+        </span>is<span> </span><strong>{{ '%0.2f' | format(totalPortfolioValueAfternoon|float) }}$,</strong><span> </span>as
+        the S&amp;P500 has closed at <strong>{{ '%0.2f' | format(closePrice|float) }}.</strong></div></p>
+    <br>
+    <p><div style="text-align: justify">Our<span> </span><strong>mean portfolio value </strong>(considering just open instants)
+        is<span> </span><strong>{{ '%0.2f' | format(meanPortfolioValue|float) }}$.</strong></div></p>
+    <br>
+    <p><div style="text-align: justify">All in all, the situation of the benchmarks and our strategy at the beginning of the day was.</div></p>
+    <br>
+    <div style="text-align: center">
+    <table style="margin-left: auto; margin-right: auto; width: 500px; height: 90px" border="1">
+        <tbody>
+            <tr style="height: 15px">
+                <td style="width: 164px; height: 15px"><strong>{{ todayDate }}</strong></td>
+                <td style="width: 164px; text-align: center; height: 15px">Portfolio Value</td>
+                <td style="width: 164px; text-align: center; height: 15px">Mean Portfolio Value</td>
+            </tr>
+                <tr style="height: 15px">
+                <td style="width: 164px; height: 15px">CA</td>
+                <td style="width: 164px; text-align: center; height: 15px">{{ '%0.2f' | format(caPortfolioValue|float) }}$</td>
+                <td style="width: 163.68px; text-align: center; height: 15px">{{ '%0.2f' | format(caMeanPortfolioValue|float) }}$</td>
+            </tr>
+                <tr style="height: 15px">
+                <td style="width: 164px; height: 15px">Idle</td>
+                <td style="width: 164px; text-align: center; height: 15px">{{ '%0.2f' | format(idlePortfolioValue|float) }}$</td>
+                <td style="width: 163.68px; text-align: center; height: 15px">{{ '%0.2f' | format(idleMeanPortfolioValue|float) }}$</td>
+            </tr>
+                <tr style="height: 15px">
+                <td style="width: 164px; height: 15px">Random</td>
+                <td style="width: 164px; text-align: center; height: 15px">{{ '%0.2f' | format(randomPortfolioValue|float) }}$</td>
+                <td style="width: 163.68px; text-align: center; height: 15px">{{ '%0.2f' | format(randomMeanPortfolioValue|float) }}$</td>
+            </tr>
+                <tr style="height: 15px">
+                <td style="width: 164px; height: 15px">Bah</td>
+                <td style="width: 164px; text-align: center; height: 15px">{{ '%0.2f' | format(bahPortfolioValue|float) }}$</td>
+                <td style="width: 163.68px; text-align: center; height: 15px">{{ '%0.2f' | format(bahMeanPortfolioValue|float) }}$</td>
+            </tr>
+                <tr style="height: 15px">
+                <td style="width: 164px; height: 15px">Our Strategy</td>
+                <td style="width: 164px; text-align: center; height: 15px">{{ '%0.2f' | format(totalPortfolioValueMorning|float) }}$</td>
+                <td style="width: 163.68px; text-align: center; height: 15px">{{ '%0.2f' | format(meanPortfolioValue|float) }}$</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <p><img src="{{ graph_url_CompMPV }}.png"></p>
+    <br>
+    <a href="{{ graph_url_CompMPV }}">Click to comment and see the interactive graph </a>
+    <br>
+    <p><img src="{{ graph_url_CompTPV }}.png"></p>
+    <br>
+    <a href="{{ graph_url_CompTPV }}">Click to comment and see the interactive graph </a>
+    <br>
+    <p><img src="{{ graph_url_EvolTPV }}.png"></p>
+    <br>
+    <a href="{{ graph_url_EvolTPV }}">Click to comment and see the interactive graph </a>
+    <br>
+    <p><img src="{{ graph_url_EvolMIT }}.png"></p>
+    <br>
+    <a href="{{ graph_url_EvolMIT }}">Click to comment and see the interactive graph </a>
+    </div>
+    <br>
+    <div style="text-align: justify">
+    <p>Best regards,</p>
+    <p>NotSoCreative Team</p>
+    </div>
+</div>
+</body>
+</html>
