@@ -34,15 +34,6 @@ def main():
 	if stockData.index[-1].to_pydatetime().date() != todayDate.date():
 		return
 
-	# Strategy data already computed?
-	while True:
-		strategyData = readBlobDf()
-		if todayDate.replace(hour=16, minute=0, second=0) == datetime.strptime(strategyData.index[-1],
-																			  '%Y-%m-%d %H:%M:%S').replace(
-				tzinfo=pytz.timezone('America/New_York')):
-			break
-		time.sleep(300)
-
 	"""
 	2) Instantiate a Renderer
 	"""
