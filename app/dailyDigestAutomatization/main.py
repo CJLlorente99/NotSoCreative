@@ -18,7 +18,6 @@ This file is to be called after the stock market is closed in order to send the 
 """
 
 notSoCreativeEmail = 'notsocreative2023@gmail.com'
-destinationEmail = 'paulleonardo.heller@stud.tu-darmstadt.de'
 
 def main():
 
@@ -32,7 +31,7 @@ def main():
 
 	# Stock opened today?
 	stockData = yf.download('^GSPC', (todayDate-timedelta(days=7)).strftime('%Y-%m-%d'), (todayDate+timedelta(days=1)).strftime('%Y-%m-%d'))
-	if todayDate.replace(hour=0, minute=0, second=0) > stockData.index[-1].to_pydatetime().replace(hour=0, minute=0, second=0):
+	if todayDate.replace(hour=0, minute=0, second=0) > stockData.index[-1].to_pydatetime().replace(hour=0, minute=0, second=0, tzinfo=pytz.timezone('America/New_York')):
 		return
 
 	# Strategy data already computed?
@@ -87,6 +86,9 @@ def main():
 		# Send email
 
 		s.sendmail(notSoCreativeEmail, index, msg.as_string())
+
+		with open('log.txt','a') as f:
+			f.write(f'Email sent to {row.index}')
 
 	s.close()
 
