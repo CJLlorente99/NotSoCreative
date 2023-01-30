@@ -178,7 +178,3 @@ class Renderer:
 						  legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.93))
 		url = py.plot(fig, filename='evolMIT', auto_open=False)
 		return url
-
-todayDate = datetime.now(pytz.timezone('America/New_York'))
-rend = Renderer(todayDate)
-renderedHTML = rend.renderShortDailyDigest('Carlos')

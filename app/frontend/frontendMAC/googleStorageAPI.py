@@ -25,7 +25,7 @@ def readBlobDf():
 	return df
 
 def readBlobEmailsDf() -> pd.DataFrame:
-	# It can be that the file is empty or non-existent
+	# It can be that the file is empty or non-existant
 	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 	storageClient = Client(project=projectName)
 	bucket = storageClient.bucket(bucketName)
@@ -57,7 +57,10 @@ def subscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
 def unsubscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
 	# If the email is present change type and name
 	dfEmails = readBlobEmailsDf()
-	dfEmails = dfEmails.drop(email)
+	try:
+		dfEmails = dfEmails.drop(email)
+	except:
+		pass
 
 	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 	storageClient = Client(project=projectName)

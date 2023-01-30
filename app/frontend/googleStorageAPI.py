@@ -57,7 +57,10 @@ def subscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
 def unsubscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
 	# If the email is present change type and name
 	dfEmails = readBlobEmailsDf()
-	dfEmails = dfEmails.drop(email)
+	try:
+		dfEmails = dfEmails.drop(email)
+	except:
+		pass
 
 	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 	storageClient = Client(project=projectName)
