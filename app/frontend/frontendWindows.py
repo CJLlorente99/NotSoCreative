@@ -537,7 +537,7 @@ digest_var = ctk.StringVar(value='Short')
 FIRST COLUMN WIDGET CREATION
 """
 # Create frame that will contain everything
-sidebar_frame = ctk.CTkFrame(root, corner_radius=0)
+sidebar_frame = ctk.CTkFrame(root)
 sidebar_frame.grid(row=0, column=1, padx=(10, 10), pady=(10, 10), sticky="nsew")
 
 # Title and logo

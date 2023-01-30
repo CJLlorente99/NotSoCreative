@@ -7,6 +7,7 @@ import yfinance as yf
 from googleStorageAPI import readBlobDf
 from jinja2 import Environment, FileSystemLoader
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 shortDailyDigestTemplatePath = 'shortDailyDigest.html'
 longDailyDigestTemplatePath = 'longDailyDigest.html'
@@ -166,14 +167,15 @@ class Renderer:
 	def generateHTMLImageMoneyInvestedEvolution(self) -> str:
 		data = self.strategiesData[self.ourStrategy]
 
-		fig = go.Figure()
-		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['MoneyInvestedToday']))
-		fig.update_layout(title='Money Invested each Day Evolution')
-		url = py.plot(fig, filename='evolMIT', auto_open=False)
+		fig = make_subplots(specs=[[{"secondary_y": True}]])
+		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['MoneyInvestedToday']), secondary_y=False)
+		fig.add_trace(go.Scatter(name='Open Price', x=data.index, y=data['Open']), secondary_y=True)
+		fig.update_layout(title='Money Invested each Day Evolution and Stock Market Open Price')
+		url = py.plot(fig, filename='evolMIT', auto_open=True)
 		return url
 
 
 if __name__ == '__main__':
 	todayDate = datetime.now(pytz.timezone('America/New_York'))
 	rend = Renderer(todayDate)
-	renderedHTML = rend.renderShortDailyDigest()
+	renderedHTML = rend.renderLongDailyDigest('example')
