@@ -414,7 +414,7 @@ def windowDailyDigest():
 	name_label.pack(side=TOP, padx=20, pady=(5, 0))
 
 	# Name value
-	name_text_box = ctk.CTkTextbox(newWindow, height=40)
+	name_text_box = ctk.CTkTextbox(newWindow, height=40, width=300)
 	name_text_box.pack(side=TOP, padx=20, pady=(5, 0))
 
 	# Email label
@@ -422,7 +422,7 @@ def windowDailyDigest():
 	email_label.pack(side=TOP, padx=20, pady=(5, 0))
 
 	# Email value
-	email_text_box = ctk.CTkTextbox(newWindow, height=40)
+	email_text_box = ctk.CTkTextbox(newWindow, height=40, width=300)
 	email_text_box.pack(side=TOP, padx=20, pady=(5, 0))
 
 	# Switch short/long digest

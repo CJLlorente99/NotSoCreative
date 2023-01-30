@@ -11,7 +11,7 @@ from matplotlib.figure import Figure
 from PIL import Image
 import yfinance as yf
 import numpy as np
-from googleStorageAPI import readBlobDf
+from googleStorageAPI import readBlobDf, subscribeBlobEmailsDf, unsubscribeBlobEmailsDf
 import sys
 import webbrowser
 
@@ -377,6 +377,91 @@ def openNewWindow():
 	newWindow.maxsize(300, 300)
 	newWindow.minsize(300, 300)
 
+def windowDailyDigest():
+	def invalidNameCheck():
+		res = True
+		name_text_box.configure(fg_color='green')
+		if "," in name_text_box.get(1.0, "end-1c"):
+			pastText = email_text_box.get(1.0, "end-1c")
+			name_text_box.delete('0.0', 'end')
+			name_text_box.insert('0.0', pastText.replace(',',''))
+			name_text_box.configure(fg_color='red')
+			res = False
+
+		email_text_box.configure(fg_color='green')
+		if "," in email_text_box.get(1.0, "end-1c"):
+			pastText = email_text_box.get(1.0, "end-1c")
+			email_text_box.delete('0.0', 'end')
+			email_text_box.insert("0.0", pastText.replace(',', ''))
+			email_text_box.configure(fg_color='red')
+			res = False
+		return res
+
+	def subscribeCallback():
+		if not invalidNameCheck():
+			return
+		subscribeBlobEmailsDf(name_text_box.get(1.0, "end-1c"),
+							  email_text_box.get(1.0, "end-1c"),
+							  switch_digest.get())
+		newWindow.destroy()
+
+	def unsubscribeCallback():
+		if not invalidNameCheck():
+			return
+		unsubscribeBlobEmailsDf(name_text_box.get(1.0, "end-1c"),
+								email_text_box.get(1.0, "end-1c"),
+								switch_digest.get())
+		newWindow.destroy()
+
+	# Toplevel object which will
+	# be treated as a new window
+	newWindow = ctk.CTkToplevel(root)
+
+	# Name label
+	name_label = ctk.CTkLabel(newWindow, text="Enter your name:", anchor="w")
+	name_label.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Name value
+	name_text_box = ctk.CTkTextbox(newWindow, height=40, width=300)
+	name_text_box.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Email label
+	email_label = ctk.CTkLabel(newWindow, text="Enter your email:", anchor="w")
+	email_label.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Email value
+	email_text_box = ctk.CTkTextbox(newWindow, height=40, width=300)
+	email_text_box.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Switch short/long digest
+	switch_digest = ctk.CTkSwitch(newWindow, text="Short/Long Digest", variable=digest_var, onvalue='Long',
+								  offvalue='Short')
+	switch_digest.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Frame to hold buttons
+	frame_buttons = ctk.CTkFrame(newWindow)
+	frame_buttons.grid_rowconfigure(0, weight=1)
+	frame_buttons.grid_columnconfigure(0, weight=1)
+	frame_buttons.grid_columnconfigure(1, weight=1)
+	frame_buttons.pack(side=TOP, padx=20, pady=(5, 0))
+
+	# Button to subscribe
+	button_subscribe = ctk.CTkButton(frame_buttons, text="Subscribe",
+									 command=subscribeCallback)
+	button_subscribe.grid(row=0, column=0, padx=(5, 5), pady=(5, 10), sticky="nsew")
+
+	# Button to subscribe
+	button_unsubscribe = ctk.CTkButton(frame_buttons, text="Unsubscribe",
+									   command=unsubscribeCallback)
+	button_unsubscribe.grid(row=0, column=1, padx=(5, 5), pady=(5, 10), sticky="nsew")
+
+	# sets the title of the
+	# Toplevel widget
+	newWindow.title("Daily Digest Suscribe/Unsuscribe")
+	newWindow.geometry("300x200")
+	newWindow.maxsize(300, 200)
+	newWindow.minsize(300, 200)
+
 # Function to save data into csv
 def saveToCSV():
 	df = refreshDataStrategy(allData=True)[['Date', 'MoneyInvested', 'MoneyNotInvested',
@@ -453,7 +538,7 @@ def dealWithTimer():
 		root.after_cancel(updateJob)
 
 def openEmail():
-	webbrowser.open('mailto:notSoCreative@dsii.tu-darmstadt.de', new=1)
+	webbrowser.open('mailto:notsocreative2023@gmail.com', new=1)
 
 """
 MAIN WINDOW AND WIDGET INITIALIZATION
@@ -480,12 +565,13 @@ color_var = ctk.BooleanVar(value=True)
 bar_var = ctk.BooleanVar(value=False)
 offset_var = ctk.BooleanVar(value=False)
 update_var = ctk.BooleanVar(value=False)
+digest_var = ctk.StringVar(value='Short')
 
 """
 FIRST COLUMN WIDGET CREATION
 """
 # Create frame that will contain everything
-sidebar_frame = ctk.CTkFrame(root, corner_radius=0)
+sidebar_frame = ctk.CTkFrame(root)
 sidebar_frame.grid(row=0, column=1, sticky="nsew")
 
 # Title and logo
@@ -556,6 +642,10 @@ data_save_button.pack(side=TOP, padx=20, pady=(15, 15))
 # Send email button
 send_email_button= ctk.CTkButton(sidebar_frame, text="Send Email to NotSoCreative", command=openEmail, fg_color='#FFFDC2',corner_radius=15, text_color='black')
 send_email_button.pack(side=BOTTOM, padx=20, pady=(15, 15))
+
+# Daily digest button
+daily_digest_button= ctk.CTkButton(sidebar_frame, text="Daily Digest\nSuscribe/Unsuscribe", command=windowDailyDigest, corner_radius=15, text_color='black')
+daily_digest_button.pack(side=BOTTOM, padx=20, pady=(15, 15))
 
 """
 SECOND COLUMN WIDGET CREATION
