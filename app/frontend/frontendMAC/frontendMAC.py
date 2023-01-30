@@ -373,8 +373,8 @@ def openNewWindow():
 	# sets the title of the
 	# Toplevel widget
 	newWindow.title("Information")
-	ws = root.winfo_screenwidth() / 2 + 300/2
-	hs = root.winfo_screenheight() / 2 + 300/2
+	ws = root.winfo_screenwidth() / 2
+	hs = root.winfo_screenheight() / 2
 	newWindow.geometry("300x300+%d+%d" % (ws, hs))
 	newWindow.maxsize(300, 300)
 	newWindow.minsize(300, 300)
@@ -460,8 +460,8 @@ def windowDailyDigest():
 	# sets the title of the
 	# Toplevel widget
 	newWindow.title("Daily Digest Subscribe/Unsubscribe")
-	ws = root.winfo_screenwidth() / 2 + 300 / 2
-	hs = root.winfo_screenheight() / 2 + 200 / 2
+	ws = root.winfo_screenwidth() / 2
+	hs = root.winfo_screenheight() / 2
 	newWindow.geometry("300x200+%d+%d" % (ws, hs))
 	newWindow.maxsize(300, 200)
 	newWindow.minsize(300, 200)
