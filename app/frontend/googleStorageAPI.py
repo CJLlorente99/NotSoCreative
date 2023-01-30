@@ -8,6 +8,7 @@ url = 'https://storage.googleapis.com/datascienceii/myData.csv'
 projectName = 'datascienceii'
 bucketName = 'datascienceii'
 objectNameDf = 'myData.csv'
+objectNameEmailsDf = 'emails.csv'
 credentials = './application_default_credentials.json'
 
 
@@ -22,3 +23,11 @@ def readBlobDf():
 	except:
 		df = pd.DataFrame()
 	return df
+
+def readBlobEmailsDf() -> pd.DataFrame:
+	# TODO
+	return pd.DataFrame()
+
+def updateBlobEmailsDf(name: str, email: str, typeOfDigest: str):
+	# TODO
+	pass

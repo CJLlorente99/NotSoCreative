@@ -1,13 +1,14 @@
-python -m ensurepip
+python -m ensurepip > /dev/null 2>&1
 
-python ./installPackage.py customtkinter
-python ./installPackage.py pandas
-python ./installPackage.py matplotlib
-python ./installPackage.py tk
-python ./installPackage.py mplfinance
-python ./installPackage.py Pillow
-python ./installPackage.py yfinance
-python ./installPackage.py numpy
-python ./installPackage.py google-cloud-storage
+python ./installPackage.py customtkinter > /dev/null 2>&1
+python ./installPackage.py pandas > /dev/null 2>&1
+python ./installPackage.py matplotlib > /dev/null 2>&1
+python ./installPackage.py tk > /dev/null 2>&1
+python ./installPackage.py mplfinance > /dev/null 2>&1
+python ./installPackage.py Pillow > /dev/null 2>&1
+python ./installPackage.py yfinance > /dev/null 2>&1
+python ./installPackage.py numpy > /dev/null 2>&1
+python ./installPackage.py google-cloud-storage > /dev/null 2>&1
 
-python ./frontend_mac.py
+python ./frontendMAC.py > /dev/null 2>&1
+exit
