@@ -37,7 +37,7 @@ class Renderer:
 		This method should call yfinance and retrieve the data until today
 		:return: pd.DataFrame containing the stock market data
 		"""
-		return yf.download('^GSPC', (self.todayDate-timedelta(10)).strftime('%Y-%m-%d'), self.todayDate.strftime('%Y-%m-%d'))
+		return yf.download('^GSPC', (self.todayDate-timedelta(10)).strftime('%Y-%m-%d'), (self.todayDate+timedelta(1)).strftime('%Y-%m-%d'))
 
 	def getStrategiesData(self, listStrategies) -> dict:
 		"""
@@ -178,3 +178,7 @@ class Renderer:
 						  legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.93))
 		url = py.plot(fig, filename='evolMIT', auto_open=False)
 		return url
+
+todayDate = datetime.now(pytz.timezone('America/New_York'))
+rend = Renderer(todayDate)
+renderedHTML = rend.renderShortDailyDigest('Carlos')
