@@ -370,15 +370,41 @@ def openNewWindow():
 	newWindow.minsize(300, 300)
 
 def windowDailyDigest():
+	def invalidNameCheck():
+		res = True
+		name_text_box.configure(fg_color='green')
+		if "," in name_text_box.get(1.0, "end-1c"):
+			pastText = email_text_box.get(1.0, "end-1c")
+			name_text_box.delete('0.0', 'end')
+			name_text_box.insert('0.0', pastText.replace(',',''))
+			name_text_box.configure(fg_color='red')
+			res = False
+
+		email_text_box.configure(fg_color='green')
+		if "," in email_text_box.get(1.0, "end-1c"):
+			pastText = email_text_box.get(1.0, "end-1c")
+			email_text_box.delete('0.0', 'end')
+			email_text_box.insert("0.0", pastText.replace(',', ''))
+			email_text_box.configure(fg_color='red')
+			res = False
+		return res
+
 	def subscribeCallback():
+		if not invalidNameCheck():
+			return
 		subscribeBlobEmailsDf(name_text_box.get(1.0, "end-1c"),
 							  email_text_box.get(1.0, "end-1c"),
 							  switch_digest.get())
+		newWindow.destroy()
 
 	def unsubscribeCallback():
+		if not invalidNameCheck():
+			return
 		unsubscribeBlobEmailsDf(name_text_box.get(1.0, "end-1c"),
 								email_text_box.get(1.0, "end-1c"),
 								switch_digest.get())
+		newWindow.destroy()
+
 	# Toplevel object which will
 	# be treated as a new window
 	newWindow = ctk.CTkToplevel(root)
@@ -424,9 +450,9 @@ def windowDailyDigest():
 	# sets the title of the
 	# Toplevel widget
 	newWindow.title("Daily Digest Suscribe/Unsuscribe")
-	newWindow.geometry("300x300")
-	newWindow.maxsize(300, 300)
-	newWindow.minsize(300, 300)
+	newWindow.geometry("300x200")
+	newWindow.maxsize(300, 200)
+	newWindow.minsize(300, 200)
 
 # Function to save data into csv
 def saveToCSV():

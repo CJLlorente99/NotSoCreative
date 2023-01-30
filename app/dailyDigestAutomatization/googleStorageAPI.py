@@ -25,5 +25,14 @@ def readBlobDf():
 	return df
 
 def readBlobEmailsDf() -> pd.DataFrame:
-	# TODO
-	return pd.DataFrame()
+	# It can be that the file is empty or non-existent
+	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+	storageClient = Client(project=projectName)
+	bucket = storageClient.bucket(bucketName)
+	blob = bucket.blob(objectNameEmailsDf)
+	try:
+		contents = StringIO(blob.download_as_string().decode('utf-8'))
+		df = pd.read_csv(contents, index_col=['email'])
+	except:
+		df = pd.DataFrame()
+	return df

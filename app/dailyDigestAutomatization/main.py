@@ -1,11 +1,13 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from renderer import Renderer
 import pytz
 from datetime import datetime, timedelta
 from googleStorageAPI import readBlobEmailsDf, readBlobDf
 import yfinance as yf
+import time
 
 """
 This file is to be called after the stock market is closed in order to send the daily digest
@@ -34,9 +36,13 @@ def main():
 		return
 
 	# Strategy data already computed?
-	strategyData = readBlobDf()
-	if todayDate.replace(hour=16, minute=0, second=0) > datetime.strptime(strategyData.index[-1], '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('America/New_York')):
-		return
+	while True:
+		strategyData = readBlobDf()
+		if todayDate.replace(hour=16, minute=0, second=0) == datetime.strptime(strategyData.index[-1],
+																			  '%Y-%m-%d %H:%M:%S').replace(
+				tzinfo=pytz.timezone('America/New_York')):
+			break
+		time.sleep(300)
 
 	"""
 	2) Instantiate a Renderer
@@ -66,15 +72,21 @@ def main():
 			renderedHTML = rend.renderLongDailyDigest(row['name'])
 
 		# Create a msg with the different parts
-		msg = MIMEMultipart('alternative')
+		msg = MIMEMultipart('related')
 		msg['Subject'] = '[DataScienceII] Daily Digest ' + todayDate.strftime('%d/%m/%Y')
 		msg['From'] = notSoCreativeEmail
-		msg['To'] = row['email']
+		msg['To'] = index
 		msg.attach(MIMEText(renderedHTML, 'html'))
+
+		fp = open('png.png', 'rb')
+		msgImage = MIMEImage(fp.read())
+		fp.close()
+		msgImage.add_header('Content-ID', '<logoNotSoCreative>')
+		msg.attach(msgImage)
 
 		# Send email
 
-		s.sendmail(notSoCreativeEmail, destinationEmail, msg.as_string())
+		s.sendmail(notSoCreativeEmail, index, msg.as_string())
 
 	s.close()
 

@@ -100,7 +100,7 @@ class Renderer:
 		graph_url_EvolTPV = self.generateHTMLImageTPVEvolution()
 		graph_url_EvolMIT = self.generateHTMLImageMoneyInvestedEvolution()
 
-		template = self.env.get_template(shortDailyDigestTemplatePath)
+		template = self.env.get_template(longDailyDigestTemplatePath)
 		renderedHTML = template.render(name=name,
 									   openPrice=self.stockData.Open[-1],
 									   closePrice=self.stockData.Close[-1],
@@ -134,6 +134,8 @@ class Renderer:
 			data = data.query('index == @latestMorning')
 			df = pd.concat([df, data], ignore_index=True)
 
+		df['investorStrategy'] = df['investorStrategy'].replace([self.ourStrategy], 'ourStrategy')
+
 		fig = go.Figure()
 		fig.add_trace(go.Bar(x=df['investorStrategy'], y=df['MPV'] - 10000))
 		fig.update_layout(title='Mean Portfolio Value Comparison (10,000$ offset)')
@@ -149,9 +151,11 @@ class Renderer:
 			data = data.query('index == @latestMorning')
 			df = pd.concat([df, data], ignore_index=True)
 
+		df['investorStrategy'] = df['investorStrategy'].replace([self.ourStrategy], 'ourStrategy')
+
 		fig = go.Figure()
 		fig.add_trace(go.Bar(x=df['investorStrategy'], y=df['TotalPortfolioValue'] - 10000))
-		fig.update_layout(title='Total Portfolio Value Comparison (10,000$ offset)')
+		fig.update_layout(title='Today Total Portfolio Value Comparison (10,000$ offset)')
 		url = py.plot(fig, filename='compTPV', auto_open=False)
 		return url
 
@@ -160,7 +164,7 @@ class Renderer:
 
 		fig = go.Figure()
 		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['TotalPortfolioValue'] - 10000))
-		fig.update_layout(title='Total Portfolio Value Evolution (10,000$ offset)')
+		fig.update_layout(title='Our Strategy Total Portfolio Value Evolution (10,000$ offset)')
 		url = py.plot(fig, filename='evolTPV', auto_open=False)
 		return url
 
@@ -168,14 +172,9 @@ class Renderer:
 		data = self.strategiesData[self.ourStrategy]
 
 		fig = make_subplots(specs=[[{"secondary_y": True}]])
-		fig.add_trace(go.Bar(name=self.ourStrategy, x=data.index, y=data['MoneyInvestedToday']), secondary_y=False)
+		fig.add_trace(go.Bar(name='Money Invested', x=data.index, y=data['MoneyInvestedToday']), secondary_y=False)
 		fig.add_trace(go.Scatter(name='Open Price', x=data.index, y=data['Open']), secondary_y=True)
-		fig.update_layout(title='Money Invested each Day Evolution and Stock Market Open Price')
-		url = py.plot(fig, filename='evolMIT', auto_open=True)
+		fig.update_layout(title='Our Strategy\'s Money Invested each Day and Stock Market Open Price',
+						  legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.93))
+		url = py.plot(fig, filename='evolMIT', auto_open=False)
 		return url
-
-
-if __name__ == '__main__':
-	todayDate = datetime.now(pytz.timezone('America/New_York'))
-	rend = Renderer(todayDate)
-	renderedHTML = rend.renderLongDailyDigest('example')
