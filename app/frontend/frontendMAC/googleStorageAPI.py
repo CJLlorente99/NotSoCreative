@@ -25,7 +25,7 @@ def readBlobDf():
 	return df
 
 def readBlobEmailsDf() -> pd.DataFrame:
-	# It can be that the file is empty or non-existant
+	# It can be that the file is empty or non-existent
 	os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
 	storageClient = Client(project=projectName)
 	bucket = storageClient.bucket(bucketName)
