@@ -49,7 +49,7 @@ class Renderer:
 			res[strategy] = df.query('investorStrategy == @strategy')
 		return res
 
-	def renderShortDailyDigest(self) -> str:
+	def renderShortDailyDigest(self, name) -> str:
 		"""
 		This method should render the short daily digest template
 		:return: html string
@@ -63,7 +63,7 @@ class Renderer:
 		graph_url = self.generateHTMLImageMPV()
 
 		template = self.env.get_template(shortDailyDigestTemplatePath)
-		renderedHTML = template.render(name='Kim Erik',
+		renderedHTML = template.render(name=name,
 									   openPrice=self.stockData.Open[-1],
 									   closePrice=self.stockData.Close[-1],
 									   moneyInvestedToday=self.strategiesData['bilstmWindowRobMMT1T2Legacy_25_1_2023'].MoneyInvestedToday[-2],
@@ -83,7 +83,7 @@ class Renderer:
 									   graph_url=graph_url)
 		return renderedHTML
 
-	def renderLongDailyDigest(self) -> str:
+	def renderLongDailyDigest(self, name) -> str:
 		"""
 		This method should render the short daily digest template
 		:return: html string
@@ -100,7 +100,7 @@ class Renderer:
 		graph_url_EvolMIT = self.generateHTMLImageMoneyInvestedEvolution()
 
 		template = self.env.get_template(shortDailyDigestTemplatePath)
-		renderedHTML = template.render(name='Kim Erik',
+		renderedHTML = template.render(name=name,
 									   openPrice=self.stockData.Open[-1],
 									   closePrice=self.stockData.Close[-1],
 									   moneyInvestedToday=

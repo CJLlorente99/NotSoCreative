@@ -26,8 +26,17 @@ def readBlobDf():
 
 def readBlobEmailsDf() -> pd.DataFrame:
 	# TODO
+	# df has 3 rows |name|email|type
+	# It can be that the file is empty or non-existant
 	return pd.DataFrame()
 
-def updateBlobEmailsDf(name: str, email: str, typeOfDigest: str):
+def subscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
 	# TODO
+	# Before writing check that the email is not present
+	# df has 3 rows |name|email|type
+	pass
+
+def unsubscribeBlobEmailsDf(name: str, email: str, typeOfDigest: str):
+	# TODO
+	# df has 3 rows |name|email|type
 	pass
