@@ -21,7 +21,7 @@ def main():
     dataGetter = DataGetter('2019-12-01', '2022-12-30')
 
     # Run various experiments
-    numExperiments = 30
+    numExperiments = 20
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -72,32 +72,32 @@ def main():
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
-        experimentManager.addStrategy(investorRandom, "random", plotEvolution=False)
+        experimentManager.addStrategy(investorRandom, "random", plotEvolution=True)
         print("investorRandom created")
 
         # Create investor BIA
         investorBIA = InvestorBIA(10000)
-        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=False)
+        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=True)
         print("investorBIA created")
 
         # Create investor WIA
         investorWIA = InvestorWIA(10000)
-        experimentManager.addStrategy(investorWIA, "wia", plotEvolution=False)
+        experimentManager.addStrategy(investorWIA, "wia", plotEvolution=True)
         print("investorWIA created")
 
         # Create investor CA
         investorCA = InvestorCA(10000, 0.1)
-        experimentManager.addStrategy(investorCA, "ca", plotEvolution=False)
+        experimentManager.addStrategy(investorCA, "ca", plotEvolution=True)
         print("investorCA created")
 
         # Create investor BaH
         investorBaH = InvestorBaH(10000)
-        experimentManager.addStrategy(investorBaH, "bah", plotEvolution=False)
+        experimentManager.addStrategy(investorBaH, "bah", plotEvolution=True)
         print("investorBaH created")
 
         # Create investor Idle
         investorIdle = InvestorIdle(10000)
-        experimentManager.addStrategy(investorIdle, "idle", plotEvolution=False)
+        experimentManager.addStrategy(investorIdle, "idle", plotEvolution=True)
         print("investorIdle created")
 
         auxLoop = pd.DataFrame()
