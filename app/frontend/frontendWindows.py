@@ -123,13 +123,11 @@ def getCurrentValue_metric(stock_data, strategyData):
 
 	nowStockData = stock_data.index[-1].to_pydatetime()
 	now = datetime.now(pytz.timezone('America/New_York'))
-	if nowStockData.day < now.day:  # Either we're in a holiday or the market has not opened yet
+	if nowStockData.replace(tzinfo=pytz.timezone('America/New_York')).date() < now.date():  # Either we're in a holiday or the market has not opened yet
 		now = nowStockData.replace(hour=16, minute=0, second=0)
-	else: # nowStockData.day == now.day
+	else: # nowStockData.date() == now.date()
 		if now > now.replace(hour=16, minute=0, second=0): # the market has already closed (16.00 - 24.00)
 			now = now.replace(hour=16, minute=0, second=0)
-		elif now < now.replace(hour=9, minute=30, second=0): # the market has not opened yet (00.00 - 9.30)
-			now = now.replace(day=now.day,hour=9, minute=30, second=0)
 	now = now.strftime('%Y-%m-%d %H:%M:%S')
 	res['Date'] = np.append(strategyData['Date'], now)
 
