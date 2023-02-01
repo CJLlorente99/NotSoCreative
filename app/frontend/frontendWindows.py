@@ -357,7 +357,7 @@ def openNewWindow():
 	newWindow = ctk.CTkToplevel(root)
 	textbox = ctk.CTkTextbox(newWindow, width= 0.278*ws, height= 0.444*hs)
 	textbox.insert("0.0",
-				   "Information\n\n "  + "Portfolio Value = Cash + Current Stock Value\n\n" + " Gain (%) " + "= Percentage difference between the purchase price and the current value of the shares\n\n" + " Gain (absolute) = Difference between the current value of the shares and the purchase price of the shares\n\n" + "Mean Portfolio Value= Mean of Portfolio Value for all test days Invested Money = Money that has been invested in the stock market\n\n" + " Invested Money Today = Money that is invested today\n\n" + " Money not Invested = Money that hasn`t been invested in the stock market" + " Standard Deviation = Describes the spread of the PVs (?) \n\n" + " Max. gain per Day = Maximum percentage gain on one day\n\n")
+				   "Information\n\n " + " Portfolio Value " + "= Cash (money not invested) + current value of shares that we hold\n\n" + " Gain (%) " + "= Percentage difference between the purchase price and the current value of the shares\n\n" + " Gain (absolute) " + "= Difference between the current value of the shares and the purchase price of the shares\n\n" + " Mean Portfolio Value " + "=  Mean of all portfolio values\n\n " + " Money Invested " + "=  Money that has been invested in the stock market \n\n" + " Money Invested Today " + "= Money that is invested today\n\n" + " Money not Invested " + "= Money that hasn`t been invested in the stock market\n\n" + " Standard Deviation " + "= Describes the spread of all portfolio values\n\n" + " Max. gain per day " + "= Maximum percentage gain on one day\n\n")
 
 	# "\033[1m"
 	#side= BOTTOM,
