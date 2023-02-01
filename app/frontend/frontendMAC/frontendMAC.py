@@ -129,7 +129,7 @@ def getCurrentValue_metric(stock_data, strategyData):
 		if now > now.replace(hour=16, minute=0, second=0): # the market has already closed (16.00 - 24.00)
 			now = now.replace(hour=16, minute=0, second=0)
 		elif now < now.replace(hour=9, minute=30, second=0): # the market has not opened yet (00.00 - 9.30)
-			now = now.replace(day=now.day-1,hour=9, minute=30, second=0)
+			now = now.replace(day=now.day,hour=9, minute=30, second=0)
 	now = now.strftime('%Y-%m-%d %H:%M:%S')
 	res['Date'] = np.append(strategyData['Date'], now)
 
