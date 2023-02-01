@@ -1,13 +1,10 @@
 import math
 from ta.volatility import BollingerBands
-from classes.investorParamsClass import BBInvestorParams, NNInvestorParams
+from classes.investorParamsClass import BBInvestorParams
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import numpy as np
 from classes.investorClass import Investor
 import pandas as pd
-from DecisionFunction.decisionFunctionNN import NNDecisionFunction
-
 
 class InvestorBB(Investor):
     def __init__(self, initialInvestment=10000, bbParams=None):

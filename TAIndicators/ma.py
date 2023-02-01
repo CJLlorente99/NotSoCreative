@@ -4,7 +4,6 @@ from classes.investorParamsClass import MACDInvestorParams, MAInvestorParams
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import pandas as pd
 from classes.investorClass import Investor
 import pandas as pd
 

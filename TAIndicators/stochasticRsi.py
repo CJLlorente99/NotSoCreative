@@ -1,4 +1,3 @@
-import numpy as np
 import ta
 from classes.investorParamsClass import StochasticRSIInvestorParams
 import plotly.graph_objects as go
