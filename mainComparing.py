@@ -18,7 +18,7 @@ from classes.experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2019-12-01', '2022-12-30')
+    dataGetter = DataGetter('2020-03-01', '2020-03-30')
 
     # Run various experiments
     numExperiments = 20
