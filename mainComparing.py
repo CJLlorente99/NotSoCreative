@@ -42,7 +42,7 @@ def main():
         # Create investor based on window forecasting (open_t - open_t+2)
         investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 5)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1T2Legacy, "bilstmWindowRobMMT1T2Legacy",
-                                      [experimentManager.createTIInput("df")], True)
+                                      [experimentManager.createTIInput("df")], False)
 
         """
         LSTM RobMinMax Legacy
@@ -51,7 +51,7 @@ def main():
         # Create investor based on window forecasting (open_t - open_t+3)
         investorLSTMWindowRobMMT2Legacy = InvestorLSTMWindowRobustMinMaxT2Legacy(10000, 5)
         experimentManager.addStrategy(investorLSTMWindowRobMMT2Legacy, "lstmWindowRobMMT2Legacy",
-                                      [experimentManager.createTIInput("df")], True)
+                                      [experimentManager.createTIInput("df")], False)
 
         """
         Random Forest
@@ -59,7 +59,7 @@ def main():
 
         investorRandomForest = InvestorRandomForestClassifier(10000)
         experimentManager.addStrategy(investorRandomForest, "randomForest",
-                                      [experimentManager.createTIInput("df")], True)
+                                      [experimentManager.createTIInput("df")], False)
 
         """
         XGBoost
@@ -67,37 +67,37 @@ def main():
 
         investorXGBoost = InvestorXGB(10000)
         experimentManager.addStrategy(investorXGBoost, "xgBoost",
-                                      [experimentManager.createTIInput("df")], True)
+                                      [experimentManager.createTIInput("df")], False)
 
 
         # Create investor Random
         investorRandom = InvestorRandom(10000)
-        experimentManager.addStrategy(investorRandom, "random", plotEvolution=True)
+        experimentManager.addStrategy(investorRandom, "random", plotEvolution=False)
         print("investorRandom created")
 
         # Create investor BIA
         investorBIA = InvestorBIA(10000)
-        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=True)
+        experimentManager.addStrategy(investorBIA, "bia", plotEvolution=False)
         print("investorBIA created")
 
         # Create investor WIA
         investorWIA = InvestorWIA(10000)
-        experimentManager.addStrategy(investorWIA, "wia", plotEvolution=True)
+        experimentManager.addStrategy(investorWIA, "wia", plotEvolution=False)
         print("investorWIA created")
 
         # Create investor CA
         investorCA = InvestorCA(10000, 0.1)
-        experimentManager.addStrategy(investorCA, "ca", plotEvolution=True)
+        experimentManager.addStrategy(investorCA, "ca", plotEvolution=False)
         print("investorCA created")
 
         # Create investor BaH
         investorBaH = InvestorBaH(10000)
-        experimentManager.addStrategy(investorBaH, "bah", plotEvolution=True)
+        experimentManager.addStrategy(investorBaH, "bah", plotEvolution=False)
         print("investorBaH created")
 
         # Create investor Idle
         investorIdle = InvestorIdle(10000)
-        experimentManager.addStrategy(investorIdle, "idle", plotEvolution=True)
+        experimentManager.addStrategy(investorIdle, "idle", plotEvolution=False)
         print("investorIdle created")
 
         auxLoop = pd.DataFrame()

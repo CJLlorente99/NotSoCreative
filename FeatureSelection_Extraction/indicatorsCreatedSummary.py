@@ -3,7 +3,7 @@ import json
 import numpy as np
 import plotly.graph_objects as go
 
-file = "dataLog.json"
+file = "data.json"
 
 with open(file) as f:
 	jsonData = json.load(f)
@@ -43,16 +43,37 @@ for indicator in auxDict:
 	keys = list(parameterDict[indicator].keys())
 	if dimDict[indicator] == 1:
 		fig = go.Figure()
-		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=np.zeros(len(auxDict[indicator][0])), mode="markers"))
-		fig.update_layout(title=indicator + " distribution", xaxis_title=keys[0])
-		fig.show()
+		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=np.zeros(len(auxDict[indicator][0])), mode="markers",
+					  marker=dict(size=20)))
+		fig.update_layout(title=indicator.upper() + " Features Distribution", xaxis=dict(title=keys[0], gridcolor='black'), paper_bgcolor = "rgba(0,0,0,0)",
+                  font=dict(size=30))
+		fig.write_image(indicator + " distribution.png", scale=1, width=2880, height=1800)
+		# fig.show()
 	elif dimDict[indicator] == 2:
 		fig = go.Figure()
-		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=auxDict[indicator][1], mode="markers"))
-		fig.update_layout(title=indicator + " distribution", xaxis_title=keys[0], yaxis_title=keys[1])
-		fig.show()
+		fig.add_trace(go.Scatter(x=auxDict[indicator][0], y=auxDict[indicator][1], mode="markers",
+					  marker=dict(size=20)))
+		fig.update_layout(title=indicator.upper() + " Features Distribution", paper_bgcolor = "rgba(0,0,0,0)",
+                  font=dict(size=30), xaxis=dict(title=keys[0], gridcolor='black'),
+												 yaxis=dict(title=keys[1], gridcolor='black'))
+		fig.write_image(indicator + " distribution.png", scale=1, width=2880, height=1800)
+		# fig.show()
 	elif dimDict[indicator] == 3:
 		fig = go.Figure()
 		fig.add_trace(go.Scatter3d(x=auxDict[indicator][0], y=auxDict[indicator][1], z=auxDict[indicator][2], mode="markers"))
-		fig.update_layout(title=indicator + " distribution", scene=dict(xaxis_title=keys[0], yaxis_title=keys[1], zaxis_title=keys[2]))
-		fig.show()
+		camera = dict(
+			up=dict(x=0, y=0, z=1),
+			center=dict(x=0, y=0, z=0),
+			eye=dict(x=1.5, y=1.5, z=1.5)
+		)
+		title = {'text': indicator.upper() + " Features Distribution",
+				 'y': 0.9,
+				 'x': 0.25,
+				 'xanchor': 'center',
+				 'yanchor': 'top',
+				 'font': dict(size=30)}
+		fig.update_layout(scene=dict(xaxis=dict(title=keys[0], gridcolor='black'), yaxis=dict(title=keys[1], gridcolor='black'),
+						  zaxis=dict(title=keys[2], gridcolor='black')),
+						  paper_bgcolor = "rgba(0,0,0,0)", font=dict(size=18), scene_camera=camera, title=title)
+		fig.write_image(indicator + " distribution.png", scale=1, width=3000, height=3000)
+		# fig.show()

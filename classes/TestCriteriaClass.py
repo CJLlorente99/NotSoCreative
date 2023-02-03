@@ -142,74 +142,23 @@ class TestCriteriaClass:
 		:param dfResult: dataFrame that contains the record of a specific strategy
 		:param title: Title to be given to the whole figure (should identify uniquely the strategy)
 		"""
-		# Create one figure to show the first sets of test criteria
-		# fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
-		# 					subplot_titles=["MPV(StdPV)", "maxPV/minPV", "%Gain/AbsGain", "nOp",
-		# 									"Sharpe/Sortino", "Treynor/Jensen"],
-		# 					specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-		# 						   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
-		#
-		# fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"]-10000,
-		# 						 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
-		# 			  col=1)
-		#
-		# fig.add_trace(go.Bar(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"]), row=1, col=2)
-		# fig.add_trace(go.Bar(name="minPV", x=dfResult["name"], y=dfResult["minPV"]), row=1, col=2)
-		#
-		# fig.add_trace(go.Bar(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"], visible="legendonly"), row=1, col=3)
-		# fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3,
-		# 			  secondary_y=True)
-		#
-		# fig.add_trace(go.Bar(name="nOperation", x=dfResult["name"], y=dfResult["nOperation"]), row=2, col=1)
-		#
-		# fig.add_trace(go.Bar(name="SharpeRatio", x=dfResult["name"],
-		# 						 y=dfResult["SharpeRatio"]), row=2, col=2)
-		# fig.add_trace(go.Bar(name="SortinoRatio", x=dfResult["name"],
-		# 					 y=dfResult["SortinoRatio"]), row=2, col=2, secondary_y=True)
-		#
-		# fig.add_trace(go.Bar(name="TreynorMeasure", x=dfResult["name"],
-		# 					 y=dfResult["TreynorMeasure"]), row=2, col=3)
-		# fig.add_trace(go.Bar(name="JensenMeasure", x=dfResult["name"],
-		# 						 y=dfResult["JensenMeasure"]), row=2, col=3)
-
-		fig = make_subplots(rows=1, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
-							subplot_titles=["MPV(StdPV)", "maxPV/minPV", "%Gain/AbsGain"],
-							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}]])
+		# Plot MPV
+		fig = go.Figure()
 
 		fig.add_trace(go.Bar(name="MPV", x=dfResult["name"], y=dfResult["MPV"] - 10000,
-							 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)), row=1,
-					  col=1)
-
-		fig.add_trace(go.Bar(name="maxPV", x=dfResult["name"], y=dfResult["maxPV"]), row=1, col=2)
-		fig.add_trace(go.Bar(name="minPV", x=dfResult["name"], y=dfResult["minPV"]), row=1, col=2)
-
-		fig.add_trace(go.Bar(name="PerGain", x=dfResult["name"], y=dfResult["PerGain"], visible="legendonly"), row=1,
-					  col=3)
-		fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]), row=1, col=3,
-					  secondary_y=True)
-
-		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
+							 error_y=dict(type='data', array=dfResult["StdPV"].values, visible=True)))
+		fig.update_layout(title_text=title + " MPV", hovermode="x unified", barmode="group")
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
-		fig.write_image("images/" + title + "(1_2).png",scale=6, width=2880, height=1800)
-		# fig.show()
+		fig.write_image("images/" + title + "MPV.png", scale=6, width=2880, height=1800)
 
-		# Create one figure showing the second set of test criteria
-		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
-							subplot_titles=["MNotInv/MInv", "MBuy/MSell"])
+		# Plot abs gain
+		fig = go.Figure()
 
-		fig.add_trace(go.Bar(name="MNotInvested,", x=dfResult["name"],
-								 y=dfResult["meanNotInvested"], marker_color="red"), row=1, col=1)
-		fig.add_trace(go.Bar(name="MInvested", x=dfResult["name"],
-								 y=dfResult["meanInvested"], marker_color="green"), row=1, col=1)
-		fig.add_trace(go.Bar(name="MBuying", x=dfResult["name"],
-								 y=dfResult["meanBuying"], marker_color="green"), row=2, col=1)
-		fig.add_trace(go.Bar(name="MSelling", x=dfResult["name"],
-								 y=dfResult["meanSelling"], marker_color="red"), row=2, col=1)
+		fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]))
 
-		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="group")
-		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
-		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
-		# fig.show()
+		fig.update_layout(title_text=title + " AbsGain", hovermode="x unified", barmode="group")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
+		fig.write_image("images/" + title + "AbsGain.png", scale=6, width=2880, height=1800)
 
 	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
@@ -377,83 +326,23 @@ class TestCriteriaClass:
 		:param dfResult: dataFrame that contains the summaty test criteria of all strategies used in a given script execution
 		:param title: Title to be given to the figure
 		"""
-		# fig = make_subplots(rows=2, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
-		# 					subplot_titles=["MMPV", "MStdPV", "M%Gain/MAbsGain", "MnOp",
-		# 									"Sharpe/Sortino", "Treynor/Jensen"],
-		# 					specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}],
-		# 						   [{"secondary_y": False}, {"secondary_y": True}, {"secondary_y": False}]])
-		#
-		# fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"]-10000,
-		# 						 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
-		# 			  col=1)
-		#
-		# fig.add_trace(go.Bar(name="MStdPV", x=dfResult["name"], y=dfResult["MStdPV"],
-		# 						 error_y=dict(type='data', array=dfResult["StdStdPV"].values, visible=True)), row=1,
-		# 			  col=2)
-		#
-		# fig.add_trace(go.Bar(name="MPerGain", x=dfResult["name"], y=dfResult["MPerGain"],
-		# 						 error_y=dict(type='data', array=dfResult["StdPerGain"].values, visible=True)), row=1,
-		# 			  col=3)
-		# fig.add_trace(go.Bar(name="MAbsGain", x=dfResult["name"], y=dfResult["MAbsGain"],
-		# 						 error_y=dict(type='data', array=dfResult["StdAbsGain"].values, visible=True)), row=1,
-		# 			  col=3, secondary_y=True)
-		#
-		# fig.add_trace(go.Bar(name="MnOperation", x=dfResult["name"], y=dfResult["MnOperation"],
-		# 						 error_y=dict(type='data', array=dfResult["StdnOperation"].values, visible=True)),
-		# 			  row=2, col=1)
-		#
-		# fig.add_trace(go.Bar(name="MSharpeRatio", x=dfResult["name"], y=dfResult["MSharpeRatio"]),
-		# 			  row=2, col=2)
-		# fig.add_trace(
-		# 	go.Bar(name="MSortinoRatio", x=dfResult["name"], y=dfResult["MSortinoRatio"]),
-		# 	row=2, col=2, secondary_y=True)
-		# fig.add_trace(go.Bar(name="MTreynorMeasure", x=dfResult["name"], y=dfResult["MTreynorMeasure"]),
-		# 			  row=2, col=3)
-		#
-		# fig.add_trace(go.Bar(name="MJensenMeasure", x=dfResult["name"], y=dfResult["MJensenMeasure"]),
-		# 			  row=2, col=3)
-
-		fig = make_subplots(rows=1, cols=3, vertical_spacing=0.2, horizontal_spacing=0.04,
-							subplot_titles=["MMPV", "MStdPV", "M%Gain/MAbsGain"],
-							specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": True}]])
+		# Plot MMPV
+		fig = go.Figure()
 
 		fig.add_trace(go.Bar(name="MMPV", x=dfResult["name"], y=dfResult["MMPV"]-10000,
-								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)), row=1,
-					  col=1)
+								 error_y=dict(type='data', array=dfResult["MStdPV"].values, visible=True)))
 
-		fig.add_trace(go.Bar(name="MStdPV", x=dfResult["name"], y=dfResult["MStdPV"],
-								 error_y=dict(type='data', array=dfResult["StdStdPV"].values, visible=True)), row=1,
-					  col=2)
-
-		fig.add_trace(go.Bar(name="MPerGain", x=dfResult["name"], y=dfResult["MPerGain"],
-								 error_y=dict(type='data', array=dfResult["StdPerGain"].values, visible=True)), row=1,
-					  col=3)
-		fig.add_trace(go.Bar(name="MAbsGain", x=dfResult["name"], y=dfResult["MAbsGain"],
-								 error_y=dict(type='data', array=dfResult["StdAbsGain"].values, visible=True)), row=1,
-					  col=3, secondary_y=True)
-
-		fig.update_layout(title_text=title + " (1/2)", hovermode="x unified", barmode="group")
+		fig.update_layout(title_text=title + " MMPV", hovermode="x unified", barmode="group")
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
-		fig.write_image("images/" + title + "(1_2).png",scale=6, width=2880, height=1800)
-		fig.show()
+		fig.write_image("images/" + title + "MMPV.png", scale=6, width=2880, height=1800)
 
-		fig = make_subplots(rows=2, cols=1, vertical_spacing=0.2, horizontal_spacing=0.04,
-							subplot_titles=["MMNotInvested/MMInvested", "MMBuying/MMSelling"])
 
-		fig.add_trace(go.Bar(name="MMNotInvested,", x=dfResult["name"], y=dfResult["MMNotInvested"], marker_color="red",
-								 error_y=dict(type='data', array=dfResult["StdMNotInvested"].values, visible=True)),
-					  row=1, col=1)
-		fig.add_trace(go.Bar(name="MMInvested", x=dfResult["name"], y=dfResult["MMInvested"], marker_color="green",
-								 error_y=dict(type='data', array=dfResult["StdMInvested"].values, visible=True)),
-					  row=1, col=1)
-		fig.add_trace(go.Bar(name="MMBuying", x=dfResult["name"], y=dfResult["MMBuying"], marker_color="green",
-								 error_y=dict(type='data', array=dfResult["StdMBuying"].values, visible=True)),
-					  row=2, col=1)
-		fig.add_trace(go.Bar(name="MMSelling", x=dfResult["name"], y=dfResult["MMSelling"], marker_color="red",
-								 error_y=dict(type='data', array=dfResult["StdMSelling"].values, visible=True)),
-					  row=2, col=1)
+		# Plot M abs Gain
+		fig = go.Figure()
 
-		fig.update_layout(title_text=title + " (2/2)", hovermode="x unified", barmode="stack")
-		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash')
-		# fig.write_image("images/" + title + "(2_2).png",scale=6, width=2880, height=1800)
-		# fig.show()
+		fig.add_trace(go.Bar(name="MAbsGain", x=dfResult["name"], y=dfResult["MAbsGain"],
+								 error_y=dict(type='data', array=dfResult["StdAbsGain"].values, visible=True)))
+
+		fig.update_layout(title_text=title + " MAbsGain", hovermode="x unified", barmode="group")
+		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
+		fig.write_image("images/" + title + "MAbsGain.png",scale=6, width=2880, height=1800)
