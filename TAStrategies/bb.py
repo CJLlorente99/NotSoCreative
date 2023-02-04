@@ -16,10 +16,10 @@ class InvestorBB(Investor):
 
 	def possiblyInvestMorning(self, data):
 		params = BBInvestorParams(20, 2, None, None, None, None)
-		bb = bollingerBands(data['Close'], params)
-		if bb['pband'] >= 1:
+		bb = bollingerBands(data['df']['Close'], params)
+		if bb['pband'][-1] >= 1:
 			self.perToInvest = -1
-		elif bb['pband'] <= -1:
+		elif bb['pband'][-1] <= -1:
 			self.perToInvest = 1
 		else:
 			self.perToInvest = 0

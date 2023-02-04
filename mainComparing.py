@@ -7,7 +7,7 @@ from LSTM.investorLSTMWindowRobustMinMaxScalerLegacy import InvestorLSTMWindowRo
 from RF_DT.investorRandomForestClassifier import InvestorRandomForestClassifier
 from RF_DT.investorXGB import InvestorXGB
 from TAStrategies.bb import InvestorBB
-from TAIndicators.ma import InvestorMACD
+from TAStrategies.macd import InvestorMACD
 from Benchmarks.randomBenchmark import InvestorRandom
 from Benchmarks.bia import InvestorBIA
 from Benchmarks.wia import InvestorWIA
@@ -36,6 +36,22 @@ def main():
         initDate = pd.DatetimeIndex([dataGetter.today])
         # Load data
         df = dataGetter.getPastData()
+
+        """
+        MACD
+        """
+
+        investorMACD = InvestorMACD(10000)
+        experimentManager.addStrategy(investorMACD, "macd",
+                                      [experimentManager.createTIInput("df")], False)
+
+        """
+		BB
+		"""
+
+        investorBB = InvestorBB(10000)
+        experimentManager.addStrategy(investorBB, "bb",
+                                      [experimentManager.createTIInput("df")], False)
 
         """
         BiLSTM RobMinMax Legacy
@@ -69,22 +85,6 @@ def main():
 
         investorXGBoost = InvestorXGB(10000)
         experimentManager.addStrategy(investorXGBoost, "xgBoost",
-                                      [experimentManager.createTIInput("df")], False)
-
-        """
-        MACD
-        """
-
-        investorMACD = InvestorMACD(10000)
-        experimentManager.addStrategy(investorMACD, "macd",
-                                      [experimentManager.createTIInput("df")], False)
-
-        """
-        MACD
-        """
-
-        investorBB = InvestorBB(10000)
-        experimentManager.addStrategy(investorBB, "bb",
                                       [experimentManager.createTIInput("df")], False)
 
 
