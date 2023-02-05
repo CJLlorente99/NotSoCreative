@@ -23,7 +23,7 @@ def main():
     dataGetter = DataGetter('2020-05-01', '2020-05-30')
 
     # Run various experiments
-    numExperiments = 20
+    numExperiments = 30
     nDays = 10
     dfTestCriteria = pd.DataFrame()
 
@@ -58,7 +58,7 @@ def main():
         """
 
         # Create investor based on window forecasting (open_t - open_t+2)
-        investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 5)
+        investorBiLSTMWindowRobMMT1T2Legacy = InvestorBiLSTMWindowRobustMinMaxT1T2Legacy(10000, 1)
         experimentManager.addStrategy(investorBiLSTMWindowRobMMT1T2Legacy, "bilstmWindowRobMMT1T2Legacy",
                                       [experimentManager.createTIInput("df")], False)
 
@@ -67,7 +67,7 @@ def main():
         """
 
         # Create investor based on window forecasting (open_t - open_t+3)
-        investorLSTMWindowRobMMT2Legacy = InvestorLSTMWindowRobustMinMaxT2Legacy(10000, 5)
+        investorLSTMWindowRobMMT2Legacy = InvestorLSTMWindowRobustMinMaxT2Legacy(10000, 1)
         experimentManager.addStrategy(investorLSTMWindowRobMMT2Legacy, "lstmWindowRobMMT2Legacy",
                                       [experimentManager.createTIInput("df")], False)
 

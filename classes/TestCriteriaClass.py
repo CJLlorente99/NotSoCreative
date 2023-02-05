@@ -151,31 +151,13 @@ class TestCriteriaClass:
 						  paper_bgcolor="rgba(0,0,0,0)",
 						  font=dict(size=40),
 						  xaxis=dict(gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44',
-									 zeroline=False),
+									 zeroline=False, title_font_size=40, tickfont_size=50),
 						  yaxis=dict(gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44',
-									 zeroline=False),
-						  plot_bgcolor='black'
-						  )
-		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending'
-						 )
-		fig.write_image("images/" + title + "MPV.png", scale=6, width=2880, height=1800)
-
-		# Plot abs gain
-		fig = go.Figure()
-
-		fig.add_trace(go.Bar(name="AbsGain", x=dfResult["name"], y=dfResult["AbsGain"]))
-
-		fig.update_layout(title_text=title + " AbsGain", hovermode="x unified", barmode="group",
-						  paper_bgcolor="rgba(0,0,0,0)",
-						  font=dict(size=40),
-						  xaxis=dict(gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44',
-									 zeroline=False),
-						  yaxis=dict(gridwidth=10, gridcolor='#2D3A44', linewidth=10, linecolor='#2D3A44',
-									 zeroline=False),
+									 zeroline=False, title_font_size=40, tickfont_size=50),
 						  plot_bgcolor='black'
 						  )
 		fig.update_xaxes(ticks='inside', showgrid=True, griddash='dash', categoryorder='total descending')
-		fig.write_image("images/" + title + "AbsGain.png", scale=6, width=2880, height=1800)
+		fig.write_image("images/" + title + "MPV.png", scale=6, width=2880, height=1800)
 
 	def calculateCriteriaVariousExperiments(self, dfResults):
 		"""
