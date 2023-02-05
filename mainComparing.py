@@ -20,7 +20,7 @@ from classes.experimentManager import ExperimentManager
 
 def main():
     # Create DataGetter instance
-    dataGetter = DataGetter('2020-08-01', '2020-08-30')
+    dataGetter = DataGetter('2020-05-01', '2020-05-30')
 
     # Run various experiments
     numExperiments = 20
