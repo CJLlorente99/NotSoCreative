@@ -17,6 +17,8 @@ class InvestorMACD(Investor):
 	def possiblyInvestMorning(self, data):
 		params = MACDInvestorParams(None, None, 12, 26, 9, None, None, None)
 		ma = movingAverageConvergenceDivergence(data['df']['Close'], params)
+		print(ma['diff'][-1])
+		print(ma['signal'][-2])
 		if -0.05 < ma['diff'][-1] < 0.05:
 			if ma['signal'][-2] < 0:
 				self.perToInvest = 1
