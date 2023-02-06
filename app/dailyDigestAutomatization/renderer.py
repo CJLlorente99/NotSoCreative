@@ -9,8 +9,8 @@ from jinja2 import Environment, FileSystemLoader
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-shortDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/htmlTemplates/shortDailyDigest.html'
-longDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/htmlTemplates/longDailyDigest.html'
+shortDailyDigestTemplatePath = 'shortDailyDigest.html'
+longDailyDigestTemplatePath = 'longDailyDigest.html'
 
 usernameChartStudio = 'NotSoCreative'
 apiChartStudio = 'c6a9xRk9hFTuEGqZ6xPT'
@@ -30,7 +30,7 @@ class Renderer:
 		self.strategiesData = self.getStrategiesData(['ca_25_1_2022', 'random_25_1_2022', 'idle_25_1_2022',
 													  'bah_25_1_2022', 'bilstmWindowRobMMT1T2Legacy_25_1_2023'])
 		self.ourStrategy = 'bilstmWindowRobMMT1T2Legacy_25_1_2023'
-		self.env = Environment(loader=FileSystemLoader(searchpath='./htmlTemplates/'))
+		self.env = Environment(loader=FileSystemLoader(searchpath='/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/htmlTemplates/'))
 
 	def getYfData(self) -> pd.DataFrame:
 		"""
