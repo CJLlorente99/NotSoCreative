@@ -79,7 +79,7 @@ def main():
 		s.sendmail(notSoCreativeEmail, index, msg.as_string())
 
 		with open('log.txt','a') as f:
-			f.write(f'Email sent to {row.index}')
+			f.write(f'Email sent to {index}')
 
 	s.close()
 
