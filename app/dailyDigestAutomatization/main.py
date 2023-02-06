@@ -68,7 +68,7 @@ def main():
 		msg['To'] = index
 		msg.attach(MIMEText(renderedHTML, 'html'))
 
-		fp = open('png.png', 'rb')
+		fp = open('/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/png.png', 'rb')
 		msgImage = MIMEImage(fp.read())
 		fp.close()
 		msgImage.add_header('Content-ID', '<logoNotSoCreative>')
