@@ -9,8 +9,8 @@ from jinja2 import Environment, FileSystemLoader
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-shortDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/shortDailyDigest.html'
-longDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/longDailyDigest.html'
+shortDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/htmlTemplates/shortDailyDigest.html'
+longDailyDigestTemplatePath = '/home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/htmlTemplates/longDailyDigest.html'
 
 usernameChartStudio = 'NotSoCreative'
 apiChartStudio = 'c6a9xRk9hFTuEGqZ6xPT'
