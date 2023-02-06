@@ -9,7 +9,7 @@ projectName = 'datascienceii'
 bucketName = 'datascienceii'
 objectNameDf = 'myData.csv'
 objectNameEmailsDf = 'emails.csv'
-credentials = './application_default_credentials.json'
+credentials = 'home/carlosllocor/NotSoCreative/app/dailyDigestAutomatization/application_default_credentials.json'
 
 
 def readBlobDf():
